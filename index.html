@@ -27,7 +27,6 @@
         .target-badge { background: #6366f1; color: white; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 900; }
         .btn-remove-set { color: #ef4444; font-size: 1.5rem; font-weight: 900; padding: 0 10px; line-height: 1; }
         
-        /* Modal Styles */
         #exModal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; padding: 20px; overflow-y: auto; }
         .ex-item { background: #334155; padding: 15px; border-radius: 10px; margin-bottom: 8px; font-weight: 700; text-transform: uppercase; font-size: 12px; }
     </style>
@@ -97,15 +96,16 @@
     </nav>
 
     <script>
-        const EX_LIBRARY = {
-            "Borst": ["Bench Press", "Incline DB Press", "Chest Flys", "Pushups", "Dips"],
-            "Rug": ["Deadlift", "Lat Pulldown", "Bent Over Row", "Pullups", "Seated Row"],
-            "Benen": ["Squat", "Leg Press", "Leg Extension", "Leg Curl", "Lunges", "Calf Raise"],
-            "Schouders": ["Overhead Press", "Lateral Raise", "Front Raise", "Face Pulls"],
-            "Armen": ["Bicep Curl", "Hammer Curl", "Tricep Pushdown", "Skullcrusher"],
-            "Buik": ["Crunches", "Plank", "Leg Raise"]
+        const INITIAL_LIBRARY = {
+            "Borst": ["Bench Press", "Incline DB Press"],
+            "Rug": ["Deadlift", "Lat Pulldown"],
+            "Benen": ["Squat", "Leg Press"],
+            "Schouders": ["Overhead Press"],
+            "Armen": ["Bicep Curl", "Tricep Pushdown"],
+            "Buik": ["Crunches"]
         };
 
+        let exLibrary = JSON.parse(localStorage.getItem('gym_ex_library')) || INITIAL_LIBRARY;
         let sessions, userData;
         let activeSessionId = null;
         let chartInstance = null;
@@ -121,27 +121,37 @@
         function renderExLibrary() {
             const container = document.getElementById('exLibraryList');
             container.innerHTML = "";
-            for (const [cat, items] of Object.entries(EX_LIBRARY)) {
+            for (const [cat, items] of Object.entries(exLibrary)) {
                 container.innerHTML += `<h3 class="text-indigo-400 font-black text-xs mt-6 mb-2 tracking-widest uppercase">${cat}</h3>`;
                 items.forEach(ex => {
                     container.innerHTML += `<div onclick="selectEx('${ex}')" class="ex-item">${ex}</div>`;
                 });
             }
-            container.innerHTML += `<div onclick="selectEx('CUSTOM')" class="ex-item border-2 border-dashed border-indigo-500 text-indigo-400 text-center">+ OVERIG (ZELF TYPEN)</div>`;
+            container.innerHTML += `<div onclick="selectEx('CUSTOM')" class="ex-item border-2 border-dashed border-indigo-500 text-indigo-400 text-center">+ NIEUWE OEFENING TOEVOEGEN</div>`;
         }
 
         function openExModal(sId) { currentTargetSessionId = sId; document.getElementById('exModal').classList.remove('hidden'); }
         function closeExModal() { document.getElementById('exModal').classList.add('hidden'); }
 
         function selectEx(name) {
-            let finalName = name;
-            if(name === 'CUSTOM') finalName = prompt("Naam oefening:");
-            if(finalName) {
-                const sess = sessions.find(s => s.id === currentTargetSessionId);
-                sess.exercises.push({ id: Date.now(), name: finalName.toUpperCase(), sets: [{w:0, r:0, b:""}] });
-                saveAndRender();
-                closeExModal();
+            if(name === 'CUSTOM') {
+                const newName = prompt("Naam van de nieuwe oefening:").toUpperCase();
+                if(!newName) return;
+                const cats = Object.keys(exLibrary).join(", ");
+                const newCat = prompt(`Onder welke categorie? (Bijv: ${cats})`);
+                if(newCat) {
+                    const matchedCat = Object.keys(exLibrary).find(c => c.toLowerCase() === newCat.toLowerCase()) || newCat;
+                    if(!exLibrary[matchedCat]) exLibrary[matchedCat] = [];
+                    exLibrary[matchedCat].push(newName);
+                    localStorage.setItem('gym_ex_library', JSON.stringify(exLibrary));
+                    renderExLibrary();
+                    name = newName;
+                } else { return; }
             }
+            const sess = sessions.find(s => s.id === currentTargetSessionId);
+            sess.exercises.push({ id: Date.now(), name: name.toUpperCase(), sets: [{w:0, r:0, b:""}] });
+            saveAndRender();
+            closeExModal();
         }
 
         function updateHeader() { const lastW = (userData.weightLogs && userData.weightLogs.length > 0) ? userData.weightLogs[0].w : "--"; document.getElementById('headerStats').innerText = `${userData.name || "GEBRUIKER"} • ${lastW} KG`; }
@@ -216,7 +226,6 @@
                 </div>`).join('');
         }
 
-        // --- CORE LOGICA ---
         function addManualSet(sId, eId) { const ex = sessions.find(s => s.id === sId).exercises.find(e => e.id === eId); ex.sets.push({w:0, r:0, b:""}); saveAndRender(); }
         function saveProfileName() { const val = document.getElementById('profName').value.trim().toUpperCase(); userData.name = val || "GEBRUIKER"; saveAndRender(); }
         function logWeight() { const v = document.getElementById('profWeightInput').value; if(v){ userData.weightLogs.unshift({w:parseFloat(v), date:new Date().toLocaleDateString('nl-NL'), ts:Date.now()}); saveAndRender(); }}
@@ -224,16 +233,15 @@
         function showView(v) { document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden')); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.getElementById('view-'+v).classList.remove('hidden'); document.getElementById('nav-'+v).classList.add('active'); if(v==='charts') { updateChart(); renderStats(); } }
         function createNewSession() { const name = (document.getElementById('newWorkoutName').value || "Training").toUpperCase(); const rawDate = document.getElementById('newWorkoutDate').value; sessions.push({ id: Date.now(), name, date: new Date(rawDate).toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'long' }), rawDate, exercises: [] }); activeSessionId = sessions[sessions.length-1].id; saveAndRender(); }
         function populateExerciseSelect() { const u = [...new Set(sessions.flatMap(s => s.exercises.map(e => e.name)))].sort(); document.getElementById('chartExerciseSelect').innerHTML = u.map(n => `<option value="${n}">${n}</option>`).join(''); }
-        function updateChart() { const exName = document.getElementById('chartExerciseSelect').value; if(!exName) return; const relevant = sessions.filter(s => s.exercises.some(e => e.name === exName)).sort((a,b) => new Date(a.rawDate) - new Date(a.rawDate)); const labels = relevant.map(s => new Date(s.rawDate).toLocaleDateString('nl-NL', {day:'numeric', month:'short'})); const weights = relevant.map(s => Math.max(...s.exercises.find(e => e.name === exName).sets.map(st => parseFloat(st.w) || 0))); if(chartInstance) chartInstance.destroy(); chartInstance = new Chart(document.getElementById('progressionChart'), { type: 'line', data: { labels, datasets: [{ data: weights, borderColor: '#6366f1', tension: 0.3, fill: true, backgroundColor: 'rgba(99, 102, 241, 0.1)' }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#64748b' } }, x: { ticks: { color: '#64748b' } } } } }); }
+        function updateChart() { const exName = document.getElementById('chartExerciseSelect').value; if(!exName) return; const relevant = sessions.filter(s => s.exercises.some(e => e.name === exName)).sort((a,b) => new Date(a.rawDate) - new Date(b.rawDate)); const labels = relevant.map(s => new Date(s.rawDate).toLocaleDateString('nl-NL', {day:'numeric', month:'short'})); const weights = relevant.map(s => Math.max(...s.exercises.find(e => e.name === exName).sets.map(st => parseFloat(st.w) || 0))); if(chartInstance) chartInstance.destroy(); chartInstance = new Chart(document.getElementById('progressionChart'), { type: 'line', data: { labels, datasets: [{ data: weights, borderColor: '#6366f1', tension: 0.3, fill: true, backgroundColor: 'rgba(99, 102, 241, 0.1)' }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#64748b' } }, x: { ticks: { color: '#64748b' } } } } }); }
         function cloneSession(oldId) { const oldSess = sessions.find(s => s.id === oldId); const today = new Date(); const newSess = { id: Date.now(), name: oldSess.name, date: today.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'long' }), rawDate: today.toISOString().split('T')[0], exercises: oldSess.exercises.map(ex => ({ id: Date.now()+Math.random(), name: ex.name, sets: ex.sets.map(s => ({w:s.w, r:s.r, b:""})) })) }; sessions.push(newSess); activeSessionId = newSess.id; saveAndRender(); showView('training'); }
         function shareWorkout(id) { const s = sessions.find(x => x.id === id); let text = `🏋️ GYMLOG: ${s.name}\n📅 ${s.date}\n\n`; s.exercises.forEach(ex => { text += `💪 ${ex.name.toUpperCase()}\n`; ex.sets.forEach((set, i) => text += `   S${i+1}: ${set.w}kg x ${set.r}${set.b ? ' (BPM: '+set.b+')' : ''}\n`); text += `\n`; }); if (navigator.share) navigator.share({ title: `Workout: ${s.name}`, text: text }).catch(() => {}); else { navigator.clipboard.writeText(text); alert("Gekopieerd!"); } }
-        function exportData() { const blob = new Blob([JSON.stringify({ sessions, userData }, null, 2)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `gymlog_backup.json`; a.click(); }
-        function importData(e) { const reader = new FileReader(); reader.onload = (ev) => { try { const d = JSON.parse(ev.target.result); if(confirm("Herstellen?")){ const u = d.user || d.userData || { name: "GEBRUIKER", weightLogs: [] }; localStorage.setItem('gym_sessions', JSON.stringify(d.sessions || [])); localStorage.setItem('gym_user', JSON.stringify(u)); init(); alert("Hersteld!"); } } catch(err) { alert("Fout!"); } }; reader.readAsText(e.target.files[0]); }
+        function exportData() { const blob = new Blob([JSON.stringify({ sessions, userData, exLibrary }, null, 2)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `gymlog_backup.json`; a.click(); }
+        function importData(e) { const reader = new FileReader(); reader.onload = (ev) => { try { const d = JSON.parse(ev.target.result); if(confirm("Herstellen?")){ localStorage.setItem('gym_sessions', JSON.stringify(d.sessions || [])); localStorage.setItem('gym_user', JSON.stringify(d.userData || {name:"GEBRUIKER", weightLogs:[]})); localStorage.setItem('gym_ex_library', JSON.stringify(d.exLibrary || INITIAL_LIBRARY)); init(); alert("Hersteld!"); } } catch(err) { alert("Fout!"); } }; reader.readAsText(e.target.files[0]); }
         function renderStats() {
             const recordsCont = document.getElementById('recordsContainer'); const tipsCont = document.getElementById('tipsContainer'); recordsCont.innerHTML = ""; tipsCont.innerHTML = ""; const exerciseStats = {};
             sessions.forEach(s => s.exercises.forEach(ex => { const name = ex.name.toUpperCase(); const maxWeight = Math.max(...ex.sets.map(set => parseFloat(set.w) || 0)); if(!exerciseStats[name]) exerciseStats[name] = { max: 0, history: [] }; if(maxWeight > exerciseStats[name].max) exerciseStats[name].max = maxWeight; exerciseStats[name].history.push({ weight: maxWeight, date: s.rawDate }); }));
             Object.keys(exerciseStats).sort().forEach(name => { recordsCont.innerHTML += `<div class="stat-card"><p class="text-[8px] font-black opacity-50 uppercase">${name}</p><p class="text-lg font-black text-emerald-400">${exerciseStats[name].max} KG</p></div>`; });
-            Object.keys(exerciseStats).forEach(name => { const hist = exerciseStats[name].history.sort((a,b) => new Date(b.date) - new Date(a.date)); if(hist.length >= 2) { const current = hist[0].weight; const prev = hist[1].weight; if(current < prev && current > 0) tipsCont.innerHTML += `<div class="stat-card border-l-4 border-rose-500"><p class="text-[10px] font-black">${name}</p><p class="text-xs opacity-70">Lager dan vorige keer (${prev}kg).</p></div>`; else if (current === prev && current > 0) tipsCont.innerHTML += `<div class="stat-card border-l-4 border-amber-500"><p class="text-[10px] font-black">${name}</p><p class="text-xs opacity-70">Plateau. Probeer +1 rep.</p></div>`; } });
         }
 
         init();
