@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GymLog Pro - User Sync Fix</title>
+    <title>GymLog Pro - Stats Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
@@ -23,6 +23,7 @@
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #64748b; font-weight: 900; font-size: 10px; text-transform: uppercase; background:none; border:none; }
         .nav-item.active { color: #ffffff; }
         .btn-add-small { color: #ffffff; border: 2px dashed #475569; font-size: 10px; font-weight: 900; padding: 12px; border-radius: 10px; text-transform: uppercase; width: 100%; margin-top: 15px; background:none; }
+        .stat-card { background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; border-radius: 1.25rem; padding: 15px; }
     </style>
 </head>
 <body class="p-4 max-w-md mx-auto pb-32">
@@ -45,7 +46,21 @@
         <div class="surface p-8 mb-8 border-white/10">
             <h2 class="text-xl font-black uppercase mb-6 italic tracking-tighter text-indigo-400">Progressie</h2>
             <select id="chartExerciseSelect" onchange="updateChart()" class="input-field mb-8 text-sm bg-slate-900 border-white/20 uppercase font-black"></select>
-            <div class="h-80 w-full"><canvas id="progressionChart"></canvas></div>
+            <div class="h-64 w-full mb-8"><canvas id="progressionChart"></canvas></div>
+
+            <hr class="border-white/10 mb-8">
+
+            <div id="extraStats" class="space-y-8">
+                <div>
+                    <h3 class="text-sm font-black uppercase text-rose-400 mb-4 tracking-widest">⚠️ Aandachtspunten</h3>
+                    <div id="tipsContainer" class="space-y-3"></div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-black uppercase text-emerald-400 mb-4 tracking-widest">🏆 Records</h3>
+                    <div id="recordsContainer" class="grid grid-cols-2 gap-3"></div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -74,7 +89,7 @@
 
     <nav class="bottom-nav">
         <button onclick="showView('training')" id="nav-training" class="nav-item active"><span class="text-xl">🏋️</span><span>Training</span></button>
-        <button onclick="showView('charts')" id="nav-charts" class="nav-item"><span class="text-xl">📈</span><span>Progressie</span></button>
+        <button onclick="showView('charts')" id="nav-charts" class="nav-item"><span class="text-xl">📈</span><span>Stats</span></button>
         <button onclick="showView('profile')" id="nav-profile" class="nav-item"><span class="text-xl">👤</span><span>Profiel</span></button>
     </nav>
 
@@ -94,10 +109,7 @@
             loadFromStorage();
             document.getElementById('newWorkoutDate').valueAsDate = new Date();
             document.getElementById('profName').value = userData.name === "GEBRUIKER" ? "" : userData.name;
-            updateHeader(); 
-            renderSessions(); 
-            renderWeightLogs(); 
-            populateExerciseSelect();
+            updateHeader(); renderSessions(); renderWeightLogs(); populateExerciseSelect();
         }
 
         function updateHeader() {
@@ -112,50 +124,72 @@
             updateHeader(); renderSessions(); renderWeightLogs(); populateExerciseSelect();
         }
 
-        // --- VERBETERDE IMPORT VOOR "USER" SLEUTEL ---
+        function renderStats() {
+            const recordsCont = document.getElementById('recordsContainer');
+            const tipsCont = document.getElementById('tipsContainer');
+            recordsCont.innerHTML = ""; tipsCont.innerHTML = "";
+
+            const exerciseStats = {};
+            sessions.forEach(s => {
+                s.exercises.forEach(ex => {
+                    const name = ex.name.toUpperCase();
+                    const maxWeight = Math.max(...ex.sets.map(set => parseFloat(set.w) || 0));
+                    if(!exerciseStats[name]) exerciseStats[name] = { max: 0, history: [] };
+                    if(maxWeight > exerciseStats[name].max) exerciseStats[name].max = maxWeight;
+                    exerciseStats[name].history.push({ weight: maxWeight, date: s.rawDate });
+                });
+            });
+
+            // Render Records
+            Object.keys(exerciseStats).sort().forEach(name => {
+                recordsCont.innerHTML += `
+                    <div class="stat-card">
+                        <p class="text-[8px] font-black opacity-50 uppercase">${name}</p>
+                        <p class="text-lg font-black text-emerald-400">${exerciseStats[name].max} KG</p>
+                    </div>`;
+            });
+
+            // Render Tips/Aandachtspunten
+            Object.keys(exerciseStats).forEach(name => {
+                const hist = exerciseStats[name].history.sort((a,b) => new Date(b.date) - new Date(a.date));
+                if(hist.length >= 2) {
+                    const current = hist[0].weight;
+                    const prev = hist[1].weight;
+                    
+                    if(current < prev && current > 0) {
+                        tipsCont.innerHTML += `
+                            <div class="stat-card border-l-4 border-rose-500">
+                                <p class="text-[10px] font-black">${name}</p>
+                                <p class="text-xs opacity-70">Lager dan vorige keer (${prev}kg). Tip: Focus op excentrische controle of verhoog herstel-tijd.</p>
+                            </div>`;
+                    } else if (current === prev && current > 0) {
+                        tipsCont.innerHTML += `
+                            <div class="stat-card border-l-4 border-amber-500">
+                                <p class="text-[10px] font-black">${name}</p>
+                                <p class="text-xs opacity-70">Plateau bereikt. Probeer 1-2 reps extra of verander de volgorde van je oefeningen.</p>
+                            </div>`;
+                    }
+                }
+            });
+            if(tipsCont.innerHTML === "") tipsCont.innerHTML = "<p class='text-xs opacity-40 italic font-black'>Lekker bezig, geen dips gevonden!</p>";
+        }
+
         function importData(e) {
             const reader = new FileReader();
             reader.onload = (ev) => {
                 try {
                     const d = JSON.parse(ev.target.result);
                     if(confirm("Data herstellen?")){
-                        // Check of data onder "user" of "userData" staat
                         const importedUser = d.user || d.userData || { name: "GEBRUIKER", weightLogs: [] };
-                        
                         localStorage.setItem('gym_sessions', JSON.stringify(d.sessions || []));
                         localStorage.setItem('gym_ex_list', JSON.stringify(d.exData || DEFAULT_EX));
                         localStorage.setItem('gym_user', JSON.stringify(importedUser));
-                        
-                        // Forceer onmiddellijke herlaad van interface
                         init(); 
                         alert(`Welkom terug, ${importedUser.name}!`);
                     }
                 } catch(err) { alert("Fout bij inladen."); }
             };
             reader.readAsText(e.target.files[0]);
-        }
-
-        function saveProfileName() {
-            const val = document.getElementById('profName').value.trim().toUpperCase();
-            userData.name = val || "GEBRUIKER";
-            saveAndRender();
-        }
-
-        function logWeight() {
-            const v = document.getElementById('profWeightInput').value;
-            if(v){
-                userData.weightLogs.unshift({w:parseFloat(v), date:new Date().toLocaleDateString('nl-NL'), ts:Date.now()});
-                saveAndRender();
-                document.getElementById('profWeightInput').value="";
-            }
-        }
-
-        function renderWeightLogs() {
-            document.getElementById('weightLogList').innerHTML = (userData.weightLogs || []).map(l => `
-                <div class="flex justify-between bg-slate-800/50 p-4 rounded-xl mb-2 border border-white/5">
-                    <span class="font-black">${l.w} KG</span>
-                    <span class="opacity-40 text-xs">${l.date}</span>
-                </div>`).join('');
         }
 
         function renderSessions() {
@@ -191,35 +225,34 @@
                 </div>`).join('');
         }
 
-        // --- CORE HELPER FUNCTIES ---
+        function showView(v) { 
+            document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden')); 
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); 
+            document.getElementById('view-'+v).classList.remove('hidden'); 
+            document.getElementById('nav-'+v).classList.add('active'); 
+            if(v==='charts') { updateChart(); renderStats(); }
+        }
+
         function cloneSession(oldId) {
             const oldSess = sessions.find(s => s.id === oldId);
             const today = new Date();
-            const newSess = {
-                id: Date.now(),
-                name: oldSess.name,
-                date: today.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'long' }),
-                rawDate: today.toISOString().split('T')[0],
-                exercises: oldSess.exercises.map(ex => ({ id: Date.now()+Math.random(), name: ex.name, sets: ex.sets.map(s => ({w:s.w, r:s.r, b:""})) }))
-            };
+            const newSess = { id: Date.now(), name: oldSess.name, date: today.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'long' }), rawDate: today.toISOString().split('T')[0], exercises: oldSess.exercises.map(ex => ({ id: Date.now()+Math.random(), name: ex.name, sets: ex.sets.map(s => ({w:s.w, r:s.r, b:""})) })) };
             sessions.push(newSess); activeSessionId = newSess.id; saveAndRender(); showView('training');
         }
 
         function shareWorkout(id) {
             const s = sessions.find(x => x.id === id);
             let text = `🏋️ GYMLOG: ${s.name}\n📅 ${s.date}\n\n`;
-            s.exercises.forEach(ex => {
-                text += `💪 ${ex.name.toUpperCase()}\n`;
-                ex.sets.forEach((set, i) => text += `   S${i+1}: ${set.w}kg x ${set.r}${set.b ? ' (BPM: '+set.b+')' : ''}\n`);
-                text += `\n`;
-            });
+            s.exercises.forEach(ex => { text += `💪 ${ex.name.toUpperCase()}\n`; ex.sets.forEach((set, i) => text += `   S${i+1}: ${set.w}kg x ${set.r}${set.b ? ' (BPM: '+set.b+')' : ''}\n`); text += `\n`; });
             if (navigator.share) navigator.share({ title: `Workout: ${s.name}`, text: text }).catch(() => {});
             else { navigator.clipboard.writeText(text); alert("Gekopieerd!"); }
         }
 
         function updSet(sId, eId, i, f, v) { const s = sessions.find(x => x.id === sId); const e = s.exercises.find(x => x.id === eId); e.sets[i][f] = v; localStorage.setItem('gym_sessions', JSON.stringify(sessions)); }
         function addManualSet(sId, eId) { const ex = sessions.find(s => s.id === sId).exercises.find(e => e.id === eId); ex.sets.push({w:0, r:0, b:""}); saveAndRender(); }
-        function showView(v) { document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden')); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.getElementById('view-'+v).classList.remove('hidden'); document.getElementById('nav-'+v).classList.add('active'); if(v==='charts') updateChart(); }
+        function saveProfileName() { const val = document.getElementById('profName').value.trim().toUpperCase(); userData.name = val || "GEBRUIKER"; saveAndRender(); }
+        function logWeight() { const v = document.getElementById('profWeightInput').value; if(v){ userData.weightLogs.unshift({w:parseFloat(v), date:new Date().toLocaleDateString('nl-NL'), ts:Date.now()}); saveAndRender(); document.getElementById('profWeightInput').value=""; }}
+        function renderWeightLogs() { document.getElementById('weightLogList').innerHTML = (userData.weightLogs || []).map(l => `<div class="flex justify-between bg-slate-800/50 p-4 rounded-xl mb-2 border border-white/5"><span class="font-black">${l.w} KG</span><span class="opacity-40 text-xs">${l.date}</span></div>`).join(''); }
         function exportData() { const blob = new Blob([JSON.stringify({ sessions, exData, userData }, null, 2)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `gymlog_backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); }
         function createNewSession() { const name = (document.getElementById('newWorkoutName').value || "Training").toUpperCase(); const rawDate = document.getElementById('newWorkoutDate').value; sessions.push({ id: Date.now(), name, date: new Date(rawDate).toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'long' }), rawDate, exercises: [] }); activeSessionId = sessions[sessions.length-1].id; saveAndRender(); }
         function populateExerciseSelect() { const u = [...new Set(sessions.flatMap(s => s.exercises.map(e => e.name)))].sort(); document.getElementById('chartExerciseSelect').innerHTML = u.map(n => `<option value="${n}">${n}</option>`).join(''); }
