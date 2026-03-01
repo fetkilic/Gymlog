@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GymLog Pro - Copy Edition</title>
+    <title>GymLog Pro - User Sync Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
@@ -15,14 +15,10 @@
         .hidden { display: none; }
         .modal-bg { background-color: rgba(0, 0, 0, 0.95); backdrop-filter: blur(15px); z-index: 100; }
         .table-input { background: #0f172a; width: 100%; font-weight: 900; font-size: 1.25rem; outline: none; border: 1px solid #475569; border-radius: 8px; padding: 8px; text-align: center; color: #818cf8; }
-        
-        /* ACTIE KNOPPEN */
-        .action-btn { font-size: 10px; font-weight: 900; padding: 8px 14px; border-radius: 10px; text-transform: uppercase; border: 2px solid; transition: all 0.1s; display: flex; align-items: center; gap: 4px; }
+        .action-btn { font-size: 10px; font-weight: 900; padding: 8px 14px; border-radius: 10px; text-transform: uppercase; border: 2px solid; display: flex; align-items: center; gap: 4px; }
         .btn-copy { color: #22c55e; border-color: #22c55e; background: rgba(34, 197, 94, 0.1); }
         .btn-share { color: #818cf8; border-color: #818cf8; background: rgba(129, 140, 248, 0.1); }
         .btn-delete { color: #ef4444; border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
-        .action-btn:active { transform: scale(0.95); opacity: 0.7; }
-
         .bottom-nav { background: #0f172a; border-top: 2px solid #334155; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; padding: 15px 5px 25px 5px; z-index: 50; }
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #64748b; font-weight: 900; font-size: 10px; text-transform: uppercase; background:none; border:none; }
         .nav-item.active { color: #ffffff; }
@@ -33,7 +29,7 @@
 
     <header class="flex justify-between items-center mb-8 mt-4 px-1">
         <h1 class="text-3xl font-black tracking-tighter text-white">GYM<span class="text-indigo-400">LOG</span></h1>
-        <div id="headerStats" class="text-[10px] font-black text-white uppercase bg-indigo-900/40 px-3 py-2 rounded-lg border border-indigo-500/30 italic">...</div>
+        <div id="headerStats" class="text-[10px] font-black text-white uppercase bg-indigo-900/40 px-3 py-2 rounded-lg border border-indigo-500/30 italic">LADEN...</div>
     </header>
 
     <section id="view-training" class="view-section">
@@ -56,13 +52,13 @@
     <section id="view-profile" class="view-section hidden">
         <div class="surface p-8 mb-8 border-white/10">
             <h2 class="text-xl font-black uppercase mb-6 italic tracking-tighter text-indigo-400">Instellingen</h2>
-            <input id="profName" class="input-field mb-10" placeholder="NAAM" onchange="saveProfileName()" onfocus="this.select()">
+            <input id="profName" class="input-field mb-10" placeholder="JOUW NAAM" onchange="saveProfileName()" onfocus="this.select()">
             
             <div class="bg-slate-900/50 p-6 rounded-2xl border border-indigo-500/20 mb-10">
                 <h3 class="text-[10px] font-black uppercase mb-4 tracking-widest text-indigo-400">Data & Cloud</h3>
                 <div class="grid grid-cols-2 gap-3">
-                    <button onclick="exportData()" class="btn-white-outline text-center text-[9px]">💾 Backup</button>
-                    <button onclick="document.getElementById('importFile').click()" class="btn-white-outline text-center text-[9px]">📂 Herstel</button>
+                    <button onclick="exportData()" class="btn-white-outline text-center text-[9px] border-white/40 p-2 rounded-lg border">💾 Backup</button>
+                    <button onclick="document.getElementById('importFile').click()" class="btn-white-outline text-center text-[9px] border-white/40 p-2 rounded-lg border">📂 Herstel</button>
                     <input type="file" id="importFile" class="hidden" onchange="importData(event)">
                 </div>
             </div>
@@ -82,153 +78,152 @@
         <button onclick="showView('profile')" id="nav-profile" class="nav-item"><span class="text-xl">👤</span><span>Profiel</span></button>
     </nav>
 
-    <div id="pickerModal" class="hidden fixed inset-0 modal-bg flex flex-col p-6 overflow-y-auto">
-        <div class="flex justify-between items-center mb-8">
-            <h3 id="pickerTitle" class="text-2xl font-black italic uppercase text-indigo-400">Kies Oefening</h3>
-            <button onclick="closePicker()" class="text-white font-black text-4xl">&times;</button>
-        </div>
-        <div id="categoryList" class="space-y-4"></div>
-        <div id="exerciseList" class="hidden space-y-4">
-            <button onclick="showCategories()" class="text-indigo-400 font-black uppercase text-xs mb-6 flex items-center">← Terug</button>
-            <div id="exerciseItems" class="space-y-3"></div>
-        </div>
-    </div>
-
     <script>
         const DEFAULT_EX = { "Leg": ["Squat", "Leg Press"], "Bicep": ["Barbell Curl"], "Tricep": ["Pushdown"], "Chest": ["Bench Press"], "Back": ["Deadlift"], "Shoulders": ["Overhead Press"] };
-        let exData = JSON.parse(localStorage.getItem('gym_ex_list')) || DEFAULT_EX;
-        let sessions = JSON.parse(localStorage.getItem('gym_sessions')) || [];
-        let userData = JSON.parse(localStorage.getItem('gym_user')) || { name: "ATLEET", weightLogs: [] };
+        let exData, sessions, userData;
         let activeSessionId = null;
         let chartInstance = null;
 
+        function loadFromStorage() {
+            exData = JSON.parse(localStorage.getItem('gym_ex_list')) || DEFAULT_EX;
+            sessions = JSON.parse(localStorage.getItem('gym_sessions')) || [];
+            userData = JSON.parse(localStorage.getItem('gym_user')) || { name: "GEBRUIKER", weightLogs: [] };
+        }
+
         function init() {
+            loadFromStorage();
             document.getElementById('newWorkoutDate').valueAsDate = new Date();
-            document.getElementById('profName').value = userData.name || "";
+            document.getElementById('profName').value = userData.name === "GEBRUIKER" ? "" : userData.name;
+            updateHeader(); 
+            renderSessions(); 
+            renderWeightLogs(); 
+            populateExerciseSelect();
+        }
+
+        function updateHeader() {
+            const lastW = (userData.weightLogs && userData.weightLogs.length > 0) ? userData.weightLogs[0].w : "--";
+            document.getElementById('headerStats').innerText = `${userData.name || "GEBRUIKER"} • ${lastW} KG`;
+        }
+
+        function saveAndRender() { 
+            localStorage.setItem('gym_sessions', JSON.stringify(sessions)); 
+            localStorage.setItem('gym_ex_list', JSON.stringify(exData));
+            localStorage.setItem('gym_user', JSON.stringify(userData));
             updateHeader(); renderSessions(); renderWeightLogs(); populateExerciseSelect();
         }
 
-        // --- COPY LOGICA ---
-        function cloneSession(oldId) {
-            const oldSess = sessions.find(s => s.id === oldId);
-            if(!oldSess) return;
-
-            const today = new Date();
-            const formattedDate = today.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'long' });
-            
-            const clonedExercises = oldSess.exercises.map(ex => ({
-                id: Date.now() + Math.random(),
-                name: ex.name,
-                sets: ex.sets.map(set => ({
-                    w: set.w,
-                    r: set.r,
-                    b: "" // BPM leegmaken
-                }))
-            }));
-
-            const newSess = {
-                id: Date.now(),
-                name: oldSess.name,
-                date: formattedDate,
-                rawDate: today.toISOString().split('T')[0],
-                exercises: clonedExercises
+        // --- VERBETERDE IMPORT VOOR "USER" SLEUTEL ---
+        function importData(e) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                try {
+                    const d = JSON.parse(ev.target.result);
+                    if(confirm("Data herstellen?")){
+                        // Check of data onder "user" of "userData" staat
+                        const importedUser = d.user || d.userData || { name: "GEBRUIKER", weightLogs: [] };
+                        
+                        localStorage.setItem('gym_sessions', JSON.stringify(d.sessions || []));
+                        localStorage.setItem('gym_ex_list', JSON.stringify(d.exData || DEFAULT_EX));
+                        localStorage.setItem('gym_user', JSON.stringify(importedUser));
+                        
+                        // Forceer onmiddellijke herlaad van interface
+                        init(); 
+                        alert(`Welkom terug, ${importedUser.name}!`);
+                    }
+                } catch(err) { alert("Fout bij inladen."); }
             };
+            reader.readAsText(e.target.files[0]);
+        }
 
-            sessions.push(newSess);
-            activeSessionId = newSess.id; 
+        function saveProfileName() {
+            const val = document.getElementById('profName').value.trim().toUpperCase();
+            userData.name = val || "GEBRUIKER";
             saveAndRender();
-            showView('training');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function logWeight() {
+            const v = document.getElementById('profWeightInput').value;
+            if(v){
+                userData.weightLogs.unshift({w:parseFloat(v), date:new Date().toLocaleDateString('nl-NL'), ts:Date.now()});
+                saveAndRender();
+                document.getElementById('profWeightInput').value="";
+            }
+        }
+
+        function renderWeightLogs() {
+            document.getElementById('weightLogList').innerHTML = (userData.weightLogs || []).map(l => `
+                <div class="flex justify-between bg-slate-800/50 p-4 rounded-xl mb-2 border border-white/5">
+                    <span class="font-black">${l.w} KG</span>
+                    <span class="opacity-40 text-xs">${l.date}</span>
+                </div>`).join('');
         }
 
         function renderSessions() {
             const container = document.getElementById('sessionContainer');
-            container.innerHTML = sessions.slice().reverse().map(session => {
-                const isActive = activeSessionId === session.id;
-                return `
-                <div class="surface overflow-hidden ${isActive ? 'border-indigo-400' : 'border-white/10'} mb-6">
-                    <div class="p-8 flex flex-col gap-4" onclick="activeSessionId = activeSessionId === ${session.id} ? null : ${session.id}; renderSessions();">
-                        <div class="flex flex-col gap-1">
-                            <h3 class="text-3xl font-black text-white uppercase italic leading-none">${session.name}</h3>
-                            <p class="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">${session.date}</p>
-                        </div>
-                        
-                        <div class="flex flex-wrap gap-2 mt-2" onclick="event.stopPropagation();">
+            container.innerHTML = sessions.slice().reverse().map(session => `
+                <div class="surface overflow-hidden ${activeSessionId === session.id ? 'border-indigo-400' : 'border-white/10'} mb-6">
+                    <div class="p-8" onclick="activeSessionId = activeSessionId === ${session.id} ? null : ${session.id}; renderSessions();">
+                        <h3 class="text-3xl font-black text-white uppercase italic leading-none">${session.name}</h3>
+                        <p class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mt-1">${session.date}</p>
+                        <div class="flex gap-2 mt-4" onclick="event.stopPropagation();">
                             <button onclick="cloneSession(${session.id})" class="action-btn btn-copy">Copy</button>
                             <button onclick="shareWorkout(${session.id})" class="action-btn btn-share">Delen</button>
-                            <button onclick="if(confirm('Deze training verwijderen?')){ sessions=sessions.filter(x=>x.id!==${session.id}); saveAndRender(); }" class="action-btn btn-delete">Wissen</button>
+                            <button onclick="if(confirm('Wissen?')){ sessions=sessions.filter(x=>x.id!==${session.id}); saveAndRender(); }" class="action-btn btn-delete">Wissen</button>
                         </div>
                     </div>
-
-                    <div class="${isActive ? 'px-8 pb-8 border-t-4 border-slate-900 pt-8' : 'hidden'}">
-                        <button onclick="openPicker(${session.id})" class="w-full mb-10 border-2 border-white text-white py-5 rounded-2xl text-sm font-black uppercase tracking-widest">+ OEFENING</button>
-                        <div class="space-y-12">
-                            ${session.exercises.map((ex, exIdx) => `
-                                <div class="exercise-card border-l-4 border-indigo-500 pl-6">
-                                    <div class="flex justify-between items-center mb-6">
-                                        <span class="text-xl font-black text-white uppercase italic">${ex.name}</span>
-                                        <button onclick="const s=sessions.find(x=>x.id===${session.id}); s.exercises.splice(${exIdx},1); saveAndRender();" class="text-red-500 font-bold text-[10px] uppercase border border-red-500/30 px-2 py-1 rounded">Verwijder</button>
-                                    </div>
-                                    <table class="w-full text-left">
-                                        <tr class="text-white/40 font-black uppercase text-[10px] tracking-widest">
-                                            <th class="pb-4">SET</th><th class="pb-4">KG</th><th class="pb-4">REPS</th><th class="pb-4">BPM</th>
-                                        </tr>
-                                        ${ex.sets.map((s, i) => `
-                                            <tr class="border-b border-white/5">
-                                                <td class="py-4 font-black text-white text-xl">S${i+1}</td>
-                                                <td><input type="text" inputmode="decimal" onfocus="this.select()" onchange="updSet(${session.id},${ex.id},${i},'w',this.value)" value="${s.w}" class="table-input"></td>
-                                                <td><input type="text" inputmode="numeric" onfocus="this.select()" onchange="updSet(${session.id},${ex.id},${i},'r',this.value)" value="${s.r}" class="table-input"></td>
-                                                <td><input type="text" inputmode="numeric" onfocus="this.select()" onchange="updSet(${session.id},${ex.id},${i},'b',this.value)" value="${s.b || ''}" class="table-input !text-rose-500"></td>
-                                                <td class="text-right">
-                                                    <button onclick="const s=sessions.find(x=>x.id===${session.id}); const e=s.exercises.find(ex=>ex.id===${ex.id}); e.sets.splice(${i},1); saveAndRender();" class="text-white font-black text-2xl px-2">&times;</button>
-                                                </td>
-                                            </tr>`).join('')}
-                                    </table>
-                                    <button onclick="addManualSet(${session.id}, ${ex.id})" class="btn-add-small">+ SET</button>
-                                </div>`).join('')}
-                        </div>
+                    <div class="${activeSessionId === session.id ? 'px-8 pb-8 pt-4' : 'hidden'}">
+                        ${session.exercises.map((ex, exIdx) => `
+                            <div class="mb-8 border-l-2 border-indigo-500 pl-4">
+                                <div class="flex justify-between mb-4"><span class="font-black italic uppercase text-xs">${ex.name}</span><button onclick="const s=sessions.find(x=>x.id===${session.id}); s.exercises.splice(${exIdx},1); saveAndRender();" class="text-red-500 text-[10px]">WIS</button></div>
+                                <table class="w-full">
+                                    <tr class="text-[10px] opacity-40 font-bold"><th>SET</th><th>KG</th><th>REPS</th><th>BPM</th></tr>
+                                    ${ex.sets.map((s, i) => `
+                                        <tr>
+                                            <td class="py-2 font-bold">S${i+1}</td>
+                                            <td><input type="text" inputmode="decimal" onfocus="this.select()" onchange="updSet(${session.id},${ex.id},${i},'w',this.value)" value="${s.w}" class="table-input"></td>
+                                            <td><input type="text" inputmode="numeric" onfocus="this.select()" onchange="updSet(${session.id},${ex.id},${i},'r',this.value)" value="${s.r}" class="table-input"></td>
+                                            <td><input type="text" inputmode="numeric" onfocus="this.select()" onchange="updSet(${session.id},${ex.id},${i},'b',this.value)" value="${s.b || ''}" class="table-input !text-rose-500"></td>
+                                        </tr>`).join('')}
+                                </table>
+                                <button onclick="addManualSet(${session.id}, ${ex.id})" class="btn-add-small">+ SET</button>
+                            </div>`).join('')}
                     </div>
-                </div>`;
-            }).join('');
+                </div>`).join('');
         }
 
-        function saveAndRender() { localStorage.setItem('gym_sessions', JSON.stringify(sessions)); renderSessions(); populateExerciseSelect(); }
-        function updSet(sId, eId, i, f, v) { const s = sessions.find(x => x.id === sId); const e = s.exercises.find(x => x.id === eId); e.sets[i][f] = parseFloat(v.toString().replace(',', '.')) || 0; localStorage.setItem('gym_sessions', JSON.stringify(sessions)); }
-        function addManualSet(sId, eId) { const ex = sessions.find(s => s.id === sId).exercises.find(e => e.id === eId); ex.sets.push({ ...(ex.sets[ex.sets.length-1] || {w:0, r:0, b:0}) }); saveAndRender(); }
+        // --- CORE HELPER FUNCTIES ---
+        function cloneSession(oldId) {
+            const oldSess = sessions.find(s => s.id === oldId);
+            const today = new Date();
+            const newSess = {
+                id: Date.now(),
+                name: oldSess.name,
+                date: today.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'long' }),
+                rawDate: today.toISOString().split('T')[0],
+                exercises: oldSess.exercises.map(ex => ({ id: Date.now()+Math.random(), name: ex.name, sets: ex.sets.map(s => ({w:s.w, r:s.r, b:""})) }))
+            };
+            sessions.push(newSess); activeSessionId = newSess.id; saveAndRender(); showView('training');
+        }
+
+        function shareWorkout(id) {
+            const s = sessions.find(x => x.id === id);
+            let text = `🏋️ GYMLOG: ${s.name}\n📅 ${s.date}\n\n`;
+            s.exercises.forEach(ex => {
+                text += `💪 ${ex.name.toUpperCase()}\n`;
+                ex.sets.forEach((set, i) => text += `   S${i+1}: ${set.w}kg x ${set.r}${set.b ? ' (BPM: '+set.b+')' : ''}\n`);
+                text += `\n`;
+            });
+            if (navigator.share) navigator.share({ title: `Workout: ${s.name}`, text: text }).catch(() => {});
+            else { navigator.clipboard.writeText(text); alert("Gekopieerd!"); }
+        }
+
+        function updSet(sId, eId, i, f, v) { const s = sessions.find(x => x.id === sId); const e = s.exercises.find(x => x.id === eId); e.sets[i][f] = v; localStorage.setItem('gym_sessions', JSON.stringify(sessions)); }
+        function addManualSet(sId, eId) { const ex = sessions.find(s => s.id === sId).exercises.find(e => e.id === eId); ex.sets.push({w:0, r:0, b:""}); saveAndRender(); }
         function showView(v) { document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden')); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.getElementById('view-'+v).classList.remove('hidden'); document.getElementById('nav-'+v).classList.add('active'); if(v==='charts') updateChart(); }
-        function saveProfileName() { userData.name = document.getElementById('profName').value.toUpperCase(); localStorage.setItem('gym_user', JSON.stringify(userData)); updateHeader(); }
-        function updateHeader() { const lastW = (userData.weightLogs && userData.weightLogs.length > 0) ? userData.weightLogs[0].w : "--"; document.getElementById('headerStats').innerText = `${userData.name || "ATLEET"} • ${lastW} KG`; }
-        function logWeight() { const v = document.getElementById('profWeightInput').value; if(v){ userData.weightLogs.unshift({w:parseFloat(v), date:new Date().toLocaleDateString('nl-NL'), ts:Date.now()}); localStorage.setItem('gym_user', JSON.stringify(userData)); renderWeightLogs(); updateHeader(); document.getElementById('profWeightInput').value=""; }}
-        function renderWeightLogs() { document.getElementById('weightLogList').innerHTML = (userData.weightLogs || []).map(l => `<div class="flex justify-between bg-slate-800/50 p-4 rounded-xl mb-2"><span>${l.w} KG</span><span class="opacity-40">${l.date}</span></div>`).join(''); }
-        function shareWorkout(id) { 
-            const s = sessions.find(x=>x.id===id); 
-            let t = `🔥 GYMLOG: ${s.name}\n📅 ${s.date}\n\n`; 
-            s.exercises.forEach(e => { 
-                t += `💪 ${e.name}\n`; 
-                e.sets.forEach((st,i) => t+=`   S${i+1}: ${st.w}kg x ${st.r}\n`); 
-                t += `\n`;
-            }); 
-            if(navigator.share) navigator.share({text:t}).catch(()=>{});
-            else { navigator.clipboard.writeText(t); alert("Gekopieerd!"); }
-        }
-        function createNewSession() {
-            const name = (document.getElementById('newWorkoutName').value || "Training").toUpperCase();
-            const rawDate = document.getElementById('newWorkoutDate').value;
-            const formattedDate = new Date(rawDate).toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'long' });
-            const newSess = { id: Date.now(), name, date: formattedDate, rawDate, exercises: [] };
-            sessions.push(newSess); activeSessionId = newSess.id;
-            saveAndRender(); document.getElementById('newWorkoutName').value = "";
-        }
-        function openPicker(id) { activeSessionId = id; document.getElementById('pickerModal').classList.remove('hidden'); renderCategories(); }
-        function closePicker() { document.getElementById('pickerModal').classList.add('hidden'); }
-        function renderCategories() { document.getElementById('categoryList').innerHTML = Object.keys(exData).sort().map(c => `<button onclick="selectCategory('${c}')" class="w-full surface p-5 mb-2 text-left uppercase font-black">${c} →</button>`).join(''); }
-        function selectCategory(c) { document.getElementById('categoryList').classList.add('hidden'); document.getElementById('exerciseItems').innerHTML = exData[c].sort().map(e => `<button onclick="pickEx('${e}')" class="w-full bg-slate-800 p-4 mb-2 rounded-xl text-left uppercase">${e}</button>`).join(''); document.getElementById('exerciseList').classList.remove('hidden'); }
-        function showCategories() { document.getElementById('categoryList').classList.remove('hidden'); document.getElementById('exerciseList').classList.add('hidden'); }
-        function pickEx(n) { sessions.find(s => s.id === activeSessionId).exercises.push({id:Date.now(), name:n.toUpperCase(), sets:[{w:0,r:0,b:0}]}); saveAndRender(); closePicker(); }
-        function exportData() { try { const blob = new Blob([JSON.stringify({sessions, exData, userData})], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'gymlog_backup.json'; a.click(); } catch(e){ alert(e); } }
-        function importData(e) { const reader = new FileReader(); reader.onload = (ev) => { const d = JSON.parse(ev.target.result); localStorage.setItem('gym_sessions', JSON.stringify(d.sessions)); location.reload(); }; reader.readAsText(e.target.files[0]); }
+        function exportData() { const blob = new Blob([JSON.stringify({ sessions, exData, userData }, null, 2)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `gymlog_backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); }
+        function createNewSession() { const name = (document.getElementById('newWorkoutName').value || "Training").toUpperCase(); const rawDate = document.getElementById('newWorkoutDate').value; sessions.push({ id: Date.now(), name, date: new Date(rawDate).toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'long' }), rawDate, exercises: [] }); activeSessionId = sessions[sessions.length-1].id; saveAndRender(); }
         function populateExerciseSelect() { const u = [...new Set(sessions.flatMap(s => s.exercises.map(e => e.name)))].sort(); document.getElementById('chartExerciseSelect').innerHTML = u.map(n => `<option value="${n}">${n}</option>`).join(''); }
-        function updateChart() { /* Chart.js logica... */ }
+        function updateChart() { const exName = document.getElementById('chartExerciseSelect').value; if(!exName) return; const relevant = sessions.filter(s => s.exercises.some(e => e.name === exName)).sort((a,b) => new Date(a.rawDate) - new Date(b.rawDate)); const labels = relevant.map(s => new Date(s.rawDate).toLocaleDateString('nl-NL', {day:'numeric', month:'short'})); const weights = relevant.map(s => Math.max(...s.exercises.find(e => e.name === exName).sets.map(st => parseFloat(st.w) || 0))); if(chartInstance) chartInstance.destroy(); chartInstance = new Chart(document.getElementById('progressionChart'), { type: 'line', data: { labels, datasets: [{ data: weights, borderColor: '#6366f1', tension: 0.3, fill: true, backgroundColor: 'rgba(99, 102, 241, 0.1)' }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#64748b' } }, x: { ticks: { color: '#64748b' } } } } }); }
 
         init();
     </script>
