@@ -14,8 +14,18 @@
         .input-field { background-color: #334155; border-radius: 1rem; padding: 18px; width: 100%; outline: none; border: 2px solid transparent; color: white; font-size: 1.1rem; font-weight: 700; }
         .btn-primary { background-color: #6366f1; color: white; border-radius: 1.25rem; font-weight: 900; text-transform: uppercase; }
         .hidden { display: none; }
-        .table-input { background: #0f172a; width: 100%; font-weight: 900; font-size: 1.25rem; outline: none; border: 1px solid #475569; border-radius: 8px; padding: 8px; text-align: center; color: #818cf8; }
+        .table-input { background: #0f172a; width: 100%; font-weight: 900; font-size: 1.25rem; outline: none; border: 1px solid #475569; border-radius: 8px; padding: 8px; text-align: center; color: #818cf8; transition: all 0.3s; }
         .table-input::placeholder { color: rgba(129, 140, 248, 0.3); font-weight: 400; font-style: italic; }
+        .table-input.auto-filled { border-color: #22c55e; color: #22c55e; }
+        
+        /* VERBETERDE RPE SELECTOR */
+        .rpe-container { display: flex; gap: 6px; justify-content: center; align-items: center; padding: 4px; background: rgba(15, 23, 42, 0.4); border-radius: 12px; }
+        .rpe-btn { width: 28px; height: 28px; border-radius: 8px; border: 2px solid transparent; opacity: 0.2; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); flex-shrink: 0; }
+        .rpe-btn.active { opacity: 1; transform: scale(1.15); border-color: white; box-shadow: 0 0 10px rgba(255,255,255,0.2); }
+        .rpe-green { background-color: #22c55e; }
+        .rpe-yellow { background-color: #eab308; }
+        .rpe-red { background-color: #ef4444; }
+
         .action-btn { font-size: 10px; font-weight: 900; padding: 8px 14px; border-radius: 10px; text-transform: uppercase; border: 2px solid; display: flex; align-items: center; gap: 4px; }
         .btn-copy { color: #22c55e; border-color: #22c55e; background: rgba(34, 197, 94, 0.1); }
         .btn-share { color: #818cf8; border-color: #818cf8; background: rgba(129, 140, 248, 0.1); }
@@ -24,14 +34,9 @@
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #64748b; font-weight: 900; font-size: 10px; text-transform: uppercase; background:none; border:none; }
         .nav-item.active { color: #ffffff; }
         .btn-add-small { color: #ffffff; border: 2px dashed #475569; font-size: 10px; font-weight: 900; padding: 12px; border-radius: 10px; text-transform: uppercase; width: 100%; margin-top: 15px; background:none; }
-        .stat-card { background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; border-radius: 1.25rem; padding: 15px; }
-        .btn-remove-set { color: #ef4444; font-size: 1.5rem; font-weight: 900; padding: 0 10px; line-height: 1; }
-        #exModal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; padding: 20px; overflow-y: auto; }
-        .ex-item { background: #334155; padding: 15px; border-radius: 10px; margin-bottom: 8px; font-weight: 700; text-transform: uppercase; font-size: 12px; }
+        .volume-tag { font-size: 8px; background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 2px 5px; border-radius: 4px; font-weight: 900; }
         .heatmap-bar-bg { background: #0f172a; border-radius: 8px; height: 12px; width: 100%; overflow: hidden; margin-top: 4px; }
         .heatmap-bar-fill { background: linear-gradient(90deg, #6366f1, #a855f7); height: 100%; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
-        .quick-link-btn { background: #6366f1; color: white; padding: 4px 10px; border-radius: 8px; font-size: 9px; font-weight: 900; text-transform: uppercase; }
-        .volume-tag { font-size: 8px; background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 2px 5px; border-radius: 4px; font-weight: 900; }
     </style>
 </head>
 <body class="p-4 max-w-md mx-auto pb-32">
@@ -60,14 +65,14 @@
 
     <section id="view-charts" class="view-section hidden">
         <div class="surface p-8 mb-8 border-white/10">
-            <h2 class="text-xl font-black uppercase mb-6 italic tracking-tighter text-indigo-400">Progressie</h2>
+            <h2 class="text-xl font-black uppercase mb-6 italic tracking-tighter text-indigo-400 text-center">Progressie</h2>
             <select id="chartExerciseSelect" onchange="updateChart()" class="input-field mb-8 text-sm bg-slate-900 border-white/20 uppercase font-black"></select>
             <div class="h-64 w-full mb-8"><canvas id="progressionChart"></canvas></div>
             <hr class="border-white/10 mb-8">
             <h2 class="text-xl font-black uppercase mb-2 italic tracking-tighter text-indigo-400">Pomp Meter (7 Dagen)</h2>
             <div id="volumeTracker" class="space-y-6 mb-8"></div>
             <hr class="border-white/10 mb-8">
-            <h2 class="text-xl font-black uppercase mb-2 italic tracking-tighter text-indigo-400">Spieren Heatmap (Totaal)</h2>
+            <h2 class="text-xl font-black uppercase mb-2 italic tracking-tighter text-indigo-400">Spieren Heatmap</h2>
             <div id="muscleHeatmap" class="space-y-6 mb-8"></div>
             <div id="fixContainer" class="hidden mt-4 p-5 bg-rose-500/10 border border-rose-500/30 rounded-3xl">
                 <div id="unknownListItems" class="space-y-3"></div>
@@ -112,6 +117,7 @@
         let exLibrary = JSON.parse(localStorage.getItem('gym_ex_library')) || INITIAL_LIBRARY;
         let sessions = [], userData = { name: "GEBRUIKER", weightLogs: [] };
         let activeSessionId = null, chartInstance = null, currentTargetSessionId = null;
+        let activeTimers = {};
 
         function loadFromStorage() {
             sessions = JSON.parse(localStorage.getItem('gym_sessions')) || [];
@@ -137,10 +143,37 @@
         function getGhostData(exName, setIdx) {
             const pastSessions = sessions.slice().sort((a,b) => new Date(b.rawDate) - new Date(a.rawDate));
             for (let s of pastSessions) {
+                if (s.id === activeSessionId) continue; 
                 const ex = s.exercises.find(e => e.name.toUpperCase() === exName.toUpperCase());
-                if (ex && ex.sets[setIdx]) return { w: ex.sets[setIdx].w, r: ex.sets[setIdx].r };
+                if (ex && ex.sets[setIdx]) return { w: ex.sets[setIdx].w, r: ex.sets[setIdx].r, q: ex.sets[setIdx].q };
             }
             return null;
+        }
+
+        function startAutoFillTimer(sId, eId, i, field, ghostValue) {
+            const timerId = `${sId}-${eId}-${i}-${field}`;
+            if (activeTimers[timerId]) clearTimeout(activeTimers[timerId]);
+            activeTimers[timerId] = setTimeout(() => {
+                const input = document.getElementById(`input-${timerId}`);
+                if (input && input.value === "" && ghostValue) {
+                    input.value = ghostValue;
+                    input.classList.add('auto-filled');
+                    updSet(sId, eId, i, field, ghostValue);
+                }
+            }, 10000);
+        }
+
+        function stopTimer(sId, eId, i, field) {
+            const timerId = `${sId}-${eId}-${i}-${field}`;
+            if (activeTimers[timerId]) { clearTimeout(activeTimers[timerId]); delete activeTimers[timerId]; }
+            const input = document.getElementById(`input-${timerId}`);
+            if(input) input.classList.remove('auto-filled');
+        }
+
+        function setRPE(sId, eId, setIdx, quality) {
+            const ex = sessions.find(s => s.id === sId).exercises.find(e => e.id === eId);
+            ex.sets[setIdx].q = quality;
+            saveAndRender();
         }
 
         function selectEx(name) {
@@ -155,7 +188,7 @@
                 } else return;
             }
             const sess = sessions.find(s => s.id === currentTargetSessionId);
-            sess.exercises.push({ id: Date.now(), name: name.trim().toUpperCase(), sets: [{w:0, r:12, b:""}] });
+            sess.exercises.push({ id: Date.now(), name: name.trim().toUpperCase(), sets: [{w:0, r:12, b:"", q:''}] });
             saveAndRender(); closeExModal();
         }
 
@@ -163,7 +196,7 @@
             const ex = sessions.find(s => s.id === sId).exercises.find(e => e.id === eId);
             const nextIdx = ex.sets.length;
             const nextReps = DEFAULT_REPS[nextIdx] !== undefined ? DEFAULT_REPS[nextIdx] : 6;
-            ex.sets.push({w:0, r:nextReps, b:''}); saveAndRender();
+            ex.sets.push({w:0, r:nextReps, b:'', q:''}); saveAndRender();
         }
 
         function updSet(sId, eId, i, f, v) { 
@@ -184,27 +217,52 @@
                             <button onclick="if(confirm('Wissen?')){ sessions=sessions.filter(x=>x.id!==${session.id}); saveAndRender(); }" class="action-btn btn-delete">Wis</button>
                         </div>
                     </div>
-                    <div class="${activeSessionId === session.id ? 'px-8 pb-8 pt-4' : 'hidden'}">
+                    <div class="${activeSessionId === session.id ? 'px-4 pb-8 pt-4' : 'hidden'}">
                         ${session.exercises.map((ex, exIdx) => `
-                            <div class="mb-8 border-l-2 border-indigo-500 pl-4">
-                                <div class="flex justify-between items-start mb-2">
-                                    <span class="font-black italic uppercase text-xs block">${ex.name}</span>
+                            <div class="mb-10 border-l-2 border-indigo-500 pl-4">
+                                <div class="flex justify-between items-start mb-3">
+                                    <span class="font-black italic uppercase text-xs block text-indigo-300">${ex.name}</span>
                                     <button onclick="const s=sessions.find(x=>x.id===${session.id}); s.exercises.splice(${exIdx},1); saveAndRender();" class="text-red-500 text-[10px] font-black">WIS</button>
                                 </div>
-                                <table class="w-full">
-                                    <tr class="text-[9px] opacity-40 font-bold text-center"><th>SET</th><th>KG</th><th>REPS</th><th>BPM</th><th></th></tr>
+                                <table class="w-full border-separate border-spacing-y-2">
+                                    <tr class="text-[9px] opacity-40 font-black text-center uppercase tracking-widest">
+                                        <th class="w-10">Set</th>
+                                        <th>Kg</th>
+                                        <th>Reps</th>
+                                        <th class="w-32">Focus</th>
+                                        <th class="w-8"></th>
+                                    </tr>
                                     ${ex.sets.map((s, i) => {
                                         const ghost = getGhostData(ex.name, i);
-                                        return `<tr><td class="py-2 font-bold text-xs text-center">S${i+1}</td><td><input type="text" inputmode="decimal" placeholder="${ghost?ghost.w:'0'}" onfocus="this.select()" onchange="updSet(${session.id},${ex.id},${i},'w',this.value)" value="${s.w||''}" class="table-input"></td><td><input type="text" inputmode="numeric" placeholder="${ghost?ghost.r:'0'}" onfocus="this.select()" onchange="updSet(${session.id},${ex.id},${i},'r',this.value)" value="${s.r||''}" class="table-input"></td><td><input type="text" inputmode="numeric" onfocus="this.select()" onchange="updSet(${session.id},${ex.id},${i},'b',this.value)" value="${s.b||''}" class="table-input !text-rose-500"></td><td class="text-right"><button onclick="const e=sessions.find(s=>s.id===${session.id}).exercises.find(x=>x.id===${ex.id}); if(e.sets.length>1){e.sets.splice(${i},1); saveAndRender();}" class="btn-remove-set">&times;</button></td></tr>`;
+                                        if (activeSessionId === session.id) {
+                                            if(!s.w) startAutoFillTimer(session.id, ex.id, i, 'w', ghost ? ghost.w : null);
+                                            if(!s.r) startAutoFillTimer(session.id, ex.id, i, 'r', ghost ? ghost.r : null);
+                                        }
+                                        return `<tr>
+                                            <td class="text-center font-black text-xs opacity-60">S${i+1}</td>
+                                            <td><input id="input-${session.id}-${ex.id}-${i}-w" type="text" inputmode="decimal" placeholder="${ghost?ghost.w:'0'}" onfocus="this.select(); stopTimer(${session.id},${ex.id},${i},'w')" oninput="stopTimer(${session.id},${ex.id},${i},'w')" onchange="updSet(${session.id},${ex.id},${i},'w',this.value)" value="${s.w||''}" class="table-input"></td>
+                                            <td><input id="input-${session.id}-${ex.id}-${i}-r" type="text" inputmode="numeric" placeholder="${ghost?ghost.r:'0'}" onfocus="this.select(); stopTimer(${session.id},${ex.id},${i},'r')" oninput="stopTimer(${session.id},${ex.id},${i},'r')" onchange="updSet(${session.id},${ex.id},${i},'r',this.value)" value="${s.r||''}" class="table-input"></td>
+                                            <td>
+                                                <div class="rpe-container">
+                                                    <button onclick="setRPE(${session.id},${ex.id},${i},'g')" class="rpe-btn rpe-green ${s.q==='g'?'active':''}"></button>
+                                                    <button onclick="setRPE(${session.id},${ex.id},${i},'y')" class="rpe-btn rpe-yellow ${s.q==='y'?'active':''}"></button>
+                                                    <button onclick="setRPE(${session.id},${ex.id},${i},'r')" class="rpe-btn rpe-red ${s.q==='r'?'active':''}"></button>
+                                                </div>
+                                            </td>
+                                            <td class="text-right">
+                                                <button onclick="const e=sessions.find(s=>s.id===${session.id}).exercises.find(x=>x.id===${ex.id}); if(e.sets.length>1){e.sets.splice(${i},1); saveAndRender();}" class="btn-remove-set">&times;</button>
+                                            </td>
+                                        </tr>`;
                                     }).join('')}
                                 </table>
-                                <button onclick="addSetToEx(${session.id}, ${ex.id})" class="btn-add-small">+ SET</button>
+                                <button onclick="addSetToEx(${session.id}, ${ex.id})" class="btn-add-small">+ SET TOEVOEGEN</button>
                             </div>`).join('')}
                         <button onclick="openExModal(${session.id})" class="btn-primary w-full py-3 text-xs mt-4">+ OEFENING TOEVOEGEN</button>
                     </div>
                 </div>`).join('');
         }
 
+        // --- OVERIGE FUNCTIES (HERSTEL, CHART, ETC) ---
         function renderVolumeTracker() {
             const container = document.getElementById('volumeTracker'); container.innerHTML = "";
             let volumePerCat = {}, exToCat = {};
@@ -214,7 +272,6 @@
             const sortedCats = Object.entries(volumePerCat).sort((a,b) => b[1] - a[1]);
             const maxVol = sortedCats.length > 0 ? sortedCats[0][1] : 1;
             sortedCats.forEach(([cat, vol]) => { if (vol === 0) return; const perc = Math.min(100, Math.round((vol / maxVol) * 100)); container.innerHTML += `<div><div class="flex justify-between items-end mb-1"><span class="text-[10px] font-black uppercase tracking-widest">${cat}</span><span class="volume-tag">${vol.toLocaleString()} KG VOL.</span></div><div class="heatmap-bar-bg"><div class="heatmap-bar-fill !from-emerald-400 !to-cyan-500" style="width: ${perc}%"></div></div></div>`; });
-            if (container.innerHTML === "") container.innerHTML = "<p class='text-[10px] opacity-40 font-bold uppercase'>Geen trainingen laatste 7 dagen.</p>";
         }
 
         function renderHeatmap() {
@@ -224,44 +281,31 @@
             for (const [cat, exs] of Object.entries(exLibrary)) exs.forEach(e => exToCat[e.toUpperCase()] = cat);
             sessions.forEach(s => s.exercises.forEach(ex => { const cat = exToCat[ex.name.toUpperCase()]; const sets = ex.sets.length; if(cat) counts[cat] = (counts[cat] || 0) + sets; else { counts["OVERIG"] = (counts["OVERIG"] || 0) + sets; unknownSet.add(ex.name.toUpperCase()); } total += sets; }));
             if(total === 0) return;
-            Object.keys(counts).sort((a,b) => counts[b] - counts[a]).forEach(cat => { const perc = Math.round((counts[cat] / total) * 100); if(perc > 0) container.innerHTML += `<div><div class="flex justify-between items-end mb-1"><span class="text-[10px] font-black uppercase tracking-widest ${cat==='OVERIG'?'text-rose-400':''}">${cat}</span><span class="text-[10px] font-black text-indigo-400">${perc}%</span></div><div class="heatmap-bar-bg"><div class="heatmap-bar-fill" style="width: ${perc}%"></div></div></div>`; });
-            if(unknownSet.size > 0) { document.getElementById('fixContainer').classList.remove('hidden'); unknownSet.forEach(ex => { unknownItems.innerHTML += `<div class="flex justify-between items-center bg-slate-900/50 p-3 rounded-xl border border-white/5"><span class="text-[10px] font-bold uppercase truncate pr-4">${ex}</span><button onclick="quickLink('${ex}')" class="quick-link-btn">KOPPEL</button></div>`; }); } else document.getElementById('fixContainer').classList.add('hidden');
+            Object.keys(counts).sort((a,b) => counts[b] - counts[a]).forEach(cat => { const perc = Math.round((counts[cat] / total) * 100); if(perc > 0) container.innerHTML += `<div><div class="flex justify-between items-end mb-1"><span class="text-[10px] font-black uppercase tracking-widest">${cat}</span><span class="text-[10px] font-black text-indigo-400">${perc}%</span></div><div class="heatmap-bar-bg"><div class="heatmap-bar-fill" style="width: ${perc}%"></div></div></div>`; });
         }
 
-        function quickLink(name) { const cat = prompt(`Koppel "${name}" aan: (${Object.keys(exLibrary).join(", ")})`).trim(); if(cat) { const m = Object.keys(exLibrary).find(c => c.toLowerCase() === cat.toLowerCase()) || cat; if(!exLibrary[m]) exLibrary[m] = []; exLibrary[m].push(name.toUpperCase()); saveAndRender(); renderHeatmap(); } }
         function renderStats() { const cont = document.getElementById('recordsContainer'); cont.innerHTML = ""; const recs = {}; sessions.forEach(s => s.exercises.forEach(ex => { const w = Math.max(...ex.sets.map(st => parseFloat(st.w) || 0)); const name = ex.name.toUpperCase(); if(!recs[name] || w > recs[name]) recs[name] = w; })); Object.keys(recs).sort().forEach(n => { cont.innerHTML += `<div class="stat-card"><p class="text-[8px] font-black opacity-50 uppercase">${n}</p><p class="text-lg font-black text-emerald-400">${recs[n]} KG</p></div>`; }); }
         function updateChart() { const name = document.getElementById('chartExerciseSelect').value; if(!name) return; const relevant = sessions.filter(s => s.exercises.some(e => e.name.toUpperCase() === name)).sort((a,b) => new Date(a.rawDate) - new Date(b.rawDate)); const labels = relevant.map(s => new Date(s.rawDate).toLocaleDateString('nl-NL', {day:'numeric', month:'short'})); const weights = relevant.map(s => Math.max(...s.exercises.find(e => e.name.toUpperCase() === name).sets.map(st => parseFloat(st.w) || 0))); if(chartInstance) chartInstance.destroy(); chartInstance = new Chart(document.getElementById('progressionChart'), { type: 'line', data: { labels, datasets: [{ data: weights, borderColor: '#6366f1', tension: 0.3, fill: true, backgroundColor: 'rgba(99, 102, 241, 0.1)' }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#64748b' } }, x: { ticks: { color: '#64748b' } } } } }); }
         function showView(v) { document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden')); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.getElementById('view-'+v).classList.remove('hidden'); document.getElementById('nav-'+v).classList.add('active'); if(v==='charts') { updateChart(); renderStats(); renderHeatmap(); renderVolumeTracker(); } }
         function createNewSession() { const name = (document.getElementById('newWorkoutName').value || "Training").toUpperCase(); const rawDate = document.getElementById('newWorkoutDate').value; sessions.push({ id: Date.now(), name, date: new Date(rawDate).toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'long' }), rawDate, exercises: [] }); activeSessionId = sessions[sessions.length-1].id; saveAndRender(); }
-        function cloneSession(id) { const old = sessions.find(s => s.id === id); const d = new Date(); const news = { id: Date.now(), name: old.name, date: d.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'long' }), rawDate: d.toISOString().split('T')[0], exercises: old.exercises.map(ex => ({ id: Date.now()+Math.random(), name: ex.name.toUpperCase(), sets: ex.sets.map(s => ({w:s.w, r:s.r, b:""})) })) }; sessions.push(news); activeSessionId = news.id; saveAndRender(); showView('training'); }
-        async function shareWorkout(id) { const s = sessions.find(x => x.id === id); let t = `🏋️ *GYMLOG: ${s.name}*\n📅 ${s.date}\n\n`; s.exercises.forEach(ex => { t += `💪 *${ex.name}*\n`; ex.sets.forEach((st, i) => { t += `   Set ${i+1}: ${st.w}kg x ${st.r}\n`; }); t += `\n`; }); t += `🚀 Gemaakt met GymLog Pro`; try { if (navigator.share) { await navigator.share({ title: `Training: ${s.name}`, text: t }); } else { throw new Error(); } } catch (err) { try { await navigator.clipboard.writeText(t); alert("Gekopieerd naar klembord!"); } catch (e) { alert("Delen mislukt."); } } }
+        function cloneSession(id) { const old = sessions.find(s => s.id === id); const d = new Date(); const news = { id: Date.now(), name: old.name, date: d.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'long' }), rawDate: d.toISOString().split('T')[0], exercises: old.exercises.map(ex => ({ id: Date.now()+Math.random(), name: ex.name.toUpperCase(), sets: ex.sets.map(s => ({w:s.w, r:s.r, b:"", q:s.q})) })) }; sessions.push(news); activeSessionId = news.id; saveAndRender(); showView('training'); }
+        async function shareWorkout(id) { const s = sessions.find(x => x.id === id); let t = `🏋️ *GYMLOG: ${s.name}*\n📅 ${s.date}\n\n`; s.exercises.forEach(ex => { t += `💪 *${ex.name}*\n`; ex.sets.forEach((st, i) => { t += `   Set ${i+1}: ${st.w}kg x ${st.r}\n`; }); }); try { if (navigator.share) await navigator.share({ title: `Training: ${s.name}`, text: t }); else { await navigator.clipboard.writeText(t); alert("Gekopieerd!"); } } catch (e) { alert("Fout."); } }
         function logWeight() { const v = document.getElementById('profWeightInput').value; if(v){ userData.weightLogs.unshift({w:parseFloat(v), date:new Date().toLocaleDateString('nl-NL'), ts:Date.now()}); saveAndRender(); document.getElementById('profWeightInput').value=""; }}
         function renderWeightLogs() { document.getElementById('weightLogList').innerHTML = (userData.weightLogs || []).map(l => `<div class="flex justify-between bg-slate-800/50 p-4 rounded-xl mb-2 border border-white/5"><span class="font-black">${l.w} KG</span><span class="opacity-40 text-[10px] font-black uppercase">${l.date}</span></div>`).join(''); }
         function saveProfileName() { userData.name = document.getElementById('profName').value.toUpperCase(); saveAndRender(); }
         function populateExerciseSelect() { const u = [...new Set(sessions.flatMap(s => s.exercises.map(e => e.name.toUpperCase())))].sort(); document.getElementById('chartExerciseSelect').innerHTML = u.map(n => `<option value="${n}">${n}</option>`).join(''); }
         function exportData() { const blob = new Blob([JSON.stringify({ sessions, userData, exLibrary })], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `gymlog_backup.json`; a.click(); }
 
-        // --- DE GEFIXTE IMPORT FUNCTIE ---
         function importData(e) { 
             const reader = new FileReader(); 
             reader.onload = (ev) => { 
                 try {
                     const d = JSON.parse(ev.target.result); 
-                    // 1. Sessions herstellen
                     if(d.sessions) sessions = d.sessions;
-                    
-                    // 2. User herstellen (checkt alle mogelijke namen)
-                    if(d.userData) userData = d.userData;
-                    else if(d.user) userData = d.user;
-                    else if(d.profile) userData = d.profile;
-
-                    // 3. Library herstellen
+                    if(d.userData) userData = d.userData; else if(d.user) userData = d.user; else if(d.profile) userData = d.profile;
                     if(d.exLibrary) exLibrary = d.exLibrary;
-
-                    saveAndRender(); 
-                    init(); 
-                    alert("Herstel succesvol! Jouw profiel en data zijn terug."); 
-                } catch(err) { alert("Fout bij importeren: " + err.message); }
+                    saveAndRender(); init(); alert("Herstel succesvol!"); 
+                } catch(err) { alert("Fout: " + err.message); }
             }; 
             reader.readAsText(e.target.files[0]); 
         }
