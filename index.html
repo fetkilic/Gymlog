@@ -15,6 +15,7 @@
         .btn-primary { background-color: #6366f1; color: white; border-radius: 1.25rem; font-weight: 900; text-transform: uppercase; }
         .hidden { display: none; }
         .table-input { background: #0f172a; width: 100%; font-weight: 900; font-size: 1.25rem; outline: none; border: 1px solid #475569; border-radius: 8px; padding: 8px; text-align: center; color: #818cf8; }
+        .table-input::placeholder { color: rgba(129, 140, 248, 0.3); font-weight: 400; font-style: italic; }
         .action-btn { font-size: 10px; font-weight: 900; padding: 8px 14px; border-radius: 10px; text-transform: uppercase; border: 2px solid; display: flex; align-items: center; gap: 4px; }
         .btn-copy { color: #22c55e; border-color: #22c55e; background: rgba(34, 197, 94, 0.1); }
         .btn-share { color: #818cf8; border-color: #818cf8; background: rgba(129, 140, 248, 0.1); }
@@ -24,7 +25,6 @@
         .nav-item.active { color: #ffffff; }
         .btn-add-small { color: #ffffff; border: 2px dashed #475569; font-size: 10px; font-weight: 900; padding: 12px; border-radius: 10px; text-transform: uppercase; width: 100%; margin-top: 15px; background:none; }
         .stat-card { background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; border-radius: 1.25rem; padding: 15px; }
-        .target-badge { background: #6366f1; color: white; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 900; }
         .btn-remove-set { color: #ef4444; font-size: 1.5rem; font-weight: 900; padding: 0 10px; line-height: 1; }
         #exModal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; padding: 20px; overflow-y: auto; }
         .ex-item { background: #334155; padding: 15px; border-radius: 10px; margin-bottom: 8px; font-weight: 700; text-transform: uppercase; font-size: 12px; }
@@ -63,21 +63,15 @@
             <h2 class="text-xl font-black uppercase mb-6 italic tracking-tighter text-indigo-400">Progressie</h2>
             <select id="chartExerciseSelect" onchange="updateChart()" class="input-field mb-8 text-sm bg-slate-900 border-white/20 uppercase font-black"></select>
             <div class="h-64 w-full mb-8"><canvas id="progressionChart"></canvas></div>
-            
             <hr class="border-white/10 mb-8">
             <h2 class="text-xl font-black uppercase mb-2 italic tracking-tighter text-indigo-400">Pomp Meter (7 Dagen)</h2>
-            <p class="text-[9px] font-bold opacity-50 mb-6 uppercase">Totaal volume per spiergroep deze week</p>
             <div id="volumeTracker" class="space-y-6 mb-8"></div>
-
             <hr class="border-white/10 mb-8">
             <h2 class="text-xl font-black uppercase mb-2 italic tracking-tighter text-indigo-400">Spieren Heatmap (Totaal)</h2>
             <div id="muscleHeatmap" class="space-y-6 mb-8"></div>
-            
             <div id="fixContainer" class="hidden mt-4 p-5 bg-rose-500/10 border border-rose-500/30 rounded-3xl">
-                <h3 class="text-[10px] font-black text-rose-400 uppercase mb-4 tracking-tighter italic">Niet herkend:</h3>
                 <div id="unknownListItems" class="space-y-3"></div>
             </div>
-            
             <hr class="border-white/10 my-10">
             <h3 class="text-sm font-black uppercase text-emerald-400 mb-4 tracking-widest">🏆 Persoonlijke Records</h3>
             <div id="recordsContainer" class="grid grid-cols-2 gap-3 mb-8"></div>
@@ -140,6 +134,15 @@
         function openExModal(sId) { currentTargetSessionId = sId; document.getElementById('exModal').classList.remove('hidden'); }
         function closeExModal() { document.getElementById('exModal').classList.add('hidden'); }
 
+        function getGhostData(exName, setIdx) {
+            const pastSessions = sessions.slice().sort((a,b) => new Date(b.rawDate) - new Date(a.rawDate));
+            for (let s of pastSessions) {
+                const ex = s.exercises.find(e => e.name.toUpperCase() === exName.toUpperCase());
+                if (ex && ex.sets[setIdx]) return { w: ex.sets[setIdx].w, r: ex.sets[setIdx].r };
+            }
+            return null;
+        }
+
         function selectEx(name) {
             if(name === 'CUSTOM') {
                 const newName = prompt("Naam:").trim().toUpperCase(); if(!newName) return;
@@ -190,14 +193,10 @@
                                 </div>
                                 <table class="w-full">
                                     <tr class="text-[9px] opacity-40 font-bold text-center"><th>SET</th><th>KG</th><th>REPS</th><th>BPM</th><th></th></tr>
-                                    ${ex.sets.map((s, i) => `
-                                        <tr>
-                                            <td class="py-2 font-bold text-xs text-center">S${i+1}</td>
-                                            <td><input type="text" inputmode="decimal" onfocus="this.select()" onchange="updSet(${session.id},${ex.id},${i},'w',this.value)" value="${s.w}" class="table-input"></td>
-                                            <td><input type="text" inputmode="numeric" onfocus="this.select()" onchange="updSet(${session.id},${ex.id},${i},'r',this.value)" value="${s.r}" class="table-input"></td>
-                                            <td><input type="text" inputmode="numeric" onfocus="this.select()" onchange="updSet(${session.id},${ex.id},${i},'b',this.value)" value="${s.b || ''}" class="table-input !text-rose-500"></td>
-                                            <td class="text-right"><button onclick="const e=sessions.find(s=>s.id===${session.id}).exercises.find(x=>x.id===${ex.id}); if(e.sets.length>1){e.sets.splice(${i},1); saveAndRender();}" class="btn-remove-set">&times;</button></td>
-                                        </tr>`).join('')}
+                                    ${ex.sets.map((s, i) => {
+                                        const ghost = getGhostData(ex.name, i);
+                                        return `<tr><td class="py-2 font-bold text-xs text-center">S${i+1}</td><td><input type="text" inputmode="decimal" placeholder="${ghost?ghost.w:'0'}" onfocus="this.select()" onchange="updSet(${session.id},${ex.id},${i},'w',this.value)" value="${s.w||''}" class="table-input"></td><td><input type="text" inputmode="numeric" placeholder="${ghost?ghost.r:'0'}" onfocus="this.select()" onchange="updSet(${session.id},${ex.id},${i},'r',this.value)" value="${s.r||''}" class="table-input"></td><td><input type="text" inputmode="numeric" onfocus="this.select()" onchange="updSet(${session.id},${ex.id},${i},'b',this.value)" value="${s.b||''}" class="table-input !text-rose-500"></td><td class="text-right"><button onclick="const e=sessions.find(s=>s.id===${session.id}).exercises.find(x=>x.id===${ex.id}); if(e.sets.length>1){e.sets.splice(${i},1); saveAndRender();}" class="btn-remove-set">&times;</button></td></tr>`;
+                                    }).join('')}
                                 </table>
                                 <button onclick="addSetToEx(${session.id}, ${ex.id})" class="btn-add-small">+ SET</button>
                             </div>`).join('')}
@@ -206,45 +205,16 @@
                 </div>`).join('');
         }
 
-        // --- NIEUWE FUNCTIE: VOLUME TRACKER ---
         function renderVolumeTracker() {
-            const container = document.getElementById('volumeTracker');
-            container.innerHTML = "";
+            const container = document.getElementById('volumeTracker'); container.innerHTML = "";
             let volumePerCat = {}, exToCat = {};
             for (const [cat, exs] of Object.entries(exLibrary)) exs.forEach(e => exToCat[e.toUpperCase()] = cat);
-            
-            const sevenDaysAgo = new Date();
-            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-            sessions.forEach(s => {
-                if (new Date(s.rawDate) >= sevenDaysAgo) {
-                    s.exercises.forEach(ex => {
-                        const cat = exToCat[ex.name.toUpperCase()] || "OVERIG";
-                        if (!volumePerCat[cat]) volumePerCat[cat] = 0;
-                        ex.sets.forEach(st => {
-                            const v = (parseFloat(st.w) || 0) * (parseInt(st.r) || 0);
-                            volumePerCat[cat] += v;
-                        });
-                    });
-                }
-            });
-
+            const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            sessions.forEach(s => { if (new Date(s.rawDate) >= sevenDaysAgo) { s.exercises.forEach(ex => { const cat = exToCat[ex.name.toUpperCase()] || "OVERIG"; volumePerCat[cat] = (volumePerCat[cat] || 0) + ex.sets.reduce((sum, st) => sum + ((parseFloat(st.w) || 0) * (parseInt(st.r) || 0)), 0); }); } });
             const sortedCats = Object.entries(volumePerCat).sort((a,b) => b[1] - a[1]);
             const maxVol = sortedCats.length > 0 ? sortedCats[0][1] : 1;
-
-            sortedCats.forEach(([cat, vol]) => {
-                if (vol === 0) return;
-                const perc = Math.min(100, Math.round((vol / maxVol) * 100));
-                container.innerHTML += `
-                    <div>
-                        <div class="flex justify-between items-end mb-1">
-                            <span class="text-[10px] font-black uppercase tracking-widest">${cat}</span>
-                            <span class="volume-tag">${vol.toLocaleString()} KG VOL.</span>
-                        </div>
-                        <div class="heatmap-bar-bg"><div class="heatmap-bar-fill !from-emerald-400 !to-cyan-500" style="width: ${perc}%"></div></div>
-                    </div>`;
-            });
-            if (container.innerHTML === "") container.innerHTML = "<p class='text-[10px] opacity-40 font-bold'>GEEN TRAININGEN IN DE LAATSTE 7 DAGEN.</p>";
+            sortedCats.forEach(([cat, vol]) => { if (vol === 0) return; const perc = Math.min(100, Math.round((vol / maxVol) * 100)); container.innerHTML += `<div><div class="flex justify-between items-end mb-1"><span class="text-[10px] font-black uppercase tracking-widest">${cat}</span><span class="volume-tag">${vol.toLocaleString()} KG VOL.</span></div><div class="heatmap-bar-bg"><div class="heatmap-bar-fill !from-emerald-400 !to-cyan-500" style="width: ${perc}%"></div></div></div>`; });
+            if (container.innerHTML === "") container.innerHTML = "<p class='text-[10px] opacity-40 font-bold uppercase'>Geen trainingen laatste 7 dagen.</p>";
         }
 
         function renderHeatmap() {
@@ -252,90 +222,45 @@
             container.innerHTML = ""; unknownItems.innerHTML = "";
             let counts = {}, total = 0, unknownSet = new Set(), exToCat = {};
             for (const [cat, exs] of Object.entries(exLibrary)) exs.forEach(e => exToCat[e.toUpperCase()] = cat);
-            sessions.forEach(s => s.exercises.forEach(ex => {
-                const cat = exToCat[ex.name.toUpperCase()]; const sets = ex.sets.length;
-                if(cat) counts[cat] = (counts[cat] || 0) + sets;
-                else { counts["OVERIG"] = (counts["OVERIG"] || 0) + sets; unknownSet.add(ex.name.toUpperCase()); }
-                total += sets;
-            }));
+            sessions.forEach(s => s.exercises.forEach(ex => { const cat = exToCat[ex.name.toUpperCase()]; const sets = ex.sets.length; if(cat) counts[cat] = (counts[cat] || 0) + sets; else { counts["OVERIG"] = (counts["OVERIG"] || 0) + sets; unknownSet.add(ex.name.toUpperCase()); } total += sets; }));
             if(total === 0) return;
-            Object.keys(counts).sort((a,b) => counts[b] - counts[a]).forEach(cat => {
-                const perc = Math.round((counts[cat] / total) * 100);
-                if(perc > 0) container.innerHTML += `<div><div class="flex justify-between items-end mb-1"><span class="text-[10px] font-black uppercase tracking-widest ${cat==='OVERIG'?'text-rose-400':''}">${cat}</span><span class="text-[10px] font-black text-indigo-400">${perc}%</span></div><div class="heatmap-bar-bg"><div class="heatmap-bar-fill" style="width: ${perc}%"></div></div></div>`;
-            });
-            if(unknownSet.size > 0) { document.getElementById('fixContainer').classList.remove('hidden'); unknownSet.forEach(ex => { unknownItems.innerHTML += `<div class="flex justify-between items-center bg-slate-900/50 p-3 rounded-xl border border-white/5"><span class="text-[10px] font-bold uppercase truncate pr-4">${ex}</span><button onclick="quickLink('${ex}')" class="quick-link-btn">KOPPEL</button></div>`; }); }
-            else document.getElementById('fixContainer').classList.add('hidden');
+            Object.keys(counts).sort((a,b) => counts[b] - counts[a]).forEach(cat => { const perc = Math.round((counts[cat] / total) * 100); if(perc > 0) container.innerHTML += `<div><div class="flex justify-between items-end mb-1"><span class="text-[10px] font-black uppercase tracking-widest ${cat==='OVERIG'?'text-rose-400':''}">${cat}</span><span class="text-[10px] font-black text-indigo-400">${perc}%</span></div><div class="heatmap-bar-bg"><div class="heatmap-bar-fill" style="width: ${perc}%"></div></div></div>`; });
+            if(unknownSet.size > 0) { document.getElementById('fixContainer').classList.remove('hidden'); unknownSet.forEach(ex => { unknownItems.innerHTML += `<div class="flex justify-between items-center bg-slate-900/50 p-3 rounded-xl border border-white/5"><span class="text-[10px] font-bold uppercase truncate pr-4">${ex}</span><button onclick="quickLink('${ex}')" class="quick-link-btn">KOPPEL</button></div>`; }); } else document.getElementById('fixContainer').classList.add('hidden');
         }
 
-        function quickLink(name) {
-            const cat = prompt(`Koppel "${name}" aan: (${Object.keys(exLibrary).join(", ")})`).trim();
-            if(cat) { const m = Object.keys(exLibrary).find(c => c.toLowerCase() === cat.toLowerCase()) || cat; if(!exLibrary[m]) exLibrary[m] = []; exLibrary[m].push(name.toUpperCase()); saveAndRender(); renderHeatmap(); }
-        }
-
-        function renderStats() {
-            const cont = document.getElementById('recordsContainer'); cont.innerHTML = ""; const recs = {};
-            sessions.forEach(s => s.exercises.forEach(ex => { const w = Math.max(...ex.sets.map(st => parseFloat(st.w) || 0)); const name = ex.name.toUpperCase(); if(!recs[name] || w > recs[name]) recs[name] = w; }));
-            Object.keys(recs).sort().forEach(n => { cont.innerHTML += `<div class="stat-card"><p class="text-[8px] font-black opacity-50 uppercase">${n}</p><p class="text-lg font-black text-emerald-400">${recs[n]} KG</p></div>`; });
-        }
-
-        function updateChart() {
-            const name = document.getElementById('chartExerciseSelect').value; if(!name) return;
-            const relevant = sessions.filter(s => s.exercises.some(e => e.name.toUpperCase() === name)).sort((a,b) => new Date(a.rawDate) - new Date(b.rawDate));
-            const labels = relevant.map(s => new Date(s.rawDate).toLocaleDateString('nl-NL', {day:'numeric', month:'short'}));
-            const weights = relevant.map(s => Math.max(...s.exercises.find(e => e.name.toUpperCase() === name).sets.map(st => parseFloat(st.w) || 0)));
-            if(chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(document.getElementById('progressionChart'), { type: 'line', data: { labels, datasets: [{ data: weights, borderColor: '#6366f1', tension: 0.3, fill: true, backgroundColor: 'rgba(99, 102, 241, 0.1)' }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#64748b' } }, x: { ticks: { color: '#64748b' } } } } });
-        }
-
+        function quickLink(name) { const cat = prompt(`Koppel "${name}" aan: (${Object.keys(exLibrary).join(", ")})`).trim(); if(cat) { const m = Object.keys(exLibrary).find(c => c.toLowerCase() === cat.toLowerCase()) || cat; if(!exLibrary[m]) exLibrary[m] = []; exLibrary[m].push(name.toUpperCase()); saveAndRender(); renderHeatmap(); } }
+        function renderStats() { const cont = document.getElementById('recordsContainer'); cont.innerHTML = ""; const recs = {}; sessions.forEach(s => s.exercises.forEach(ex => { const w = Math.max(...ex.sets.map(st => parseFloat(st.w) || 0)); const name = ex.name.toUpperCase(); if(!recs[name] || w > recs[name]) recs[name] = w; })); Object.keys(recs).sort().forEach(n => { cont.innerHTML += `<div class="stat-card"><p class="text-[8px] font-black opacity-50 uppercase">${n}</p><p class="text-lg font-black text-emerald-400">${recs[n]} KG</p></div>`; }); }
+        function updateChart() { const name = document.getElementById('chartExerciseSelect').value; if(!name) return; const relevant = sessions.filter(s => s.exercises.some(e => e.name.toUpperCase() === name)).sort((a,b) => new Date(a.rawDate) - new Date(b.rawDate)); const labels = relevant.map(s => new Date(s.rawDate).toLocaleDateString('nl-NL', {day:'numeric', month:'short'})); const weights = relevant.map(s => Math.max(...s.exercises.find(e => e.name.toUpperCase() === name).sets.map(st => parseFloat(st.w) || 0))); if(chartInstance) chartInstance.destroy(); chartInstance = new Chart(document.getElementById('progressionChart'), { type: 'line', data: { labels, datasets: [{ data: weights, borderColor: '#6366f1', tension: 0.3, fill: true, backgroundColor: 'rgba(99, 102, 241, 0.1)' }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#64748b' } }, x: { ticks: { color: '#64748b' } } } } }); }
         function showView(v) { document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden')); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.getElementById('view-'+v).classList.remove('hidden'); document.getElementById('nav-'+v).classList.add('active'); if(v==='charts') { updateChart(); renderStats(); renderHeatmap(); renderVolumeTracker(); } }
         function createNewSession() { const name = (document.getElementById('newWorkoutName').value || "Training").toUpperCase(); const rawDate = document.getElementById('newWorkoutDate').value; sessions.push({ id: Date.now(), name, date: new Date(rawDate).toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'long' }), rawDate, exercises: [] }); activeSessionId = sessions[sessions.length-1].id; saveAndRender(); }
         function cloneSession(id) { const old = sessions.find(s => s.id === id); const d = new Date(); const news = { id: Date.now(), name: old.name, date: d.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'long' }), rawDate: d.toISOString().split('T')[0], exercises: old.exercises.map(ex => ({ id: Date.now()+Math.random(), name: ex.name.toUpperCase(), sets: ex.sets.map(s => ({w:s.w, r:s.r, b:""})) })) }; sessions.push(news); activeSessionId = news.id; saveAndRender(); showView('training'); }
-        
-        async function shareWorkout(id) {
-            const s = sessions.find(x => x.id === id);
-            let t = `🏋️ *GYMLOG: ${s.name}*\n📅 ${s.date}\n\n`;
-            s.exercises.forEach(ex => {
-                t += `💪 *${ex.name}*\n`;
-                ex.sets.forEach((st, i) => { t += `   Set ${i+1}: ${st.w}kg x ${st.r}\n`; });
-                t += `\n`;
-            });
-            t += `🚀 Gemaakt met GymLog Pro`;
-            try {
-                if (navigator.share) { await navigator.share({ title: `Training: ${s.name}`, text: t }); }
-                else { throw new Error('No share API'); }
-            } catch (err) {
-                try { await navigator.clipboard.writeText(t); alert("Klaar voor WhatsApp! Training is gekopieerd."); }
-                catch (clipErr) { alert("Delen mislukt."); }
-            }
-        }
-
+        async function shareWorkout(id) { const s = sessions.find(x => x.id === id); let t = `🏋️ *GYMLOG: ${s.name}*\n📅 ${s.date}\n\n`; s.exercises.forEach(ex => { t += `💪 *${ex.name}*\n`; ex.sets.forEach((st, i) => { t += `   Set ${i+1}: ${st.w}kg x ${st.r}\n`; }); t += `\n`; }); t += `🚀 Gemaakt met GymLog Pro`; try { if (navigator.share) { await navigator.share({ title: `Training: ${s.name}`, text: t }); } else { throw new Error(); } } catch (err) { try { await navigator.clipboard.writeText(t); alert("Gekopieerd naar klembord!"); } catch (e) { alert("Delen mislukt."); } } }
         function logWeight() { const v = document.getElementById('profWeightInput').value; if(v){ userData.weightLogs.unshift({w:parseFloat(v), date:new Date().toLocaleDateString('nl-NL'), ts:Date.now()}); saveAndRender(); document.getElementById('profWeightInput').value=""; }}
         function renderWeightLogs() { document.getElementById('weightLogList').innerHTML = (userData.weightLogs || []).map(l => `<div class="flex justify-between bg-slate-800/50 p-4 rounded-xl mb-2 border border-white/5"><span class="font-black">${l.w} KG</span><span class="opacity-40 text-[10px] font-black uppercase">${l.date}</span></div>`).join(''); }
         function saveProfileName() { userData.name = document.getElementById('profName').value.toUpperCase(); saveAndRender(); }
         function populateExerciseSelect() { const u = [...new Set(sessions.flatMap(s => s.exercises.map(e => e.name.toUpperCase())))].sort(); document.getElementById('chartExerciseSelect').innerHTML = u.map(n => `<option value="${n}">${n}</option>`).join(''); }
         function exportData() { const blob = new Blob([JSON.stringify({ sessions, userData, exLibrary })], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `gymlog_backup.json`; a.click(); }
 
+        // --- DE GEFIXTE IMPORT FUNCTIE ---
         function importData(e) { 
             const reader = new FileReader(); 
             reader.onload = (ev) => { 
                 try {
                     const d = JSON.parse(ev.target.result); 
-                    if(d.sessions) {
-                        sessions = d.sessions.map(s => ({
-                            ...s,
-                            exercises: s.exercises.map(ex => ({ ...ex, name: ex.name.toUpperCase() }))
-                        }));
-                    }
+                    // 1. Sessions herstellen
+                    if(d.sessions) sessions = d.sessions;
+                    
+                    // 2. User herstellen (checkt alle mogelijke namen)
                     if(d.userData) userData = d.userData;
-                    else if(d.user) userData = d.user; 
-                    if(d.exLibrary) {
-                        let cleanLib = {};
-                        for(let cat in d.exLibrary) cleanLib[cat] = d.exLibrary[cat].map(ex => ex.toUpperCase());
-                        exLibrary = cleanLib;
-                    }
+                    else if(d.user) userData = d.user;
+                    else if(d.profile) userData = d.profile;
+
+                    // 3. Library herstellen
+                    if(d.exLibrary) exLibrary = d.exLibrary;
+
                     saveAndRender(); 
                     init(); 
-                    alert("Herstel succesvol!"); 
+                    alert("Herstel succesvol! Jouw profiel en data zijn terug."); 
                 } catch(err) { alert("Fout bij importeren: " + err.message); }
             }; 
             reader.readAsText(e.target.files[0]); 
