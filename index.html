@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GymLog Pro - Full Restore</title>
+    <title>GymLog Pro - v1.1</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -31,7 +31,10 @@
 <body class="p-4 max-w-md mx-auto pb-32">
 
     <header class="flex justify-between items-center mb-8 pt-4">
-        <h1 class="text-2xl font-black italic tracking-tighter">GYM<span class="text-indigo-500">LOG</span></h1>
+        <div>
+            <h1 class="text-2xl font-black italic tracking-tighter inline-block">GYM<span class="text-indigo-500">LOG</span></h1>
+            <span class="text-[10px] font-black opacity-20 ml-1">v1.1</span>
+        </div>
         <div id="headerStats" class="glass px-4 py-2 text-[10px] font-bold border-indigo-500/30 text-indigo-100 uppercase italic">LADEN...</div>
     </header>
 
@@ -314,7 +317,7 @@
         function updSet(sId, eId, i, f, v) { const s = sessions.find(x => x.id === sId); if(s) { const e = s.exercises.find(ex => ex.id === eId); if(e) { e.sets[i][f] = v; localStorage.setItem('gym_sessions', JSON.stringify(sessions)); } } }
         function addSet(sId, exId) { const s = sessions.find(x => x.id === sId); const e = s.exercises.find(ex => ex.id === exId); const nextRep = REP_DEFAULTS[e.sets.length] || 6; e.sets.push({w:'', r:nextRep, bpm:''}); saveAndRender(); }
         function exportData() { const data = { sessions, exLibrary, user: userData }; const blob = new Blob([JSON.stringify(data)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `gymlog_backup.json`; a.click(); }
-        function renderWeightLogs() { const logs = (userData.weightLogs || []).slice(0,8); document.getElementById('weightLogList').innerHTML = logs.map((l, i) => `<div class="flex justify-between items-center text-[10px] font-bold p-2 bg-white/5 rounded-lg mb-1"><span class="text-indigo-400">${l.w} KG</span><div class="flex gap-2 items-center"><span class="opacity-40 italic">${new Date(l.date).toLocaleDateString('nl-NL')}</span><button onclick="userData.weightLogs.splice(${i},1); saveAndRender();" class="text-rose-500">✕</button></div></div>`).join(''); }
+        function renderWeightLogs() { const logs = (userData.weightLogs || []).slice(0,10); document.getElementById('weightLogList').innerHTML = logs.map((l, i) => `<div class="flex justify-between items-center text-[10px] font-bold p-2 bg-white/5 rounded-lg mb-1"><span class="text-indigo-400">${l.w} KG</span><div class="flex gap-2 items-center"><span class="opacity-40 italic">${new Date(l.date).toLocaleDateString('nl-NL')}</span><button onclick="userData.weightLogs.splice(${i},1); saveAndRender();" class="text-rose-500">✕</button></div></div>`).join(''); }
         function logWeight() { const v = document.getElementById('profWeightInput').value; if(v){ userData.weightLogs.unshift({w:parseFloat(v), date:new Date().toISOString()}); saveAndRender(); } }
         function openExModal(sId) { currentTargetSessionId = sId; document.getElementById('exModal').classList.remove('hidden'); }
         function closeExModal() { document.getElementById('exModal').classList.add('hidden'); }
