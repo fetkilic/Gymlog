@@ -94,7 +94,11 @@
                 <button onclick="document.getElementById('importFile').click()" class="glass p-3 text-[9px] font-black uppercase">📂 Herstel</button>
                 <input type="file" id="importFile" class="hidden" onchange="importData(event)" accept=".json">
             </div>
-            <div id="weightLogList" class="space-y-2"></div>
+            <div id="weightLogList" class="space-y-2 mb-8"></div>
+            
+            <button onclick="resetLibrary()" class="w-full py-3 border border-rose-500/30 text-rose-500 text-[9px] font-black uppercase rounded-xl hover:bg-rose-500/10">
+                ⚠️ Reset Bibliotheek (Triceps herstellen)
+            </button>
         </div>
     </section>
 
@@ -105,7 +109,6 @@
     </nav>
 
     <script>
-        // INITIAL_LIB aangepast: Triceps toegevoegd
         const INITIAL_LIB = { "Borst": ["BENCH PRESS", "PEC FLY"], "Rug": ["LAT PULLDOWN", "DEADLIFT"], "Benen": ["SQUAT", "LEG PRESS"], "Schouders": ["OHP"], "Triceps": ["CABLE PUSH DOWN"], "Armen": ["BICEP CURL"], "Buik / Core": ["PLANK"] };
         const REP_DEFAULTS = [12, 10, 8, 6];
         let exLibrary = INITIAL_LIB, sessions = [], userData = { name: "GEBRUIKER", weightLogs: [] };
@@ -118,6 +121,15 @@
             document.getElementById('newWorkoutDate').valueAsDate = new Date();
             document.getElementById('profName').value = userData.name || "";
             saveAndRender(); 
+        }
+
+        // RESET FUNCTIE
+        function resetLibrary() {
+            if(confirm("Dit herstelt de standaard spiergroepen (incl. Triceps). Je eigen oefeningen kunnen verdwijnen uit de bieb. Doorgaan?")) {
+                exLibrary = JSON.parse(JSON.stringify(INITIAL_LIB));
+                saveAndRender();
+                alert("Bibliotheek hersteld!");
+            }
         }
 
         function saveAndRender() { 
