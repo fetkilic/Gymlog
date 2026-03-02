@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GymLog Pro</title>
+    <title>GymLog Pro - Full Restore</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -25,6 +25,7 @@
         .filter-btn.active { background: var(--accent); }
         .heatmap-bar-fill { background: linear-gradient(90deg, #6366f1, #a855f7); height: 100%; transition: width 0.8s; }
         .hidden { display: none; }
+        .btn-link { background: #f59e0b; color: #000; padding: 2px 6px; border-radius: 4px; font-size: 8px; font-weight: 900; margin-left: 8px; vertical-align: middle; }
     </style>
 </head>
 <body class="p-4 max-w-md mx-auto pb-32">
@@ -104,7 +105,7 @@
     </nav>
 
     <script>
-        const INITIAL_LIB = { "Borst": ["BENCH PRESS", "PEC FLY", "CABLE HIGH","CABLE LOW"], "Rug": ["LAT PULLDOWN (Wijd)", "LAT PULLDOWN (Small)", "TEST"], "SEATED ROW": ["SQUAT", "LEG PRESS","CALF PRESS"], "Schouders": ["SHOULDER PRESS","SIDE LATERAL RAISES"], "Armen": ["BICEP CURL"], "Buik / Core": ["PLANK"] };
+        const INITIAL_LIB = { "Borst": ["BENCH PRESS", "PEC FLY"], "Rug": ["LAT PULLDOWN", "DEADLIFT"], "Benen": ["SQUAT", "LEG PRESS"], "Schouders": ["OHP"], "Armen": ["BICEP CURL"], "Buik / Core": ["PLANK"] };
         const REP_DEFAULTS = [12, 10, 8, 6];
         let exLibrary = INITIAL_LIB, sessions = [], userData = { name: "GEBRUIKER", weightLogs: [] };
         let activeSessionId = null, chartInstance = null, weightChartInstance = null, currentTargetSessionId = null, pendingExName = "";
@@ -161,7 +162,11 @@
 
         function startCustomEx() {
             const n = prompt("Naam oefening:").toUpperCase(); if(!n) return;
-            pendingExName = n;
+            openLinkModal(n);
+        }
+
+        function openLinkModal(exName) {
+            pendingExName = exName.toUpperCase();
             const btnCont = document.getElementById('catBtnContainer');
             btnCont.innerHTML = "";
             Object.keys(exLibrary).forEach(cat => {
@@ -176,9 +181,13 @@
 
         function finalizeCustomEx(category) {
             if(!exLibrary[category]) exLibrary[category] = [];
-            exLibrary[category].push(pendingExName);
+            // Voeg alleen toe als het er nog niet in staat (duplicaten voorkomen)
+            if (!exLibrary[category].includes(pendingExName)) {
+                exLibrary[category].push(pendingExName);
+            }
             document.getElementById('catSelectorModal').classList.add('hidden');
-            selectEx(pendingExName);
+            saveAndRender();
+            if(document.getElementById('view-charts').classList.contains('hidden') === false) renderCharts();
         }
 
         function importData(e) {
@@ -228,14 +237,24 @@
             const recCont = document.getElementById('recordsTracker');
             volCont.innerHTML = ""; recCont.innerHTML = "";
             let volPerCat = {}; let exToCat = {}; let records = {};
-            for (const [cat, exs] of Object.entries(exLibrary)) { volPerCat[cat] = 0; exs.forEach(e => exToCat[e.trim().toUpperCase()] = cat); }
+            
+            // Haal bibliotheek op
+            for (const [cat, exs] of Object.entries(exLibrary)) { 
+                volPerCat[cat] = 0; 
+                exs.forEach(e => exToCat[e.trim().toUpperCase()] = cat); 
+            }
             volPerCat["OVERIG"] = 0;
+            
+            let overigeOefeningen = new Set();
             const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            
             sessions.forEach(s => {
                 const isRecent = new Date(s.rawDate) >= sevenDaysAgo;
                 s.exercises.forEach(ex => {
                     const n = ex.name.trim().toUpperCase();
                     const cat = exToCat[n] || "OVERIG";
+                    if (cat === "OVERIG") overigeOefeningen.add(n);
+                    
                     let maxW = 0;
                     ex.sets.forEach(st => {
                         const w = parseFloat(st.w) || 0; const r = parseInt(st.r) || 0;
@@ -245,19 +264,40 @@
                     if (!records[n] || maxW > records[n]) records[n] = maxW;
                 });
             });
+
             const maxVol = Math.max(...Object.values(volPerCat), 1);
             Object.entries(volPerCat).sort((a,b)=>b[1]-a[1]).forEach(([c, v]) => {
-                if (v === 0) return;
+                if (v === 0 && c !== "OVERIG") return;
                 const p = Math.round((v/maxVol)*100);
-                volCont.innerHTML += `<div><div class="flex justify-between text-[8px] font-black uppercase"><span>${c}</span><span>${v.toLocaleString()} KG</span></div><div class="bg-slate-900 rounded-full h-2 mt-1 overflow-hidden"><div class="heatmap-bar-fill" style="width: ${p}%"></div></div></div>`;
+                
+                let extraHtml = "";
+                if (c === "OVERIG" && overigeOefeningen.size > 0) {
+                    extraHtml = `<div class="mt-2 flex flex-wrap gap-1">` + 
+                        Array.from(overigeOefeningen).map(oef => 
+                            `<span class="text-[7px] bg-white/10 p-1 rounded uppercase flex items-center">
+                                ${oef} <button onclick="openLinkModal('${oef}')" class="btn-link">LINK</button>
+                            </span>`
+                        ).join('') + `</div>`;
+                }
+
+                volCont.innerHTML += `<div>
+                    <div class="flex justify-between text-[8px] font-black uppercase">
+                        <span>${c}</span>
+                        <span>${v.toLocaleString()} KG</span>
+                    </div>
+                    <div class="bg-slate-900 rounded-full h-2 mt-1 overflow-hidden">
+                        <div class="heatmap-bar-fill" style="width: ${p}%"></div>
+                    </div>
+                    ${extraHtml}
+                </div>`;
             });
+
             Object.entries(records).sort((a,b) => a[0].localeCompare(b[0])).forEach(([n, v]) => {
                 if (v === 0) return;
                 recCont.innerHTML += `<div class="record-tile"><span class="text-[8px] font-black uppercase opacity-40 mb-1 truncate">${n}</span><span class="text-[13px] font-black text-emerald-400">${v}<span class="text-[8px] ml-0.5">KG</span></span></div>`;
             });
         }
 
-        // --- OVERIGE CORE FUNCTIES ---
         function selectEx(name) { const sess = sessions.find(s => s.id === currentTargetSessionId); sess.exercises.push({ id: Date.now(), name: name.trim().toUpperCase(), sets: [{w:'', r:REP_DEFAULTS[0], bpm:''}, {w:'', r:REP_DEFAULTS[1], bpm:''}, {w:'', r:REP_DEFAULTS[2], bpm:''}, {w:'', r:REP_DEFAULTS[3], bpm:''}]}); saveAndRender(); closeExModal(); }
         function renderSessions() { const cont = document.getElementById('sessionContainer'); cont.innerHTML = sessions.slice().reverse().map(session => `<div class="glass p-6 ${activeSessionId === session.id ? 'border-indigo-500/40' : ''}"><div onclick="activeSessionId = activeSessionId === ${session.id} ? null : ${session.id}; renderSessions();"><div class="flex justify-between items-start"><h3 class="text-xl font-black italic uppercase">${session.name}</h3><div class="flex gap-2" onclick="event.stopPropagation()"><button onclick="cloneSession(${session.id})" class="action-btn btn-copy">Kopie</button><button onclick="shareWorkout(${session.id})" class="action-btn btn-share">Deel</button><button onclick="if(confirm('Wissen?')){ sessions=sessions.filter(x=>x.id!==${session.id}); saveAndRender(); }" class="action-btn btn-delete">Wis</button></div></div><div class="text-[9px] font-black opacity-30 uppercase italic">${session.date}</div></div><div class="${activeSessionId === session.id ? 'mt-6' : 'hidden'}">${session.exercises.map((ex, exIdx) => `<div class="mb-6 bg-white/5 p-4 rounded-xl"><div class="flex justify-between mb-4"><span class="text-[10px] font-black text-indigo-300 uppercase">${ex.name}</span><button onclick="const s=sessions.find(x=>x.id===${session.id}); s.exercises.splice(${exIdx},1); saveAndRender();" class="text-rose-500 text-[9px] font-black">WIS</button></div><div class="space-y-3">${ex.sets.map((s, i) => `<div class="grid grid-cols-5 gap-2 items-center"><span class="text-[9px] opacity-20 font-bold">S${i+1}</span><input type="text" onchange="updSet(${session.id},${ex.id},${i},'w',this.value)" value="${s.w||''}" class="table-input" placeholder="kg"><input type="text" onchange="updSet(${session.id},${ex.id},${i},'r',this.value)" value="${s.r||''}" class="table-input" placeholder="reps"><input type="text" onchange="updSet(${session.id},${ex.id},${i},'bpm',this.value)" value="${s.bpm || s.b || ''}" class="table-input !text-rose-400" placeholder="bpm"><button onclick="const e=sessions.find(s=>s.id===${session.id}).exercises.find(x=>x.id===${ex.id}); e.sets.splice(${i},1); saveAndRender();" class="text-rose-500 font-bold text-xl">×</button></div>`).join('')}</div><button onclick="addSet(${session.id}, ${ex.id})" class="w-full mt-4 py-2 border border-dashed border-white/10 rounded-lg text-[8px] font-black opacity-30 uppercase">+ Set</button></div>`).join('')}<button onclick="openExModal(${session.id})" class="btn-primary w-full py-3 text-[10px] italic">+ Oefening</button></div></div>`).join(''); }
         function cloneSession(id) { const old = sessions.find(s => s.id === id); const today = new Date(); const news = { id: Date.now(), name: old.name, date: today.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'short' }), rawDate: today.toISOString().split('T')[0], exercises: old.exercises.map(ex => ({ id: Date.now() + Math.random(), name: ex.name, sets: ex.sets.map(s => ({ w: s.w, r: s.r, bpm: '' })) })) }; sessions.push(news); activeSessionId = news.id; saveAndRender(); }
