@@ -105,7 +105,8 @@
     </nav>
 
     <script>
-        const INITIAL_LIB = { "Borst": ["BENCH PRESS", "PEC FLY"], "Rug": ["LAT PULLDOWN", "DEADLIFT"], "Benen": ["SQUAT", "LEG PRESS"], "Schouders": ["OHP"], "Armen": ["BICEP CURL"], "Buik / Core": ["PLANK"] };
+        // INITIAL_LIB aangepast: Triceps toegevoegd
+        const INITIAL_LIB = { "Borst": ["BENCH PRESS", "PEC FLY"], "Rug": ["LAT PULLDOWN", "DEADLIFT"], "Benen": ["SQUAT", "LEG PRESS"], "Schouders": ["OHP"], "Triceps": ["CABLE PUSH DOWN"], "Armen": ["BICEP CURL"], "Buik / Core": ["PLANK"] };
         const REP_DEFAULTS = [12, 10, 8, 6];
         let exLibrary = INITIAL_LIB, sessions = [], userData = { name: "GEBRUIKER", weightLogs: [] };
         let activeSessionId = null, chartInstance = null, weightChartInstance = null, currentTargetSessionId = null, pendingExName = "";
@@ -181,7 +182,6 @@
 
         function finalizeCustomEx(category) {
             if(!exLibrary[category]) exLibrary[category] = [];
-            // Voeg alleen toe als het er nog niet in staat (duplicaten voorkomen)
             if (!exLibrary[category].includes(pendingExName)) {
                 exLibrary[category].push(pendingExName);
             }
@@ -238,7 +238,6 @@
             volCont.innerHTML = ""; recCont.innerHTML = "";
             let volPerCat = {}; let exToCat = {}; let records = {};
             
-            // Haal bibliotheek op
             for (const [cat, exs] of Object.entries(exLibrary)) { 
                 volPerCat[cat] = 0; 
                 exs.forEach(e => exToCat[e.trim().toUpperCase()] = cat); 
