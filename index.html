@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GymLog Pro - v1.6</title>
+    <title>GymLog Pro - v1.7</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -37,7 +37,7 @@
         <div class="flex items-center">
             <div>
                 <h1 class="text-2xl font-black italic tracking-tighter inline-block">GYM<span class="text-indigo-500">LOG</span></h1>
-                <span class="text-[10px] font-black opacity-20 ml-1">v1.6</span>
+                <span class="text-[10px] font-black opacity-20 ml-1">v1.7</span>
             </div>
             <button onclick="location.reload(true)" class="reload-btn" title="Update App">↻</button>
         </div>
@@ -107,6 +107,7 @@
             <div class="h-40 w-full mb-6"><canvas id="weightChart"></canvas></div>
             <div class="flex gap-2 mb-6">
                 <input id="profWeightInput" type="number" step="0.1" class="input-field flex-1" placeholder="KG" onclick="this.select()">
+                <input id="profFatInput" type="number" step="0.1" class="input-field flex-1 !border-emerald-500/20" placeholder="VET %" onclick="this.select()">
                 <button onclick="logWeight()" class="btn-primary px-6 font-black italic">LOG</button>
             </div>
             <div class="grid grid-cols-2 gap-3 mb-8">
@@ -259,8 +260,31 @@
         function updSet(sId, eId, i, f, v) { const s = sessions.find(x => x.id === sId); if(s) { const e = s.exercises.find(ex => ex.id === eId); if(e) { e.sets[i][f] = v; localStorage.setItem('gym_sessions', JSON.stringify(sessions)); } } }
         function addSet(sId, exId) { const s = sessions.find(x => x.id === sId); const e = s.exercises.find(ex => ex.id === exId); const nextRep = REP_DEFAULTS[e.sets.length] || 6; e.sets.push({w:'', r:nextRep, bpm:''}); saveAndRender(); }
         function exportData() { const blob = new Blob([JSON.stringify({ sessions, exLibrary, user: userData })], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `gymlog_backup.json`; a.click(); }
-        function renderWeightLogs() { const logs = [...(userData.weightLogs || [])].slice(0,12); document.getElementById('weightLogList').innerHTML = logs.map((l, i) => `<div class="flex justify-between items-center text-[10px] font-bold p-2 bg-white/5 rounded-lg mb-1"><span class="text-indigo-400">${l.w} KG</span><div class="flex gap-2 items-center"><span class="opacity-40 italic">${new Date(l.date).toLocaleDateString('nl-NL')}</span><button onclick="userData.weightLogs.splice(${i},1); saveAndRender();" class="text-rose-500">✕</button></div></div>`).join(''); }
-        function logWeight() { const v = document.getElementById('profWeightInput').value; if(v){ userData.weightLogs.unshift({w:parseFloat(v), date:new Date().toISOString()}); userData.weightLogs.sort((a,b) => new Date(b.date) - new Date(a.date)); saveAndRender(); document.getElementById('profWeightInput').value = ""; } }
+        function renderWeightLogs() { 
+            const logs = [...(userData.weightLogs || [])].slice(0,12); 
+            document.getElementById('weightLogList').innerHTML = logs.map((l, i) => {
+                const fatHtml = l.fat ? `<span class="text-emerald-400 ml-2 text-[8px] underline decoration-emerald-500/30">${l.fat}% VET</span>` : "";
+                return `<div class="flex justify-between items-center text-[10px] font-bold p-2 bg-white/5 rounded-lg mb-1">
+                    <div><span class="text-indigo-400">${l.w} KG</span>${fatHtml}</div>
+                    <div class="flex gap-2 items-center"><span class="opacity-40 italic">${new Date(l.date).toLocaleDateString('nl-NL')}</span><button onclick="userData.weightLogs.splice(${i},1); saveAndRender();" class="text-rose-500">✕</button></div>
+                </div>`;
+            }).join(''); 
+        }
+        function logWeight() { 
+            const w = document.getElementById('profWeightInput').value; 
+            const fat = document.getElementById('profFatInput').value;
+            if(w){ 
+                userData.weightLogs.unshift({
+                    w: parseFloat(w), 
+                    fat: fat ? parseFloat(fat) : null,
+                    date: new Date().toISOString()
+                }); 
+                userData.weightLogs.sort((a,b) => new Date(b.date) - new Date(a.date)); 
+                saveAndRender(); 
+                document.getElementById('profWeightInput').value = ""; 
+                document.getElementById('profFatInput').value = "";
+            } 
+        }
         function openExModal(sId) { currentTargetSessionId = sId; document.getElementById('exModal').classList.remove('hidden'); }
         function closeExModal() { document.getElementById('exModal').classList.add('hidden'); }
         function showView(v) { document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden')); document.getElementById('view-'+v).classList.remove('hidden'); if(v==='charts') renderCharts(); if(v==='profile') renderWeightChart(30); }
