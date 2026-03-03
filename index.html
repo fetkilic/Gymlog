@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GymLog Pro - v2.4.1</title>
+    <title>GymLog Pro - v2.4.2</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -35,12 +35,11 @@
         .overlay-nav-btn { font-size: 7px; font-weight: 900; white-space: nowrap; padding: 6px 10px; border-radius: 6px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); text-transform: uppercase; }
         .overlay-nav-btn.active { background: var(--accent); color: white; }
         
-        /* Badge Grid styling */
         .badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
         .badge-item { display: flex; flex-direction: column; align-items: center; text-align: center; }
         .badge-label { font-size: 7px; font-weight: 900; margin-top: 6px; text-transform: uppercase; opacity: 0.6; line-height: 1; }
         .badge-svg { width: 50px; height: 50px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); transition: all 0.3s; }
-        .badge-locked { opacity: 0.3; filter: grayscale(1) contrast(0.5); }
+        .badge-locked { opacity: 0.25; filter: grayscale(1); }
     </style>
 </head>
 <body class="p-4 max-w-md mx-auto pb-32">
@@ -49,7 +48,7 @@
         <div class="flex items-center">
             <div>
                 <h1 class="text-2xl font-black italic tracking-tighter inline-block">GYM<span class="text-indigo-500">LOG</span></h1>
-                <span class="text-[10px] font-black opacity-20 ml-1">v2.4.1</span>
+                <span class="text-[10px] font-black opacity-20 ml-1">v2.4.2</span>
             </div>
             <button onclick="location.reload(true)" class="reload-btn">↻</button>
         </div>
@@ -125,7 +124,7 @@
         <div class="glass p-6 mb-6">
             <input id="profName" class="input-field mb-6 text-xl" placeholder="JE NAAM" onchange="saveProfileName()">
             <div class="flex justify-between items-center mb-2 px-1">
-                <span class="text-[8px] font-black opacity-40 uppercase">Trends (KG & VET %)</span>
+                <span class="text-[8px] font-black opacity-40 uppercase">Trends</span>
                 <div class="flex gap-1">
                     <button onclick="renderWeightChart(7)" class="filter-btn weight-f active">WEEK</button>
                     <button onclick="renderWeightChart(30)" class="filter-btn weight-f">MAAND</button>
@@ -134,8 +133,8 @@
             </div>
             <div class="h-40 w-full mb-8"><canvas id="weightChart"></canvas></div>
             <div class="flex gap-2 mb-6">
-                <input id="profWeightInput" type="number" step="0.1" class="input-field flex-1" placeholder="KG" onclick="this.select()">
-                <input id="profFatInput" type="number" step="0.1" class="input-field flex-1" placeholder="VET %" onclick="this.select()">
+                <input id="profWeightInput" type="number" step="0.1" class="input-field flex-1" placeholder="KG">
+                <input id="profFatInput" type="number" step="0.1" class="input-field flex-1" placeholder="VET %">
                 <button onclick="logWeight()" class="btn-primary px-6 font-black italic">LOG</button>
             </div>
             <div class="grid grid-cols-2 gap-3 mb-8">
@@ -193,67 +192,59 @@
                     </linearGradient>
                 </defs>
                 <path d="M50 5 L85 20 L85 55 C85 75 50 95 50 95 C50 95 15 75 15 55 L15 20 Z" fill="url(#grad-${level})" stroke="${c.border}" stroke-width="4" ${glow}/>
-                <text x="50" y="45" text-anchor="middle" fill="${c.text}" font-size="${value.toString().length > 3 ? '13' : '16'}" font-weight="900" font-family="Arial">${value}</text>
-                <text x="50" y="65" text-anchor="middle" fill="${c.text}" font-size="7" font-weight="900" font-family="Arial" opacity="0.8">${label}</text>
-                ${level === 'locked' ? '<circle cx="50" cy="80" r="5" fill="#334155" />' : ''}
+                <text x="50" y="45" text-anchor="middle" fill="${c.text}" font-size="${value.toString().length > 3 ? '12' : '15'}" font-weight="900" font-family="Arial">${value}</text>
+                <text x="50" y="65" text-anchor="middle" fill="${c.text}" font-size="6" font-weight="900" font-family="Arial" opacity="0.8">${label}</text>
             </svg>`;
         }
 
         function renderMedals() {
             const cont = document.getElementById('medalsContainer');
             cont.innerHTML = "";
-            const counts = {};
+            
+            let exToCat = {}; 
+            Object.entries(exLibrary).forEach(([cat, exs]) => exs.forEach(e => exToCat[e.toUpperCase()] = cat));
+            
+            const catCounts = {};
             sessions.forEach(s => s.exercises.forEach(e => {
-                const n = e.name.toUpperCase();
-                counts[n] = (counts[n] || 0) + 1;
+                const cat = exToCat[e.name.toUpperCase()];
+                if(cat) catCounts[cat] = (catCounts[cat] || 0) + 1;
             }));
 
-            const milestones = [1, 100, 200, 300, 400, 500, 750, 1000, 1500, 2000, 2500, 3000];
-            const topEx = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0, 2);
-            
-            topEx.forEach(([name, count]) => {
+            // 1. Spiergroep Badges (Toon 3 meest getrainde)
+            const milestones = [1, 100, 500, 1000, 2000, 3000];
+            Object.entries(catCounts).sort((a,b)=>b[1]-a[1]).slice(0,3).forEach(([cat, count]) => {
                 milestones.forEach(m => {
                     let level = 'locked';
                     if (count >= m) {
-                        if (m >= 1000) level = 'elite';
-                        else if (m >= 500) level = 'gold';
-                        else if (m >= 100) level = 'silver';
+                        if (m >= 2000) level = 'elite';
+                        else if (m >= 1000) level = 'gold';
+                        else if (m >= 500) level = 'silver';
+                        else if (m >= 100) level = 'bronze';
                         else if (m >= 1) level = 'wood';
                     }
-                    cont.innerHTML += `<div class="badge-item">
-                        ${getBadgeSVG(level, m, 'KEER')}
-                        <span class="badge-label">${name.split(' ')[0]}</span>
-                    </div>`;
+                    cont.innerHTML += `<div class="badge-item">${getBadgeSVG(level, m, 'HITS')}<span class="badge-label">${cat}</span></div>`;
                 });
             });
 
-            // Maand-badge (laatste 3 maanden tonen, gehaald of niet)
+            // 2. Uitgebreide Maand Badges (Huidige maand)
             const now = new Date();
-            for(let i=0; i<3; i++) {
-                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-                const key = d.toLocaleDateString('nl-NL', {month:'short', year:'2-digit'}).toUpperCase();
-                let mCount = sessions.filter(s => {
-                    const sd = new Date(s.rawDate);
-                    return sd.getMonth() === d.getMonth() && sd.getFullYear() === d.getFullYear();
-                }).length;
-                
-                cont.innerHTML += `<div class="badge-item">
-                    ${getBadgeSVG(mCount >= 10 ? 'gold' : 'locked', '10+', 'Sessies')}
-                    <span class="badge-label">${key}</span>
-                </div>`;
-            }
+            const mKey = now.toLocaleDateString('nl-NL', {month:'short', year:'2-digit'}).toUpperCase();
+            const mCount = sessions.filter(s => {
+                const d = new Date(s.rawDate);
+                return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+            }).length;
 
-            // Jaar-badge (huidig jaar)
-            const currentYear = now.getFullYear();
-            const yCount = sessions.filter(s => new Date(s.rawDate).getFullYear() === currentYear).length;
-            let yLevel = 'locked';
-            if(yCount >= 300) yLevel = 'elite';
-            else if(yCount >= 150) yLevel = 'silver';
+            const mGoals = [{v:5, l:'bronze'}, {v:10, l:'silver'}, {v:15, l:'gold'}, {v:20, l:'elite'}];
+            mGoals.forEach(g => {
+                cont.innerHTML += `<div class="badge-item">${getBadgeSVG(mCount >= g.v ? g.l : 'locked', g.v, 'SESSIES')}<span class="badge-label">${mKey}</span></div>`;
+            });
 
-            cont.innerHTML += `<div class="badge-item">
-                ${getBadgeSVG(yLevel, '300', 'Jaar')}
-                <span class="badge-label">${currentYear}</span>
-            </div>`;
+            // 3. Uitgebreide Jaar Badges
+            const yCount = sessions.filter(s => new Date(s.rawDate).getFullYear() === now.getFullYear()).length;
+            const yGoals = [{v:50, l:'wood'}, {v:100, l:'bronze'}, {v:150, l:'silver'}, {v:200, l:'gold'}, {v:300, l:'elite'}];
+            yGoals.forEach(g => {
+                cont.innerHTML += `<div class="badge-item">${getBadgeSVG(yCount >= g.v ? g.l : 'locked', g.v, 'SESSIES')}<span class="badge-label">${now.getFullYear()}</span></div>`;
+            });
         }
 
         function renderRadarChart(days = 7) {
@@ -289,13 +280,7 @@
             if(weightChartInstance) weightChartInstance.destroy();
             weightChartInstance = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        { label: 'KG', data: logs.map(l => l.w), borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', tension: 0.4, fill: true, yAxisID: 'y' },
-                        { label: 'VET %', data: logs.map(l => l.fat), borderColor: '#10b981', tension: 0.4, borderDash: [5,5], yAxisID: 'y1' }
-                    ]
-                },
+                data: { labels: labels, datasets: [ { label: 'KG', data: logs.map(l => l.w), borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', tension: 0.4, fill: true, yAxisID: 'y' }, { label: 'VET %', data: logs.map(l => l.fat), borderColor: '#10b981', tension: 0.4, borderDash: [5,5], yAxisID: 'y1' } ] },
                 options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { type: 'linear', display: true, position: 'left', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#6366f1', font: { size: 9 } } }, y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#10b981', font: { size: 9 } } } } }
             });
         }
@@ -361,7 +346,7 @@
         function exportData() { const blob = new Blob([JSON.stringify({ sessions, exLibrary, user: userData })], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `gymlog_backup.json`; a.click(); }
         function importData(e) { const reader = new FileReader(); reader.onload = (ev) => { try { const imp = JSON.parse(ev.target.result); if (imp.sessions) sessions = imp.sessions; if (imp.exLibrary) exLibrary = imp.exLibrary; if (imp.user) userData = imp.user; saveAndRender(); location.reload(); } catch (err) { alert("Fout."); } }; reader.readAsText(e.target.files[0]); }
         function renderExLibrary() { const cont = document.getElementById('exLibraryList'); cont.innerHTML = ""; for (const [cat, items] of Object.entries(exLibrary)) { cont.innerHTML += `<span class="text-[9px] font-black text-indigo-400 uppercase mt-8 block mb-3 italic border-b border-indigo-500/20 pb-1">${cat}</span>`; let grid = `<div class="ex-grid">`; [...items].sort().forEach(ex => { grid += `<div onclick="selectEx('${ex}')" class="ex-item"><span>${ex}</span><button onclick="event.stopPropagation(); if(confirm('Wissen?')){ exLibrary['${cat}']=exLibrary['${cat}'].filter(x=>x!=='${ex}'); saveAndRender(); }" class="text-rose-500 text-[8px] self-end opacity-20">WIS</button></div>`; }); grid += `</div>`; cont.innerHTML += grid; } cont.innerHTML += `<button onclick="startCustomEx()" class="btn-primary w-full py-4 mt-8 italic">+ EIGEN OEFENING</button>`; }
-        function renderCharts() { updateChart(); renderRadarChart(7); const volCont = document.getElementById('volumeTracker'); const recCont = document.getElementById('recordsTracker'); volCont.innerHTML = ""; recCont.innerHTML = ""; let volPerCat = {}; let exToCat = {}; let records = {}; for (const [cat, exs] of Object.entries(exLibrary)) { volPerCat[cat] = 0; exs.forEach(e => exToCat[e.toUpperCase()] = cat); } volPerCat["OVERIG"] = 0; let overigeOefeningen = new Set(); const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); sessions.forEach(s => { const isRecent = new Date(s.rawDate) >= sevenDaysAgo; s.exercises.forEach(ex => { const n = ex.name.toUpperCase(); const cat = exToCat[n] || "OVERIG"; if (cat === "OVERIG") overigeOefeningen.add(n); let maxW = 0; ex.sets.forEach(st => { const w = parseFloat(st.w) || 0; const r = parseInt(st.r) || 0; if (isRecent) volPerCat[cat] += (w * r); if (w > maxW) maxW = w; }); if (!records[n] || maxW > records[n]) records[n] = maxW; }); }); const maxVol = Math.max(...Object.values(volPerCat), 1); Object.entries(volPerCat).sort((a,b)=>b[1]-a[1]).forEach(([c, v]) => { if (v === 0 && c !== "OVERIG") return; const p = Math.round((v/maxVol)*100); volCont.innerHTML += `<div><div class="flex justify-between text-[8px] font-black uppercase"><span>${c}</span><span>${v.toLocaleString()} KG</span></div><div class="bg-slate-900 rounded-full h-2 mt-1 overflow-hidden"><div class="heatmap-bar-fill" style="width: ${p}%"></div></div></div>`; }); Object.entries(records).sort((a,b) => a[0].localeCompare(b[0])).forEach(([n, v]) => { if (v > 0) recCont.innerHTML += `<div class="record-tile"><span class="text-[8px] font-black uppercase opacity-40 mb-1 truncate">${n}</span><span class="text-[13px] font-black text-emerald-400">${v}<span class="text-[8px] ml-0.5">KG</span></span></div>`; }); }
+        function renderCharts() { updateChart(); renderRadarChart(7); const volCont = document.getElementById('volumeTracker'); const recCont = document.getElementById('recordsTracker'); volCont.innerHTML = ""; recCont.innerHTML = ""; let volPerCat = {}; let exToCat = {}; let records = {}; for (const [cat, exs] of Object.entries(exLibrary)) { volPerCat[cat] = 0; exs.forEach(e => exToCat[e.toUpperCase()] = cat); } volPerCat["OVERIG"] = 0; const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); sessions.forEach(s => { const isRecent = new Date(s.rawDate) >= sevenDaysAgo; s.exercises.forEach(ex => { const n = ex.name.toUpperCase(); const cat = exToCat[n] || "OVERIG"; let maxW = 0; ex.sets.forEach(st => { const w = parseFloat(st.w) || 0; const r = parseInt(st.r) || 0; if (isRecent) volPerCat[cat] += (w * r); if (w > maxW) maxW = w; }); if (!records[n] || maxW > records[n]) records[n] = maxW; }); }); const maxVol = Math.max(...Object.values(volPerCat), 1); Object.entries(volPerCat).sort((a,b)=>b[1]-a[1]).forEach(([c, v]) => { if (v === 0 && c !== "OVERIG") return; const p = Math.round((v/maxVol)*100); volCont.innerHTML += `<div><div class="flex justify-between text-[8px] font-black uppercase"><span>${c}</span><span>${v.toLocaleString()} KG</span></div><div class="bg-slate-900 rounded-full h-2 mt-1 overflow-hidden"><div class="heatmap-bar-fill" style="width: ${p}%"></div></div></div>`; }); Object.entries(records).sort((a,b) => a[0].localeCompare(b[0])).forEach(([n, v]) => { if (v > 0) recCont.innerHTML += `<div class="record-tile"><span class="text-[8px] font-black uppercase opacity-40 mb-1 truncate">${n}</span><span class="text-[13px] font-black text-emerald-400">${v}<span class="text-[8px] ml-0.5">KG</span></span></div>`; }); }
         function selectEx(name) { const sess = sessions.find(s => s.id === currentTargetSessionId); if (swapExId) { const ex = sess.exercises.find(e => e.id === swapExId); if (ex) ex.name = name.trim().toUpperCase(); swapExId = null; } else { sess.exercises.push({ id: Date.now(), name: name.trim().toUpperCase(), sets: [{w:'', r:REP_DEFAULTS[0], bpm:''}, {w:'', r:REP_DEFAULTS[1], bpm:''}, {w:'', r:REP_DEFAULTS[2], bpm:''}, {w:'', r:REP_DEFAULTS[3], bpm:''}]}); } saveAndRender(); closeExModal(); }
         function openLinkModal(exName) { pendingExName = exName.toUpperCase(); const btnCont = document.getElementById('catBtnContainer'); btnCont.innerHTML = ""; Object.keys(exLibrary).forEach(cat => { const b = document.createElement('button'); b.className = "glass p-4 text-[10px] font-black uppercase text-white hover:bg-indigo-500/20"; b.innerText = cat; b.onclick = () => finalizeCustomEx(cat); btnCont.appendChild(b); }); document.getElementById('catSelectorModal').classList.remove('hidden'); }
         function finalizeCustomEx(category) { if(!exLibrary[category]) exLibrary[category] = []; if (!exLibrary[category].includes(pendingExName)) exLibrary[category].push(pendingExName); document.getElementById('catSelectorModal').classList.add('hidden'); saveAndRender(); if(!document.getElementById('view-charts').classList.contains('hidden')) { renderCharts(); renderMedals(); } }
@@ -372,17 +357,10 @@
         function startCustomEx() { const n = prompt("Naam oefening:"); if(!n) return; pendingExName = n.toUpperCase(); openLinkModal(pendingExName); }
         
         async function shareWorkout(id) {
-            const s = sessions.find(x => x.id === id);
-            if(!s) return;
+            const s = sessions.find(x => x.id === id); if(!s) return;
             const text = `GymLog - ${s.name} (${s.date})\n${s.exercises.map(ex => `\n${ex.name}:${ex.sets.map(st => `\n- ${st.w}kg x ${st.r}`).join('')}`).join('\n')}`;
-            if (navigator.share) {
-                try {
-                    await navigator.share({ title: 'Mijn Training', text: text });
-                } catch (err) { console.log("Delen geannuleerd"); }
-            } else {
-                navigator.clipboard.writeText(text);
-                alert("Niet ondersteund op dit apparaat. Gegevens gekopieerd naar klembord!");
-            }
+            if (navigator.share) { try { await navigator.share({ title: 'Mijn Training', text: text }); } catch (err) {} }
+            else { navigator.clipboard.writeText(text); alert("Gekopieerd naar klembord!"); }
         }
 
         init();
