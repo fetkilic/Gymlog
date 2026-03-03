@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GymLog Pro - v2.4.0</title>
+    <title>GymLog Pro - v2.4.1</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -39,8 +39,8 @@
         .badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
         .badge-item { display: flex; flex-direction: column; align-items: center; text-align: center; }
         .badge-label { font-size: 7px; font-weight: 900; margin-top: 6px; text-transform: uppercase; opacity: 0.6; line-height: 1; }
-        .badge-svg { width: 50px; height: 50px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
-        .badge-locked { opacity: 0.2; filter: grayscale(1); }
+        .badge-svg { width: 50px; height: 50px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); transition: all 0.3s; }
+        .badge-locked { opacity: 0.3; filter: grayscale(1) contrast(0.5); }
     </style>
 </head>
 <body class="p-4 max-w-md mx-auto pb-32">
@@ -49,7 +49,7 @@
         <div class="flex items-center">
             <div>
                 <h1 class="text-2xl font-black italic tracking-tighter inline-block">GYM<span class="text-indigo-500">LOG</span></h1>
-                <span class="text-[10px] font-black opacity-20 ml-1">v2.4.0</span>
+                <span class="text-[10px] font-black opacity-20 ml-1">v2.4.1</span>
             </div>
             <button onclick="location.reload(true)" class="reload-btn">↻</button>
         </div>
@@ -193,16 +193,15 @@
                     </linearGradient>
                 </defs>
                 <path d="M50 5 L85 20 L85 55 C85 75 50 95 50 95 C50 95 15 75 15 55 L15 20 Z" fill="url(#grad-${level})" stroke="${c.border}" stroke-width="4" ${glow}/>
-                <text x="50" y="45" text-anchor="middle" fill="${c.text}" font-size="16" font-weight="900" font-family="Arial">${value}</text>
+                <text x="50" y="45" text-anchor="middle" fill="${c.text}" font-size="${value.toString().length > 3 ? '13' : '16'}" font-weight="900" font-family="Arial">${value}</text>
                 <text x="50" y="65" text-anchor="middle" fill="${c.text}" font-size="7" font-weight="900" font-family="Arial" opacity="0.8">${label}</text>
+                ${level === 'locked' ? '<circle cx="50" cy="80" r="5" fill="#334155" />' : ''}
             </svg>`;
         }
 
         function renderMedals() {
             const cont = document.getElementById('medalsContainer');
             cont.innerHTML = "";
-            
-            // 1. Oefening herhalingen
             const counts = {};
             sessions.forEach(s => s.exercises.forEach(e => {
                 const n = e.name.toUpperCase();
@@ -210,66 +209,51 @@
             }));
 
             const milestones = [1, 100, 200, 300, 400, 500, 750, 1000, 1500, 2000, 2500, 3000];
-            
-            // Toon top 3 meest gedane oefeningen voortgang
             const topEx = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0, 2);
             
             topEx.forEach(([name, count]) => {
                 milestones.forEach(m => {
-                    if (count >= m || m === 1) { // Toon alleen behaalde OF de eerste mijlpaal
-                        let level = 'locked';
-                        if (count >= m) {
-                            if (m >= 1000) level = 'elite';
-                            else if (m >= 500) level = 'gold';
-                            else if (m >= 100) level = 'silver';
-                            else if (m >= 1) level = 'wood';
-                            
-                            cont.innerHTML += `<div class="badge-item">
-                                ${getBadgeSVG(level, m, 'KEER')}
-                                <span class="badge-label">${name.split(' ')[0]}</span>
-                            </div>`;
-                        }
+                    let level = 'locked';
+                    if (count >= m) {
+                        if (m >= 1000) level = 'elite';
+                        else if (m >= 500) level = 'gold';
+                        else if (m >= 100) level = 'silver';
+                        else if (m >= 1) level = 'wood';
                     }
+                    cont.innerHTML += `<div class="badge-item">
+                        ${getBadgeSVG(level, m, 'KEER')}
+                        <span class="badge-label">${name.split(' ')[0]}</span>
+                    </div>`;
                 });
             });
 
-            // 2. Maand sessies
-            const monthlySessions = {};
-            sessions.forEach(s => {
-                const d = new Date(s.rawDate);
+            // Maand-badge (laatste 3 maanden tonen, gehaald of niet)
+            const now = new Date();
+            for(let i=0; i<3; i++) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
                 const key = d.toLocaleDateString('nl-NL', {month:'short', year:'2-digit'}).toUpperCase();
-                monthlySessions[key] = (monthlySessions[key] || 0) + 1;
-            });
+                let mCount = sessions.filter(s => {
+                    const sd = new Date(s.rawDate);
+                    return sd.getMonth() === d.getMonth() && sd.getFullYear() === d.getFullYear();
+                }).length;
+                
+                cont.innerHTML += `<div class="badge-item">
+                    ${getBadgeSVG(mCount >= 10 ? 'gold' : 'locked', '10+', 'Sessies')}
+                    <span class="badge-label">${key}</span>
+                </div>`;
+            }
 
-            Object.entries(monthlySessions).forEach(([month, count]) => {
-                if (count >= 10) {
-                    cont.innerHTML += `<div class="badge-item">
-                        ${getBadgeSVG('gold', '10+', 'SESSIES')}
-                        <span class="badge-label">${month}</span>
-                    </div>`;
-                }
-            });
+            // Jaar-badge (huidig jaar)
+            const currentYear = now.getFullYear();
+            const yCount = sessions.filter(s => new Date(s.rawDate).getFullYear() === currentYear).length;
+            let yLevel = 'locked';
+            if(yCount >= 300) yLevel = 'elite';
+            else if(yCount >= 150) yLevel = 'silver';
 
-            // 3. Jaar sessies
-            const yearlySessions = {};
-            sessions.forEach(s => {
-                const yr = new Date(s.rawDate).getFullYear();
-                yearlySessions[yr] = (yearlySessions[yr] || 0) + 1;
-            });
-
-            Object.entries(yearlySessions).forEach(([year, count]) => {
-                if (count >= 300) {
-                    cont.innerHTML += `<div class="badge-item">
-                        ${getBadgeSVG('elite', '300', 'BULL')}
-                        <span class="badge-label">${year}</span>
-                    </div>`;
-                } else if (count >= 150) {
-                     cont.innerHTML += `<div class="badge-item">
-                        ${getBadgeSVG('silver', '150', 'STRIJDER')}
-                        <span class="badge-label">${year}</span>
-                    </div>`;
-                }
-            });
+            cont.innerHTML += `<div class="badge-item">
+                ${getBadgeSVG(yLevel, '300', 'Jaar')}
+                <span class="badge-label">${currentYear}</span>
+            </div>`;
         }
 
         function renderRadarChart(days = 7) {
