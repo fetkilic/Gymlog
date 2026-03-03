@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta name="google-adsense-account" content="ca-pub-3148580604456953">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GymLog Pro - v2.4.9</title>
+    <title>GymLog Pro - v2.5.0</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -15,9 +14,8 @@
         button, .ex-item, .ex-name-btn, nav button, .glass { transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.1s; cursor: pointer; }
         button:active, .ex-item:active, .ex-name-btn:active, nav button:active { transform: scale(0.96); opacity: 0.8; }
         
-        /* Input Styling Fix */
         .input-field { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 0.75rem; padding: 14px; width: 100%; color: white; font-weight: 700; outline: none; transition: all 0.2s; display: block; box-sizing: border-box; appearance: none; -webkit-appearance: none; }
-        input[type="date"].input-field { min-height: 52px; line-height: 1.2; } /* Forceert gelijke hoogte voor datumveld */
+        input[type="date"].input-field { min-height: 52px; line-height: 1.2; }
         
         .btn-primary { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border-radius: 1rem; font-weight: 800; text-transform: uppercase; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3); }
         .table-input { background: #0f172a; width: 100%; font-weight: 800; font-size: 0.85rem; border-radius: 8px; padding: 8px; text-align: center; color: var(--accent); border: 1px solid rgba(255,255,255,0.1); }
@@ -40,6 +38,17 @@
         .overlay-nav-btn { font-size: 7px; font-weight: 900; white-space: nowrap; padding: 6px 10px; border-radius: 6px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); text-transform: uppercase; }
         .overlay-nav-btn.active { background: var(--accent); color: white; }
         nav { position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; z-index: 9999 !important; transform: translateZ(0); }
+
+        /* BMW-Style Infographic */
+        .bmw-wrap { background: linear-gradient(180deg, #0f172a 0%, #020617 100%); position: fixed; inset: 0; z-index: 200; display: flex; flex-direction: column; padding: 30px; overflow-y: auto; }
+        .bmw-tag { color: #6366f1; font-weight: 900; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
+        .bmw-title { font-size: 28px; font-weight: 900; italic; line-height: 1.1; text-transform: uppercase; margin-bottom: 40px; }
+        .bmw-stat-row { border-top: 1px solid rgba(255,255,255,0.1); padding: 25px 0; }
+        .bmw-val { font-size: 24px; font-weight: 900; display: block; margin-bottom: 4px; }
+        .bmw-label { font-size: 11px; font-weight: 700; opacity: 0.5; text-transform: uppercase; }
+        .bmw-footer { margin-top: auto; padding-top: 40px; }
+        .bmw-hero-text { font-size: 42px; font-weight: 900; font-style: italic; color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.2); text-transform: uppercase; margin-bottom: 20px; }
+        .bmw-neon-glow { color: #fff; text-shadow: 0 0 10px rgba(99,102,241,0.8); }
     </style>
 </head>
 <body class="p-4 max-w-md mx-auto pb-32">
@@ -48,12 +57,46 @@
         <div class="flex items-center">
             <div>
                 <h1 class="text-2xl font-black italic tracking-tighter inline-block">GYM<span class="text-indigo-500">LOG</span></h1>
-                <span class="text-[10px] font-black opacity-20 ml-1">v2.4.9</span>
+                <span class="text-[10px] font-black opacity-20 ml-1">v2.5.0</span>
             </div>
             <button onclick="location.reload(true)" class="reload-btn">↻</button>
         </div>
         <div id="headerStats" class="glass px-4 py-2 text-[10px] font-bold border-indigo-500/30 text-indigo-100 uppercase italic">LADEN...</div>
     </header>
+
+    <div id="bmwOverlay" class="bmw-wrap hidden">
+        <div class="flex justify-between items-start">
+            <div>
+                <div class="bmw-tag">GymLog Recap</div>
+                <h2 class="bmw-title">Terugblik <span id="recapMonth" class="text-indigo-500">[MAAND]</span> met mijn GymLog</h2>
+            </div>
+            <button onclick="document.getElementById('bmwOverlay').classList.add('hidden')" class="text-rose-500 text-2xl font-bold">✕</button>
+        </div>
+
+        <div class="bmw-stat-row">
+            <span class="bmw-val" id="recapSessions">0</span>
+            <span class="bmw-label">Trainingssessies gedaan</span>
+            <p class="text-[10px] opacity-40 mt-2">Je bent consistent bezig geweest!</p>
+        </div>
+
+        <div class="bmw-stat-row">
+            <span class="bmw-val" id="recapVolume">0 KG</span>
+            <span class="bmw-label">Totaal Volume Verplaatst</span>
+            <p class="text-[10px] opacity-40 mt-2">Een ijzersterke prestatie deze maand.</p>
+        </div>
+
+        <div class="bmw-stat-row">
+            <span class="bmw-val" id="recapMainMuscle">BORST</span>
+            <span class="bmw-label">Meest Getrainde Focus</span>
+            <p class="text-[10px] opacity-40 mt-2">Dit was je absolute prioriteit.</p>
+        </div>
+
+        <div class="bmw-footer">
+            <div class="bmw-hero-text">PROGRESSIE <span class="bmw-neon-glow">GEBOEKT</span></div>
+            <p class="text-[8px] opacity-30 uppercase leading-relaxed">Alle weergegeven waarden hebben betrekking op de trainingsactiviteit gelogd in GymLog Pro. Resultaten kunnen variëren per individu en trainingsomstandigheden.</p>
+            <button onclick="shareRecap()" class="btn-primary w-full py-4 mt-6 italic text-sm">Deel Maandoverzicht</button>
+        </div>
+    </div>
 
     <div id="drillDownModal" class="hidden fixed inset-0 z-[120] bg-slate-950/98 p-6 flex flex-col items-center justify-center">
         <div class="glass p-6 w-full max-w-sm relative flex flex-col">
@@ -90,6 +133,14 @@
     </section>
 
     <section id="view-charts" class="view-section hidden">
+        <button onclick="generateBMWRecap()" class="w-full glass p-4 mb-6 border-indigo-500/50 flex items-center justify-between">
+            <div class="text-left">
+                <div class="text-[10px] font-black text-indigo-400 uppercase">Highlights</div>
+                <div class="text-sm font-black italic">GENEREER MAANDOVERZICHT</div>
+            </div>
+            <span class="text-2xl">⚡</span>
+        </button>
+
         <div class="glass p-6 mb-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-[10px] font-black text-indigo-400 uppercase italic">Spiergroep Balans</h3>
@@ -166,6 +217,49 @@
 
         function saveAndRender() { localStorage.setItem('gym_sessions', JSON.stringify(sessions)); localStorage.setItem('gym_user', JSON.stringify(userData)); localStorage.setItem('gym_ex_library', JSON.stringify(exLibrary)); updateHeader(); renderSessions(); renderWeightLogs(); populateExerciseSelect(); renderExLibrary(); }
         
+        function generateBMWRecap() {
+            const now = new Date();
+            const lastMonth = now.getMonth();
+            const year = now.getFullYear();
+            const monthName = now.toLocaleDateString('nl-NL', { month: 'long' }).toUpperCase();
+            
+            const monthSessions = sessions.filter(s => {
+                const d = new Date(s.rawDate);
+                return d.getMonth() === lastMonth && d.getFullYear() === year;
+            });
+
+            let totalVol = 0;
+            let catVol = {};
+            let exToCat = {};
+            Object.entries(exLibrary).forEach(([cat, exs]) => exs.forEach(e => exToCat[e.toUpperCase()] = cat));
+
+            monthSessions.forEach(s => {
+                s.exercises.forEach(ex => {
+                    const cat = exToCat[ex.name.toUpperCase()] || "OVERIG";
+                    if(!catVol[cat]) catVol[cat] = 0;
+                    ex.sets.forEach(st => {
+                        const vol = (parseFloat(st.w) || 0) * (parseInt(st.r) || 0);
+                        totalVol += vol;
+                        catVol[cat] += vol;
+                    });
+                });
+            });
+
+            const topCat = Object.entries(catVol).sort((a,b) => b[1] - a[1])[0]?.[0] || "DIVERS";
+
+            document.getElementById('recapMonth').innerText = monthName;
+            document.getElementById('recapSessions').innerText = monthSessions.length;
+            document.getElementById('recapVolume').innerText = totalVol.toLocaleString() + " KG";
+            document.getElementById('recapMainMuscle').innerText = topCat;
+            document.getElementById('bmwOverlay').classList.remove('hidden');
+        }
+
+        async function shareRecap() {
+            const txt = `Mijn GymLog Recap: ${document.getElementById('recapMonth').innerText}\nSessions: ${document.getElementById('recapSessions').innerText}\nVolume: ${document.getElementById('recapVolume').innerText}\nFocus: ${document.getElementById('recapMainMuscle').innerText}\n\n#GymLogPro #Progressie`;
+            if (navigator.share) await navigator.share({ title: 'Mijn Maandoverzicht', text: txt });
+            else { navigator.clipboard.writeText(txt); alert("Tekst gekopieerd!"); }
+        }
+
         function renderRadarChart(days = 7) {
             currentRadarDays = days;
             const ctx = document.getElementById('radarChart'); if(!ctx) return;
