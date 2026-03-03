@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GymLog Pro - v2.0</title>
+    <title>GymLog Pro - v2.1</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -30,6 +30,12 @@
         .btn-link { background: #f59e0b; color: #000; padding: 2px 6px; border-radius: 4px; font-size: 8px; font-weight: 900; margin-left: 8px; vertical-align: middle; }
         .reload-btn { background: rgba(255,255,255,0.05); border-radius: 0.5rem; padding: 4px 8px; font-size: 12px; border: 1px solid rgba(255,255,255,0.1); margin-left: 8px; }
         .ex-name-btn { text-align: left; padding: 4px 8px; background: rgba(99, 102, 241, 0.1); border-radius: 6px; border: 1px solid rgba(99, 102, 241, 0.2); }
+        
+        /* Overlay Nav Style */
+        .overlay-nav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); scrollbar-width: none; }
+        .overlay-nav::-webkit-scrollbar { display: none; }
+        .overlay-nav-btn { font-size: 7px; font-weight: 900; white-space: nowrap; padding: 6px 10px; border-radius: 6px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); text-transform: uppercase; }
+        .overlay-nav-btn.active { background: var(--accent); color: white; }
     </style>
 </head>
 <body class="p-4 max-w-md mx-auto pb-32">
@@ -38,7 +44,7 @@
         <div class="flex items-center">
             <div>
                 <h1 class="text-2xl font-black italic tracking-tighter inline-block">GYM<span class="text-indigo-500">LOG</span></h1>
-                <span class="text-[10px] font-black opacity-20 ml-1">v2.0</span>
+                <span class="text-[10px] font-black opacity-20 ml-1">v2.1</span>
             </div>
             <button onclick="location.reload(true)" class="reload-btn">↻</button>
         </div>
@@ -46,11 +52,14 @@
     </header>
 
     <div id="drillDownModal" class="hidden fixed inset-0 z-[120] bg-slate-950/98 p-6 flex flex-col items-center justify-center">
-        <div class="glass p-6 w-full max-w-sm relative">
-            <button onclick="document.getElementById('drillDownModal').classList.add('hidden')" class="absolute top-4 right-4 text-rose-500 font-bold">✕</button>
-            <h3 id="drillDownTitle" class="text-center font-black italic mb-6 text-indigo-400 uppercase">DETAILS</h3>
+        <div class="glass p-6 w-full max-w-sm relative flex flex-col">
+            <button onclick="document.getElementById('drillDownModal').classList.add('hidden')" class="absolute top-4 right-4 text-rose-500 font-bold z-10">✕</button>
+            <h3 id="drillDownTitle" class="text-center font-black italic mb-4 text-indigo-400 uppercase">DETAILS</h3>
+            
+            <div id="drillDownNav" class="overlay-nav"></div>
+
             <div class="h-64 w-full"><canvas id="drillDownChart"></canvas></div>
-            <p class="text-[8px] text-center opacity-40 mt-4 uppercase font-bold">Volume per oefening (geselecteerde periode)</p>
+            <p class="text-[8px] text-center opacity-40 mt-4 uppercase font-bold">Volume per oefening</p>
         </div>
     </div>
 
@@ -90,7 +99,7 @@
                 </div>
             </div>
             <div class="h-64 w-full"><canvas id="radarChart"></canvas></div>
-            <p class="text-[7px] text-center opacity-20 mt-2 uppercase font-black">Tip: klik op een punt voor details</p>
+            <p class="text-[7px] text-center opacity-20 mt-2 uppercase font-black">Klik op een punt voor details</p>
         </div>
         <div class="glass p-6 mb-6">
             <select id="chartExerciseSelect" onchange="updateChart()" class="input-field mb-6 text-sm"></select>
@@ -199,6 +208,18 @@
                     });
                 }
             });
+
+            // Navigatie knoppen genereren
+            const nav = document.getElementById('drillDownNav');
+            nav.innerHTML = "";
+            Object.keys(exLibrary).forEach(cat => {
+                const b = document.createElement('button');
+                b.className = `overlay-nav-btn ${cat === category ? 'active' : ''}`;
+                b.innerText = cat;
+                b.onclick = () => showDrillDown(cat);
+                nav.appendChild(b);
+            });
+
             document.getElementById('drillDownTitle').innerText = category;
             document.getElementById('drillDownModal').classList.remove('hidden');
             const ctx = document.getElementById('drillDownChart');
