@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GymLog Pro - v1.7</title>
+    <title>GymLog Pro - v1.8</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -37,7 +37,7 @@
         <div class="flex items-center">
             <div>
                 <h1 class="text-2xl font-black italic tracking-tighter inline-block">GYM<span class="text-indigo-500">LOG</span></h1>
-                <span class="text-[10px] font-black opacity-20 ml-1">v1.7</span>
+                <span class="text-[10px] font-black opacity-20 ml-1">v1.8</span>
             </div>
             <button onclick="location.reload(true)" class="reload-btn" title="Update App">↻</button>
         </div>
@@ -96,15 +96,27 @@
     <section id="view-profile" class="view-section hidden">
         <div class="glass p-6 mb-6">
             <input id="profName" class="input-field mb-6 text-xl" placeholder="JE NAAM" onchange="saveProfileName()">
+            
             <div class="flex justify-between items-center mb-2 px-1">
                 <span class="text-[8px] font-black opacity-40 uppercase">Gewicht Trend</span>
                 <div class="flex gap-1">
-                    <button onclick="renderWeightChart(7)" class="filter-btn active">WEEK</button>
-                    <button onclick="renderWeightChart(30)" class="filter-btn">MAAND</button>
-                    <button onclick="renderWeightChart(365)" class="filter-btn">JAAR</button>
+                    <button onclick="renderWeightChart(7)" class="filter-btn weight-f active">WEEK</button>
+                    <button onclick="renderWeightChart(30)" class="filter-btn weight-f">MAAND</button>
+                    <button onclick="renderWeightChart(365)" class="filter-btn weight-f">JAAR</button>
                 </div>
             </div>
-            <div class="h-40 w-full mb-6"><canvas id="weightChart"></canvas></div>
+            <div class="h-40 w-full mb-8"><canvas id="weightChart"></canvas></div>
+
+            <div class="flex justify-between items-center mb-2 px-1">
+                <span class="text-[8px] font-black text-emerald-500/60 uppercase">Vetpercentage Trend</span>
+                <div class="flex gap-1">
+                    <button onclick="renderFatChart(7)" class="filter-btn fat-f active">WEEK</button>
+                    <button onclick="renderFatChart(30)" class="filter-btn fat-f">MAAND</button>
+                    <button onclick="renderFatChart(365)" class="filter-btn fat-f">JAAR</button>
+                </div>
+            </div>
+            <div class="h-40 w-full mb-8"><canvas id="fatChart"></canvas></div>
+
             <div class="flex gap-2 mb-6">
                 <input id="profWeightInput" type="number" step="0.1" class="input-field flex-1" placeholder="KG" onclick="this.select()">
                 <input id="profFatInput" type="number" step="0.1" class="input-field flex-1 !border-emerald-500/20" placeholder="VET %" onclick="this.select()">
@@ -133,7 +145,7 @@
         const INITIAL_LIB = { "Borst": ["BENCH PRESS", "PEC FLY"], "Rug": ["LAT PULLDOWN", "DEADLIFT"], "Benen": ["SQUAT", "LEG PRESS"], "Schouders": ["OHP"], "Triceps": ["CABLE PUSH DOWN"], "Armen": ["BICEP CURL"], "Buik / Core": ["PLANK"] };
         const REP_DEFAULTS = [12, 10, 8, 6];
         let exLibrary = INITIAL_LIB, sessions = [], userData = { name: "GEBRUIKER", weightLogs: [] };
-        let activeSessionId = null, chartInstance = null, weightChartInstance = null, radarChartInstance = null, currentTargetSessionId = null, pendingExName = "", swapExId = null;
+        let activeSessionId = null, chartInstance = null, weightChartInstance = null, fatChartInstance = null, radarChartInstance = null, currentTargetSessionId = null, pendingExName = "", swapExId = null;
 
         function init() { 
             sessions = JSON.parse(localStorage.getItem('gym_sessions')) || [];
@@ -186,13 +198,37 @@
         function renderWeightChart(days = 30) {
             const ctx = document.getElementById('weightChart');
             if(!ctx) return;
-            const filtered = (userData.weightLogs || []).slice(0, days).reverse();
+            document.querySelectorAll('.weight-f').forEach(b => {
+                b.classList.remove('active');
+                if(b.getAttribute('onclick').includes(days)) b.classList.add('active');
+            });
+            const filtered = (userData.weightLogs || []).filter(l => l.w).slice(0, days).reverse();
             if(weightChartInstance) weightChartInstance.destroy();
             weightChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: filtered.map(l => new Date(l.date).toLocaleDateString('nl-NL', {day:'numeric', month:'short'})),
                     datasets: [{ data: filtered.map(l => l.w), borderColor: '#6366f1', tension: 0.4, fill: true, backgroundColor: 'rgba(99,102,241,0.1)' }]
+                },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: false } } }
+            });
+        }
+
+        function renderFatChart(days = 30) {
+            const ctx = document.getElementById('fatChart');
+            if(!ctx) return;
+            document.querySelectorAll('.fat-f').forEach(b => {
+                b.classList.remove('active');
+                if(b.getAttribute('onclick').includes(days)) b.classList.add('active');
+            });
+            // Alleen logs met een vetpercentage filteren
+            const filtered = (userData.weightLogs || []).filter(l => l.fat).slice(0, days).reverse();
+            if(fatChartInstance) fatChartInstance.destroy();
+            fatChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: filtered.map(l => new Date(l.date).toLocaleDateString('nl-NL', {day:'numeric', month:'short'})),
+                    datasets: [{ data: filtered.map(l => l.fat), borderColor: '#10b981', tension: 0.4, fill: true, backgroundColor: 'rgba(16,185,129,0.1)' }]
                 },
                 options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: false } } }
             });
@@ -283,11 +319,14 @@
                 saveAndRender(); 
                 document.getElementById('profWeightInput').value = ""; 
                 document.getElementById('profFatInput').value = "";
+                if(!document.getElementById('view-profile').classList.contains('hidden')) {
+                    renderWeightChart(30); renderFatChart(30);
+                }
             } 
         }
         function openExModal(sId) { currentTargetSessionId = sId; document.getElementById('exModal').classList.remove('hidden'); }
         function closeExModal() { document.getElementById('exModal').classList.add('hidden'); }
-        function showView(v) { document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden')); document.getElementById('view-'+v).classList.remove('hidden'); if(v==='charts') renderCharts(); if(v==='profile') renderWeightChart(30); }
+        function showView(v) { document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden')); document.getElementById('view-'+v).classList.remove('hidden'); if(v==='charts') renderCharts(); if(v==='profile') { renderWeightChart(30); renderFatChart(30); } }
         function updateHeader() { const logs = userData.weightLogs || []; const lastW = (logs.length > 0) ? logs[0].w : "--"; document.getElementById('headerStats').innerText = `${userData.name || "COACH"} • ${lastW} KG`; }
         function populateExerciseSelect() { const u = [...new Set(sessions.flatMap(s => s.exercises.map(e => e.name.toUpperCase())))].sort(); document.getElementById('chartExerciseSelect').innerHTML = u.map(n => `<option value="${n}">${n}</option>`).join(''); }
         function saveProfileName() { userData.name = document.getElementById('profName').value.toUpperCase(); saveAndRender(); }
