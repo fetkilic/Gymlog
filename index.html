@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GymLog Pro - v2.3.4</title>
+    <title>GymLog Pro - v2.4.0</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -34,6 +34,13 @@
         .overlay-nav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); scrollbar-width: none; }
         .overlay-nav-btn { font-size: 7px; font-weight: 900; white-space: nowrap; padding: 6px 10px; border-radius: 6px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); text-transform: uppercase; }
         .overlay-nav-btn.active { background: var(--accent); color: white; }
+        
+        /* Badge Grid styling */
+        .badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .badge-item { display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .badge-label { font-size: 7px; font-weight: 900; margin-top: 6px; text-transform: uppercase; opacity: 0.6; line-height: 1; }
+        .badge-svg { width: 50px; height: 50px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
+        .badge-locked { opacity: 0.2; filter: grayscale(1); }
     </style>
 </head>
 <body class="p-4 max-w-md mx-auto pb-32">
@@ -42,7 +49,7 @@
         <div class="flex items-center">
             <div>
                 <h1 class="text-2xl font-black italic tracking-tighter inline-block">GYM<span class="text-indigo-500">LOG</span></h1>
-                <span class="text-[10px] font-black opacity-20 ml-1">v2.3.4</span>
+                <span class="text-[10px] font-black opacity-20 ml-1">v2.4.0</span>
             </div>
             <button onclick="location.reload(true)" class="reload-btn">↻</button>
         </div>
@@ -94,12 +101,18 @@
                 </div>
             </div>
             <div class="h-64 w-full"><canvas id="radarChart"></canvas></div>
-            <p class="text-[7px] opacity-20 uppercase font-black mt-4">Klik op punt voor details</p>
         </div>
+
+        <div class="glass p-6 mb-6">
+            <h3 class="text-[10px] font-black text-amber-400 mb-4 uppercase italic">🏆 MIJLPALEN</h3>
+            <div id="medalsContainer" class="badge-grid"></div>
+        </div>
+
         <div class="glass p-6 mb-6">
             <select id="chartExerciseSelect" onchange="updateChart()" class="input-field mb-6 text-sm"></select>
             <div class="h-48 w-full"><canvas id="progressionChart"></canvas></div>
         </div>
+        
         <div class="glass p-6 mb-6">
             <h3 class="text-[10px] font-black text-indigo-400 mb-4 uppercase italic">Pomp Meter (7d Volume)</h3>
             <div id="volumeTracker" class="space-y-4 mb-10"></div>
@@ -130,7 +143,6 @@
                 <button onclick="document.getElementById('importFile').click()" class="glass p-3 text-[9px] font-black uppercase">📂 Herstel</button>
                 <input type="file" id="importFile" class="hidden" onchange="importData(event)" accept=".json">
             </div>
-            <p class="text-[7px] opacity-30 font-bold uppercase mb-2 text-center">Klik op een log om vet % bij te werken</p>
             <div id="weightLogList" class="space-y-2 mb-8"></div>
         </div>
     </section>
@@ -162,18 +174,114 @@
 
         function saveAndRender() { localStorage.setItem('gym_sessions', JSON.stringify(sessions)); localStorage.setItem('gym_user', JSON.stringify(userData)); localStorage.setItem('gym_ex_library', JSON.stringify(exLibrary)); updateHeader(); renderSessions(); renderWeightLogs(); populateExerciseSelect(); renderExLibrary(); }
         
+        function getBadgeSVG(level, value, label) {
+            const colors = {
+                locked: { border: '#1e293b', bg: '#0f172a', text: '#334155' },
+                wood: { border: '#78350f', bg: '#451a03', text: '#fbbf24' },
+                bronze: { border: '#92400e', bg: '#6366f1', text: '#ffffff' },
+                silver: { border: '#94a3b8', bg: '#6366f1', text: '#ffffff' },
+                gold: { border: '#fbbf24', bg: '#6366f1', text: '#ffffff' },
+                elite: { border: '#a855f7', bg: '#4c1d95', text: '#ffffff' }
+            };
+            const c = colors[level];
+            const glow = level !== 'locked' ? `filter="drop-shadow(0 0 5px ${c.border})"` : '';
+            return `<svg viewBox="0 0 100 100" class="badge-svg ${level==='locked'?'badge-locked':''}">
+                <defs>
+                    <linearGradient id="grad-${level}" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:${c.bg};stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#020617;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <path d="M50 5 L85 20 L85 55 C85 75 50 95 50 95 C50 95 15 75 15 55 L15 20 Z" fill="url(#grad-${level})" stroke="${c.border}" stroke-width="4" ${glow}/>
+                <text x="50" y="45" text-anchor="middle" fill="${c.text}" font-size="16" font-weight="900" font-family="Arial">${value}</text>
+                <text x="50" y="65" text-anchor="middle" fill="${c.text}" font-size="7" font-weight="900" font-family="Arial" opacity="0.8">${label}</text>
+            </svg>`;
+        }
+
+        function renderMedals() {
+            const cont = document.getElementById('medalsContainer');
+            cont.innerHTML = "";
+            
+            // 1. Oefening herhalingen
+            const counts = {};
+            sessions.forEach(s => s.exercises.forEach(e => {
+                const n = e.name.toUpperCase();
+                counts[n] = (counts[n] || 0) + 1;
+            }));
+
+            const milestones = [1, 100, 200, 300, 400, 500, 750, 1000, 1500, 2000, 2500, 3000];
+            
+            // Toon top 3 meest gedane oefeningen voortgang
+            const topEx = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0, 2);
+            
+            topEx.forEach(([name, count]) => {
+                milestones.forEach(m => {
+                    if (count >= m || m === 1) { // Toon alleen behaalde OF de eerste mijlpaal
+                        let level = 'locked';
+                        if (count >= m) {
+                            if (m >= 1000) level = 'elite';
+                            else if (m >= 500) level = 'gold';
+                            else if (m >= 100) level = 'silver';
+                            else if (m >= 1) level = 'wood';
+                            
+                            cont.innerHTML += `<div class="badge-item">
+                                ${getBadgeSVG(level, m, 'KEER')}
+                                <span class="badge-label">${name.split(' ')[0]}</span>
+                            </div>`;
+                        }
+                    }
+                });
+            });
+
+            // 2. Maand sessies
+            const monthlySessions = {};
+            sessions.forEach(s => {
+                const d = new Date(s.rawDate);
+                const key = d.toLocaleDateString('nl-NL', {month:'short', year:'2-digit'}).toUpperCase();
+                monthlySessions[key] = (monthlySessions[key] || 0) + 1;
+            });
+
+            Object.entries(monthlySessions).forEach(([month, count]) => {
+                if (count >= 10) {
+                    cont.innerHTML += `<div class="badge-item">
+                        ${getBadgeSVG('gold', '10+', 'SESSIES')}
+                        <span class="badge-label">${month}</span>
+                    </div>`;
+                }
+            });
+
+            // 3. Jaar sessies
+            const yearlySessions = {};
+            sessions.forEach(s => {
+                const yr = new Date(s.rawDate).getFullYear();
+                yearlySessions[yr] = (yearlySessions[yr] || 0) + 1;
+            });
+
+            Object.entries(yearlySessions).forEach(([year, count]) => {
+                if (count >= 300) {
+                    cont.innerHTML += `<div class="badge-item">
+                        ${getBadgeSVG('elite', '300', 'BULL')}
+                        <span class="badge-label">${year}</span>
+                    </div>`;
+                } else if (count >= 150) {
+                     cont.innerHTML += `<div class="badge-item">
+                        ${getBadgeSVG('silver', '150', 'STRIJDER')}
+                        <span class="badge-label">${year}</span>
+                    </div>`;
+                }
+            });
+        }
+
         function renderRadarChart(days = 7) {
             currentRadarDays = days;
             const ctx = document.getElementById('radarChart'); if(!ctx) return;
             document.querySelectorAll('#radarFilters .filter-btn').forEach(b => { b.classList.remove('active'); if(b.getAttribute('onclick').includes(days)) b.classList.add('active'); });
             const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - days);
             const categories = Object.keys(exLibrary);
-            
             let exToCat = {}; Object.entries(exLibrary).forEach(([cat, exs]) => exs.forEach(e => exToCat[e.toUpperCase()] = cat));
             let dataMap = {}; categories.forEach(cat => dataMap[cat] = 0);
             sessions.forEach(s => { if (new Date(s.rawDate) >= cutoff) { s.exercises.forEach(ex => { const cat = exToCat[ex.name.toUpperCase()]; if (cat && dataMap.hasOwnProperty(cat)) { ex.sets.forEach(set => { dataMap[cat] += (parseFloat(set.w) || 0) * (parseInt(set.r) || 0); }); } }); } });
             const myDataValues = categories.map(c => dataMap[c]);
-
             if(radarChartInstance) radarChartInstance.destroy();
             radarChartInstance = new Chart(ctx, { type: 'radar', data: { labels: categories, datasets: [{ label: 'Jij', data: myDataValues, backgroundColor: 'rgba(99, 102, 241, 0.25)', borderColor: '#6366f1', pointBackgroundColor: '#6366f1', borderWidth: 3, pointRadius: 4 }] }, options: { maintainAspectRatio: false, onClick: (e, elements) => { if(elements.length > 0) showDrillDown(categories[elements[0].index]); }, scales: { r: { beginAtZero: true, angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: 'rgba(255,255,255,0.6)', font: { size: 10, weight: '900' } }, ticks: { display: false } } }, plugins: { legend: { display: false } } } });
         }
@@ -259,7 +367,7 @@
         }
 
         function toggleMonth(key) { if (activeMonths.has(key)) activeMonths.delete(key); else activeMonths.add(key); renderSessions(); }
-        function showView(v) { document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden')); document.getElementById('view-'+v).classList.remove('hidden'); if(v==='charts') renderCharts(); if(v==='profile') renderWeightChart(30); }
+        function showView(v) { document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden')); document.getElementById('view-'+v).classList.remove('hidden'); if(v==='charts') { renderCharts(); renderMedals(); } if(v==='profile') renderWeightChart(30); }
         function updateHeader() { const logs = userData.weightLogs || []; const lastW = (logs.length > 0) ? logs[0].w : "--"; document.getElementById('headerStats').innerText = `${userData.name || "COACH"} • ${lastW} KG`; }
         function populateExerciseSelect() { const u = [...new Set(sessions.flatMap(s => s.exercises.map(e => e.name.toUpperCase())))].sort(); document.getElementById('chartExerciseSelect').innerHTML = u.map(n => `<option value="${n}">${n}</option>`).join(''); }
         function updateChart() { const ctx = document.getElementById('progressionChart'); if(!ctx) return; const name = document.getElementById('chartExerciseSelect').value; if(!name) return; const relevant = sessions.filter(s => s.exercises.some(e => e.name.toUpperCase() === name)).sort((a,b) => new Date(a.rawDate) - new Date(b.rawDate)); if(chartInstance) chartInstance.destroy(); chartInstance = new Chart(ctx, { type: 'line', data: { labels: relevant.map(s => s.rawDate), datasets: [{ data: relevant.map(s => Math.max(...s.exercises.find(e => e.name.toUpperCase() === name).sets.map(st => parseFloat(st.w) || 0))), borderColor: '#6366f1', tension: 0.3 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } } } }); }
@@ -272,7 +380,7 @@
         function renderCharts() { updateChart(); renderRadarChart(7); const volCont = document.getElementById('volumeTracker'); const recCont = document.getElementById('recordsTracker'); volCont.innerHTML = ""; recCont.innerHTML = ""; let volPerCat = {}; let exToCat = {}; let records = {}; for (const [cat, exs] of Object.entries(exLibrary)) { volPerCat[cat] = 0; exs.forEach(e => exToCat[e.toUpperCase()] = cat); } volPerCat["OVERIG"] = 0; let overigeOefeningen = new Set(); const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); sessions.forEach(s => { const isRecent = new Date(s.rawDate) >= sevenDaysAgo; s.exercises.forEach(ex => { const n = ex.name.toUpperCase(); const cat = exToCat[n] || "OVERIG"; if (cat === "OVERIG") overigeOefeningen.add(n); let maxW = 0; ex.sets.forEach(st => { const w = parseFloat(st.w) || 0; const r = parseInt(st.r) || 0; if (isRecent) volPerCat[cat] += (w * r); if (w > maxW) maxW = w; }); if (!records[n] || maxW > records[n]) records[n] = maxW; }); }); const maxVol = Math.max(...Object.values(volPerCat), 1); Object.entries(volPerCat).sort((a,b)=>b[1]-a[1]).forEach(([c, v]) => { if (v === 0 && c !== "OVERIG") return; const p = Math.round((v/maxVol)*100); volCont.innerHTML += `<div><div class="flex justify-between text-[8px] font-black uppercase"><span>${c}</span><span>${v.toLocaleString()} KG</span></div><div class="bg-slate-900 rounded-full h-2 mt-1 overflow-hidden"><div class="heatmap-bar-fill" style="width: ${p}%"></div></div></div>`; }); Object.entries(records).sort((a,b) => a[0].localeCompare(b[0])).forEach(([n, v]) => { if (v > 0) recCont.innerHTML += `<div class="record-tile"><span class="text-[8px] font-black uppercase opacity-40 mb-1 truncate">${n}</span><span class="text-[13px] font-black text-emerald-400">${v}<span class="text-[8px] ml-0.5">KG</span></span></div>`; }); }
         function selectEx(name) { const sess = sessions.find(s => s.id === currentTargetSessionId); if (swapExId) { const ex = sess.exercises.find(e => e.id === swapExId); if (ex) ex.name = name.trim().toUpperCase(); swapExId = null; } else { sess.exercises.push({ id: Date.now(), name: name.trim().toUpperCase(), sets: [{w:'', r:REP_DEFAULTS[0], bpm:''}, {w:'', r:REP_DEFAULTS[1], bpm:''}, {w:'', r:REP_DEFAULTS[2], bpm:''}, {w:'', r:REP_DEFAULTS[3], bpm:''}]}); } saveAndRender(); closeExModal(); }
         function openLinkModal(exName) { pendingExName = exName.toUpperCase(); const btnCont = document.getElementById('catBtnContainer'); btnCont.innerHTML = ""; Object.keys(exLibrary).forEach(cat => { const b = document.createElement('button'); b.className = "glass p-4 text-[10px] font-black uppercase text-white hover:bg-indigo-500/20"; b.innerText = cat; b.onclick = () => finalizeCustomEx(cat); btnCont.appendChild(b); }); document.getElementById('catSelectorModal').classList.remove('hidden'); }
-        function finalizeCustomEx(category) { if(!exLibrary[category]) exLibrary[category] = []; if (!exLibrary[category].includes(pendingExName)) exLibrary[category].push(pendingExName); document.getElementById('catSelectorModal').classList.add('hidden'); saveAndRender(); if(!document.getElementById('view-charts').classList.contains('hidden')) renderCharts(); }
+        function finalizeCustomEx(category) { if(!exLibrary[category]) exLibrary[category] = []; if (!exLibrary[category].includes(pendingExName)) exLibrary[category].push(pendingExName); document.getElementById('catSelectorModal').classList.add('hidden'); saveAndRender(); if(!document.getElementById('view-charts').classList.contains('hidden')) { renderCharts(); renderMedals(); } }
         function openExModal(sId) { currentTargetSessionId = sId; document.getElementById('exModal').classList.remove('hidden'); }
         function closeExModal() { document.getElementById('exModal').classList.add('hidden'); }
         function createNewSession() { const name = (document.getElementById('newWorkoutName').value || "Training").toUpperCase(); const raw = document.getElementById('newWorkoutDate').value; const d = new Date(raw); activeMonths.add(`${d.getFullYear()}-${d.getMonth()}`); sessions.push({ id: Date.now(), name, date: d.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'short' }), rawDate: raw, exercises: [] }); activeSessionId = sessions[sessions.length-1].id; saveAndRender(); }
