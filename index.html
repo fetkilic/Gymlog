@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GymLog Pro - v2.3.3</title>
+    <title>GymLog Pro - v2.3.4</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -31,6 +31,9 @@
         .ex-name-btn { text-align: left; padding: 4px 8px; background: rgba(99, 102, 241, 0.1); border-radius: 6px; border: 1px solid rgba(99, 102, 241, 0.2); }
         .month-header { font-size: 11px; font-weight: 900; color: #6366f1; letter-spacing: 1px; margin: 24px 0 12px 4px; display: flex; align-items: center; gap: 8px; opacity: 0.8; }
         .month-header::after { content: ''; height: 1px; background: linear-gradient(90deg, rgba(99,102,241,0.3), transparent); flex: 1; }
+        .overlay-nav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); scrollbar-width: none; }
+        .overlay-nav-btn { font-size: 7px; font-weight: 900; white-space: nowrap; padding: 6px 10px; border-radius: 6px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); text-transform: uppercase; }
+        .overlay-nav-btn.active { background: var(--accent); color: white; }
     </style>
 </head>
 <body class="p-4 max-w-md mx-auto pb-32">
@@ -39,7 +42,7 @@
         <div class="flex items-center">
             <div>
                 <h1 class="text-2xl font-black italic tracking-tighter inline-block">GYM<span class="text-indigo-500">LOG</span></h1>
-                <span class="text-[10px] font-black opacity-20 ml-1">v2.3.3</span>
+                <span class="text-[10px] font-black opacity-20 ml-1">v2.3.4</span>
             </div>
             <button onclick="location.reload(true)" class="reload-btn">↻</button>
         </div>
@@ -83,10 +86,7 @@
     <section id="view-charts" class="view-section hidden">
         <div class="glass p-6 mb-6">
             <div class="flex justify-between items-center mb-4">
-                <div class="flex flex-col">
-                    <h3 class="text-[10px] font-black text-indigo-400 uppercase italic">Spiergroep Balans</h3>
-                    <span id="friendTag" class="text-[8px] text-rose-500 font-bold hidden uppercase">⚔️ VS VRIEND ACTIEF</span>
-                </div>
+                <h3 class="text-[10px] font-black text-indigo-400 uppercase italic">Spiergroep Balans</h3>
                 <div class="flex gap-1" id="radarFilters">
                     <button onclick="renderRadarChart(7)" class="filter-btn active">WEEK</button>
                     <button onclick="renderRadarChart(30)" class="filter-btn">MAAND</button>
@@ -94,11 +94,7 @@
                 </div>
             </div>
             <div class="h-64 w-full"><canvas id="radarChart"></canvas></div>
-            <div class="flex justify-between items-center mt-4">
-                <p class="text-[7px] opacity-20 uppercase font-black">Klik op punt voor info</p>
-                <button onclick="document.getElementById('compareFile').click()" class="text-[8px] font-black bg-rose-500/20 text-rose-500 px-3 py-1 rounded-full border border-rose-500/30 uppercase">⚔️ VS Vriend</button>
-                <input type="file" id="compareFile" class="hidden" onchange="compareFriend(event)" accept=".json">
-            </div>
+            <p class="text-[7px] opacity-20 uppercase font-black mt-4">Klik op punt voor details</p>
         </div>
         <div class="glass p-6 mb-6">
             <select id="chartExerciseSelect" onchange="updateChart()" class="input-field mb-6 text-sm"></select>
@@ -149,7 +145,7 @@
         const INITIAL_LIB = { "Borst": ["BENCH PRESS", "PEC FLY"], "Rug": ["LAT PULLDOWN", "DEADLIFT"], "Benen": ["SQUAT", "LEG PRESS"], "Schouders": ["OHP"], "Triceps": ["CABLE PUSH DOWN"], "Armen": ["BICEP CURL"], "Buik / Core": ["PLANK"] };
         const REP_DEFAULTS = [12, 10, 8, 6];
         let exLibrary = INITIAL_LIB, sessions = [], userData = { name: "GEBRUIKER", weightLogs: [] };
-        let activeSessionId = null, chartInstance = null, weightChartInstance = null, radarChartInstance = null, drillDownChartInstance = null, currentTargetSessionId = null, pendingExName = "", swapExId = null, currentRadarDays = 7, friendData = null, activeMonths = new Set();
+        let activeSessionId = null, chartInstance = null, weightChartInstance = null, radarChartInstance = null, drillDownChartInstance = null, currentTargetSessionId = null, pendingExName = "", swapExId = null, currentRadarDays = 7, activeMonths = new Set();
 
         function init() { 
             sessions = JSON.parse(localStorage.getItem('gym_sessions')) || [];
@@ -166,37 +162,20 @@
 
         function saveAndRender() { localStorage.setItem('gym_sessions', JSON.stringify(sessions)); localStorage.setItem('gym_user', JSON.stringify(userData)); localStorage.setItem('gym_ex_library', JSON.stringify(exLibrary)); updateHeader(); renderSessions(); renderWeightLogs(); populateExerciseSelect(); renderExLibrary(); }
         
-        function compareFriend(event) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if(data.sessions) { friendData = data; document.getElementById('friendTag').classList.remove('hidden'); renderRadarChart(currentRadarDays); }
-                } catch(err) { alert("Bestand ongeldig"); }
-            };
-            reader.readAsText(event.target.files[0]);
-        }
-
         function renderRadarChart(days = 7) {
             currentRadarDays = days;
             const ctx = document.getElementById('radarChart'); if(!ctx) return;
             document.querySelectorAll('#radarFilters .filter-btn').forEach(b => { b.classList.remove('active'); if(b.getAttribute('onclick').includes(days)) b.classList.add('active'); });
             const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - days);
             const categories = Object.keys(exLibrary);
-            function getVolMap(targetSessions, targetLib) {
-                let exToCat = {}; Object.entries(targetLib).forEach(([cat, exs]) => exs.forEach(e => exToCat[e.toUpperCase()] = cat));
-                let dataMap = {}; categories.forEach(cat => dataMap[cat] = 0);
-                targetSessions.forEach(s => { if (new Date(s.rawDate) >= cutoff) { s.exercises.forEach(ex => { const cat = exToCat[ex.name.toUpperCase()]; if (cat && dataMap.hasOwnProperty(cat)) { ex.sets.forEach(set => { dataMap[cat] += (parseFloat(set.w) || 0) * (parseInt(set.r) || 0); }); } }); } });
-                return categories.map(c => dataMap[c]);
-            }
-            const myDataValues = getVolMap(sessions, exLibrary);
-            const datasets = [{ label: 'Jij', data: myDataValues, backgroundColor: 'rgba(99, 102, 241, 0.25)', borderColor: '#6366f1', pointBackgroundColor: '#6366f1', borderWidth: 3, pointRadius: 4 }];
-            if(friendData) {
-                const fDataValues = getVolMap(friendData.sessions, friendData.exLibrary || exLibrary);
-                datasets.push({ label: friendData.user?.name || 'Vriend', data: fDataValues, backgroundColor: 'rgba(239, 68, 68, 0.15)', borderColor: '#ef4444', pointBackgroundColor: '#ef4444', borderWidth: 2, pointRadius: 3, borderDash: [5, 5] });
-            }
+            
+            let exToCat = {}; Object.entries(exLibrary).forEach(([cat, exs]) => exs.forEach(e => exToCat[e.toUpperCase()] = cat));
+            let dataMap = {}; categories.forEach(cat => dataMap[cat] = 0);
+            sessions.forEach(s => { if (new Date(s.rawDate) >= cutoff) { s.exercises.forEach(ex => { const cat = exToCat[ex.name.toUpperCase()]; if (cat && dataMap.hasOwnProperty(cat)) { ex.sets.forEach(set => { dataMap[cat] += (parseFloat(set.w) || 0) * (parseInt(set.r) || 0); }); } }); } });
+            const myDataValues = categories.map(c => dataMap[c]);
+
             if(radarChartInstance) radarChartInstance.destroy();
-            radarChartInstance = new Chart(ctx, { type: 'radar', data: { labels: categories, datasets: datasets }, options: { maintainAspectRatio: false, onClick: (e, elements) => { if(elements.length > 0) showDrillDown(categories[elements[0].index]); }, scales: { r: { beginAtZero: true, angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: 'rgba(255,255,255,0.6)', font: { size: 10, weight: '900' } }, ticks: { display: false } } }, plugins: { legend: { display: !!friendData, labels: { color: '#fff', font: { size: 10, weight: 'bold' } } } } } });
+            radarChartInstance = new Chart(ctx, { type: 'radar', data: { labels: categories, datasets: [{ label: 'Jij', data: myDataValues, backgroundColor: 'rgba(99, 102, 241, 0.25)', borderColor: '#6366f1', pointBackgroundColor: '#6366f1', borderWidth: 3, pointRadius: 4 }] }, options: { maintainAspectRatio: false, onClick: (e, elements) => { if(elements.length > 0) showDrillDown(categories[elements[0].index]); }, scales: { r: { beginAtZero: true, angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: 'rgba(255,255,255,0.6)', font: { size: 10, weight: '900' } }, ticks: { display: false } } }, plugins: { legend: { display: false } } } });
         }
 
         function showDrillDown(category) { 
@@ -299,7 +278,20 @@
         function createNewSession() { const name = (document.getElementById('newWorkoutName').value || "Training").toUpperCase(); const raw = document.getElementById('newWorkoutDate').value; const d = new Date(raw); activeMonths.add(`${d.getFullYear()}-${d.getMonth()}`); sessions.push({ id: Date.now(), name, date: d.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'short' }), rawDate: raw, exercises: [] }); activeSessionId = sessions[sessions.length-1].id; saveAndRender(); }
         function saveProfileName() { userData.name = document.getElementById('profName').value.toUpperCase(); saveAndRender(); }
         function startCustomEx() { const n = prompt("Naam oefening:"); if(!n) return; pendingExName = n.toUpperCase(); openLinkModal(pendingExName); }
-        function shareWorkout(id) { const s = sessions.find(x => x.id === id); if(s) { const text = `GymLog - ${s.name}\n${s.exercises.map(ex => `\n${ex.name}:${ex.sets.map(st => `\n- ${st.w}kg x ${st.r}`).join('')}`).join('\n')}`; navigator.clipboard.writeText(text); alert("Gekopieerd!"); } }
+        
+        async function shareWorkout(id) {
+            const s = sessions.find(x => x.id === id);
+            if(!s) return;
+            const text = `GymLog - ${s.name} (${s.date})\n${s.exercises.map(ex => `\n${ex.name}:${ex.sets.map(st => `\n- ${st.w}kg x ${st.r}`).join('')}`).join('\n')}`;
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: 'Mijn Training', text: text });
+                } catch (err) { console.log("Delen geannuleerd"); }
+            } else {
+                navigator.clipboard.writeText(text);
+                alert("Niet ondersteund op dit apparaat. Gegevens gekopieerd naar klembord!");
+            }
+        }
 
         init();
     </script>
