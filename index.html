@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GymLog Pro - v2.4.4</title>
+    <title>GymLog Pro - v2.4.5</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -59,6 +59,9 @@
                 </div>
             </div>
             <button onclick="completeOnboarding()" class="btn-primary w-full py-5 italic text-lg mt-4">Sessie Starten</button>
+            <div class="text-center">
+                <button onclick="document.getElementById('importFile').click()" class="text-[8px] font-black opacity-40 uppercase tracking-widest mt-4 underline decoration-indigo-500/50">Ik heb al een backup</button>
+            </div>
         </div>
     </div>
 
@@ -66,7 +69,7 @@
         <div class="flex items-center">
             <div>
                 <h1 class="text-2xl font-black italic tracking-tighter inline-block">GYM<span class="text-indigo-500">LOG</span></h1>
-                <span class="text-[10px] font-black opacity-20 ml-1">v2.4.4</span>
+                <span class="text-[10px] font-black opacity-20 ml-1">v2.4.5</span>
             </div>
             <button onclick="location.reload(true)" class="reload-btn">↻</button>
         </div>
@@ -168,16 +171,27 @@
     <script>
         const INITIAL_LIB = { "Borst": ["BENCH PRESS", "PEC FLY"], "Rug": ["LAT PULLDOWN", "DEADLIFT"], "Benen": ["SQUAT", "LEG PRESS"], "Schouders": ["OHP"], "Triceps": ["CABLE PUSH DOWN"], "Armen": ["BICEP CURL"], "Buik / Core": ["PLANK"] };
         const REP_DEFAULTS = [12, 10, 8, 6];
-        let exLibrary = INITIAL_LIB, sessions = [], userData = { name: "GEBRUIKER", weightLogs: [], onboarded: false };
+        let exLibrary = INITIAL_LIB, sessions = [], userData = { name: "", weightLogs: [], onboarded: false };
         let activeSessionId = null, chartInstance = null, weightChartInstance = null, radarChartInstance = null, drillDownChartInstance = null, currentTargetSessionId = null, pendingExName = "", swapExId = null, currentRadarDays = 7, activeMonths = new Set();
 
         function init() { 
             sessions = JSON.parse(localStorage.getItem('gym_sessions')) || [];
-            userData = JSON.parse(localStorage.getItem('gym_user')) || { name: "", weightLogs: [], onboarded: false };
+            const savedUser = JSON.parse(localStorage.getItem('gym_user'));
             exLibrary = JSON.parse(localStorage.getItem('gym_ex_library')) || INITIAL_LIB;
             
+            if (savedUser) {
+                userData = savedUser;
+                // Als er al een naam is, beschouwen we onboarding als voltooid
+                if (userData.name && userData.name !== "GEBRUIKER") {
+                    userData.onboarded = true;
+                }
+            }
+
+            // Toon onboarding ALLEEN als naam ontbreekt EN onboarding niet gemarkeerd is
             if (!userData.onboarded) {
                 document.getElementById('onboardingOverlay').classList.remove('hidden');
+            } else {
+                document.getElementById('onboardingOverlay').classList.add('hidden');
             }
 
             document.getElementById('newWorkoutDate').valueAsDate = new Date();
@@ -304,14 +318,33 @@
 
         function toggleMonth(key) { if (activeMonths.has(key)) activeMonths.delete(key); else activeMonths.add(key); renderSessions(); }
         function showView(v) { document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden')); document.getElementById('view-'+v).classList.remove('hidden'); if(v==='charts') renderCharts(); if(v==='profile') renderWeightChart(30); }
-        function updateHeader() { const logs = userData.weightLogs || []; const lastW = (logs.length > 0) ? logs[0].w : "--"; document.getElementById('headerStats').innerText = `${userData.name || "GEBRUIKER"} • ${lastW} KG`; }
+        function updateHeader() { const logs = userData.weightLogs || []; const lastW = (logs.length > 0) ? logs[0].w : "--"; document.getElementById('headerStats').innerText = `${userData.name || "COACH"} • ${lastW} KG`; }
         function populateExerciseSelect() { const u = [...new Set(sessions.flatMap(s => s.exercises.map(e => e.name.toUpperCase())))].sort(); document.getElementById('chartExerciseSelect').innerHTML = u.map(n => `<option value="${n}">${n}</option>`).join(''); }
         function updateChart() { const ctx = document.getElementById('progressionChart'); if(!ctx) return; const name = document.getElementById('chartExerciseSelect').value; if(!name) return; const relevant = sessions.filter(s => s.exercises.some(e => e.name.toUpperCase() === name)).sort((a,b) => new Date(a.rawDate) - new Date(b.rawDate)); if(chartInstance) chartInstance.destroy(); chartInstance = new Chart(ctx, { type: 'line', data: { labels: relevant.map(s => s.rawDate), datasets: [{ data: relevant.map(s => Math.max(...s.exercises.find(e => e.name.toUpperCase() === name).sets.map(st => parseFloat(st.w) || 0))), borderColor: '#6366f1', tension: 0.3 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } } } }); }
         function cloneSession(id) { const old = sessions.find(s => s.id === id); const today = new Date(); const news = { id: Date.now(), name: old.name, date: today.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'short' }), rawDate: today.toISOString().split('T')[0], exercises: old.exercises.map(ex => ({ id: Date.now() + Math.random(), name: ex.name, sets: ex.sets.map(s => ({ w: s.w, r: s.r, bpm: '' })) })) }; sessions.push(news); activeSessionId = news.id; saveAndRender(); }
         function updSet(sId, eId, i, f, v) { const s = sessions.find(x => x.id === sId); if(s) { const e = s.exercises.find(ex => ex.id === eId); if(e) { e.sets[i][f] = v; localStorage.setItem('gym_sessions', JSON.stringify(sessions)); } } }
         function addSet(sId, exId) { const s = sessions.find(x => x.id === sId); const e = s.exercises.find(ex => ex.id === exId); const nextRep = REP_DEFAULTS[e.sets.length] || 6; e.sets.push({w:'', r:nextRep, bpm:''}); saveAndRender(); }
         function exportData() { const blob = new Blob([JSON.stringify({ sessions, exLibrary, user: userData })], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `gymlog_backup.json`; a.click(); }
-        function importData(e) { const reader = new FileReader(); reader.onload = (ev) => { try { const imp = JSON.parse(ev.target.result); if (imp.sessions) sessions = imp.sessions; if (imp.exLibrary) exLibrary = imp.exLibrary; if (imp.user) userData = imp.user; saveAndRender(); location.reload(); } catch (err) { alert("Fout."); } }; reader.readAsText(e.target.files[0]); }
+        
+        function importData(e) { 
+            const reader = new FileReader(); 
+            reader.onload = (ev) => { 
+                try { 
+                    const imp = JSON.parse(ev.target.result); 
+                    if (imp.sessions) sessions = imp.sessions; 
+                    if (imp.exLibrary) exLibrary = imp.exLibrary; 
+                    if (imp.user) {
+                        userData = imp.user;
+                        if (userData.name) userData.onboarded = true; // Fix: Markeer als onboarded bij import
+                    }
+                    saveAndRender(); 
+                    document.getElementById('onboardingOverlay').classList.add('hidden'); // Verberg overlay direct
+                    location.reload(); 
+                } catch (err) { alert("Import mislukt."); } 
+            }; 
+            reader.readAsText(e.target.files[0]); 
+        }
+
         function renderExLibrary() { const cont = document.getElementById('exLibraryList'); cont.innerHTML = ""; for (const [cat, items] of Object.entries(exLibrary)) { cont.innerHTML += `<span class="text-[9px] font-black text-indigo-400 uppercase mt-8 block mb-3 italic border-b border-indigo-500/20 pb-1">${cat}</span>`; let grid = `<div class="ex-grid">`; [...items].sort().forEach(ex => { grid += `<div onclick="selectEx('${ex}')" class="ex-item"><span>${ex}</span><button onclick="event.stopPropagation(); if(confirm('Wissen?')){ exLibrary['${cat}']=exLibrary['${cat}'].filter(x=>x!=='${ex}'); saveAndRender(); }" class="text-rose-500 text-[8px] self-end opacity-20">WIS</button></div>`; }); grid += `</div>`; cont.innerHTML += grid; } cont.innerHTML += `<button onclick="startCustomEx()" class="btn-primary w-full py-4 mt-8 italic">+ EIGEN OEFENING</button>`; }
         function renderCharts() { updateChart(); renderRadarChart(7); const volCont = document.getElementById('volumeTracker'); const recCont = document.getElementById('recordsTracker'); volCont.innerHTML = ""; recCont.innerHTML = ""; let volPerCat = {}; let exToCat = {}; let records = {}; for (const [cat, exs] of Object.entries(exLibrary)) { volPerCat[cat] = 0; exs.forEach(e => exToCat[e.toUpperCase()] = cat); } volPerCat["OVERIG"] = 0; const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); sessions.forEach(s => { const isRecent = new Date(s.rawDate) >= sevenDaysAgo; s.exercises.forEach(ex => { const n = ex.name.toUpperCase(); const cat = exToCat[n] || "OVERIG"; let maxW = 0; ex.sets.forEach(st => { const w = parseFloat(st.w) || 0; const r = parseInt(st.r) || 0; if (isRecent) volPerCat[cat] += (w * r); if (w > maxW) maxW = w; }); if (!records[n] || maxW > records[n]) records[n] = maxW; }); }); const maxVol = Math.max(...Object.values(volPerCat), 1); Object.entries(volPerCat).sort((a,b)=>b[1]-a[1]).forEach(([c, v]) => { if (v === 0 && c !== "OVERIG") return; const p = Math.round((v/maxVol)*100); volCont.innerHTML += `<div><div class="flex justify-between text-[8px] font-black uppercase"><span>${c}</span><span>${v.toLocaleString()} KG</span></div><div class="bg-slate-900 rounded-full h-2 mt-1 overflow-hidden"><div class="heatmap-bar-fill" style="width: ${p}%"></div></div></div>`; }); Object.entries(records).sort((a,b) => a[0].localeCompare(b[0])).forEach(([n, v]) => { if (v > 0) recCont.innerHTML += `<div class="record-tile"><span class="text-[8px] font-black uppercase opacity-40 mb-1 truncate">${n}</span><span class="text-[13px] font-black text-emerald-400">${v}<span class="text-[8px] ml-0.5">KG</span></span></div>`; }); }
         function selectEx(name) { const sess = sessions.find(s => s.id === currentTargetSessionId); if (swapExId) { const ex = sess.exercises.find(e => e.id === swapExId); if (ex) ex.name = name.trim().toUpperCase(); swapExId = null; } else { sess.exercises.push({ id: Date.now(), name: name.trim().toUpperCase(), sets: [{w:'', r:REP_DEFAULTS[0], bpm:''}, {w:'', r:REP_DEFAULTS[1], bpm:''}, {w:'', r:REP_DEFAULTS[2], bpm:''}, {w:'', r:REP_DEFAULTS[3], bpm:''}]}); } saveAndRender(); closeExModal(); }
