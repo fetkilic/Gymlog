@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GymLog Pro - v2.3</title>
+    <title>GymLog Pro - v2.3.1</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -42,7 +42,7 @@
         <div class="flex items-center">
             <div>
                 <h1 class="text-2xl font-black italic tracking-tighter inline-block">GYM<span class="text-indigo-500">LOG</span></h1>
-                <span class="text-[10px] font-black opacity-20 ml-1">v2.3</span>
+                <span class="text-[10px] font-black opacity-20 ml-1">v2.3.1</span>
             </div>
             <button onclick="location.reload(true)" class="reload-btn">↻</button>
         </div>
@@ -55,7 +55,6 @@
             <h3 id="drillDownTitle" class="text-center font-black italic mb-4 text-indigo-400 uppercase">DETAILS</h3>
             <div id="drillDownNav" class="overlay-nav"></div>
             <div class="h-64 w-full"><canvas id="drillDownChart"></canvas></div>
-            <p class="text-[8px] text-center opacity-40 mt-4 uppercase font-bold">Volume per oefening</p>
         </div>
     </div>
 
@@ -89,7 +88,7 @@
             <div class="flex justify-between items-center mb-4">
                 <div class="flex flex-col">
                     <h3 class="text-[10px] font-black text-indigo-400 uppercase italic">Spiergroep Balans</h3>
-                    <span id="friendTag" class="text-[8px] text-rose-500 font-bold hidden uppercase">VS VRIEND ACTIEF</span>
+                    <span id="friendTag" class="text-[8px] text-rose-500 font-bold hidden uppercase">⚔️ VS VRIEND ACTIEF</span>
                 </div>
                 <div class="flex gap-1" id="radarFilters">
                     <button onclick="renderRadarChart(7)" class="filter-btn active">WEEK</button>
@@ -128,18 +127,8 @@
                 </div>
             </div>
             <div class="h-40 w-full mb-8"><canvas id="weightChart"></canvas></div>
-            <div class="flex justify-between items-center mb-2 px-1">
-                <span class="text-[8px] font-black text-emerald-500/60 uppercase">Vetpercentage Trend</span>
-                <div class="flex gap-1">
-                    <button onclick="renderFatChart(7)" class="filter-btn fat-f active">WEEK</button>
-                    <button onclick="renderFatChart(30)" class="filter-btn fat-f">MAAND</button>
-                    <button onclick="renderFatChart(365)" class="filter-btn fat-f">JAAR</button>
-                </div>
-            </div>
-            <div class="h-40 w-full mb-8"><canvas id="fatChart"></canvas></div>
             <div class="flex gap-2 mb-6">
                 <input id="profWeightInput" type="number" step="0.1" class="input-field flex-1" placeholder="KG" onclick="this.select()">
-                <input id="profFatInput" type="number" step="0.1" class="input-field flex-1 !border-emerald-500/20" placeholder="VET %" onclick="this.select()">
                 <button onclick="logWeight()" class="btn-primary px-6 font-black italic">LOG</button>
             </div>
             <div class="grid grid-cols-2 gap-3 mb-8">
@@ -148,7 +137,6 @@
                 <input type="file" id="importFile" class="hidden" onchange="importData(event)" accept=".json">
             </div>
             <div id="weightLogList" class="space-y-2 mb-8"></div>
-            <button onclick="resetLibrary()" class="w-full py-3 border border-rose-500/30 text-rose-500 text-[9px] font-black uppercase rounded-xl hover:bg-rose-500/10">Reset Bibliotheek</button>
         </div>
     </section>
 
@@ -162,13 +150,12 @@
         const INITIAL_LIB = { "Borst": ["BENCH PRESS", "PEC FLY"], "Rug": ["LAT PULLDOWN", "DEADLIFT"], "Benen": ["SQUAT", "LEG PRESS"], "Schouders": ["OHP"], "Triceps": ["CABLE PUSH DOWN"], "Armen": ["BICEP CURL"], "Buik / Core": ["PLANK"] };
         const REP_DEFAULTS = [12, 10, 8, 6];
         let exLibrary = INITIAL_LIB, sessions = [], userData = { name: "GEBRUIKER", weightLogs: [] };
-        let activeSessionId = null, chartInstance = null, weightChartInstance = null, fatChartInstance = null, radarChartInstance = null, drillDownChartInstance = null, currentTargetSessionId = null, pendingExName = "", swapExId = null, currentRadarDays = 7, friendData = null;
+        let activeSessionId = null, chartInstance = null, weightChartInstance = null, radarChartInstance = null, drillDownChartInstance = null, currentTargetSessionId = null, pendingExName = "", swapExId = null, currentRadarDays = 7, friendData = null;
 
         function init() { 
             sessions = JSON.parse(localStorage.getItem('gym_sessions')) || [];
             userData = JSON.parse(localStorage.getItem('gym_user')) || { name: "GEBRUIKER", weightLogs: [] };
             exLibrary = JSON.parse(localStorage.getItem('gym_ex_library')) || INITIAL_LIB;
-            if(userData.weightLogs) userData.weightLogs.sort((a,b) => new Date(b.date) - new Date(a.date));
             document.getElementById('newWorkoutDate').valueAsDate = new Date();
             document.getElementById('profName').value = userData.name || "";
             saveAndRender(); 
@@ -195,40 +182,83 @@
             currentRadarDays = days;
             const ctx = document.getElementById('radarChart'); if(!ctx) return;
             document.querySelectorAll('#radarFilters .filter-btn').forEach(b => { b.classList.remove('active'); if(b.getAttribute('onclick').includes(days)) b.classList.add('active'); });
+            
             const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - days);
-            function getVolMap(targetSessions) {
-                let exToCat = {}; Object.entries(exLibrary).forEach(([cat, exs]) => exs.forEach(e => exToCat[e.toUpperCase()] = cat));
-                let dataMap = {}; Object.keys(exLibrary).forEach(cat => dataMap[cat] = 0);
-                targetSessions.forEach(s => { if (new Date(s.rawDate) >= cutoff) { s.exercises.forEach(ex => { const cat = exToCat[ex.name.toUpperCase()]; if (cat) { ex.sets.forEach(set => { dataMap[cat] += (parseFloat(set.w) || 0) * (parseInt(set.r) || 0); }); } }); } });
-                return dataMap;
+            const categories = Object.keys(exLibrary);
+
+            function getVolMap(targetSessions, targetLib) {
+                let exToCat = {}; 
+                Object.entries(targetLib).forEach(([cat, exs]) => exs.forEach(e => exToCat[e.toUpperCase()] = cat));
+                let dataMap = {}; 
+                categories.forEach(cat => dataMap[cat] = 0); // Altijd alignen met JOUW categorieën
+                
+                targetSessions.forEach(s => { 
+                    if (new Date(s.rawDate) >= cutoff) { 
+                        s.exercises.forEach(ex => { 
+                            const cat = exToCat[ex.name.toUpperCase()]; 
+                            if (cat && dataMap.hasOwnProperty(cat)) { 
+                                ex.sets.forEach(set => { dataMap[cat] += (parseFloat(set.w) || 0) * (parseInt(set.r) || 0); }); 
+                            } 
+                        }); 
+                    } 
+                });
+                return categories.map(c => dataMap[c]);
             }
-            const myData = getVolMap(sessions);
-            const datasets = [{ label: 'Jij', data: Object.values(myData), backgroundColor: 'rgba(99, 102, 241, 0.2)', borderColor: '#6366f1', pointBackgroundColor: '#6366f1', borderWidth: 2, pointRadius: 5, pointHoverRadius: 8, pointHitRadius: 20 }];
+
+            const myDataValues = getVolMap(sessions, exLibrary);
+            const datasets = [{ 
+                label: 'Jij', data: myDataValues, 
+                backgroundColor: 'rgba(99, 102, 241, 0.25)', borderColor: '#6366f1', pointBackgroundColor: '#6366f1', 
+                borderWidth: 3, pointRadius: 4, z: 10
+            }];
+
             if(friendData) {
-                const fData = getVolMap(friendData.sessions);
-                datasets.push({ label: friendData.user?.name || 'Vriend', data: Object.values(fData), backgroundColor: 'rgba(239, 68, 68, 0.2)', borderColor: '#ef4444', pointBackgroundColor: '#ef4444', borderWidth: 2, pointRadius: 5, pointHoverRadius: 8, pointHitRadius: 20 });
+                const fDataValues = getVolMap(friendData.sessions, friendData.exLibrary || exLibrary);
+                datasets.push({
+                    label: friendData.user?.name || 'Vriend', data: fDataValues,
+                    backgroundColor: 'rgba(239, 68, 68, 0.15)', borderColor: '#ef4444', pointBackgroundColor: '#ef4444',
+                    borderWidth: 2, pointRadius: 3, borderDash: [5, 5], z: 5
+                });
             }
+
             if(radarChartInstance) radarChartInstance.destroy();
-            radarChartInstance = new Chart(ctx, { type: 'radar', data: { labels: Object.keys(myData), datasets: datasets }, options: { maintainAspectRatio: false, onClick: (e, elements) => { if(elements.length > 0) showDrillDown(Object.keys(myData)[elements[0].index]); }, scales: { r: { angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: 'rgba(255,255,255,0.5)', font: { size: 10, weight: 'bold' } }, ticks: { display: false } } }, plugins: { legend: { display: !!friendData, labels: { color: '#fff', font: { size: 9, weight: 'bold' } } }, tooltip: { enabled: true } } } });
+            radarChartInstance = new Chart(ctx, { 
+                type: 'radar', 
+                data: { labels: categories, datasets: datasets }, 
+                options: { 
+                    maintainAspectRatio: false, 
+                    onClick: (e, elements) => { if(elements.length > 0) showDrillDown(categories[elements[0].index]); },
+                    scales: { 
+                        r: { 
+                            beginAtZero: true,
+                            angleLines: { color: 'rgba(255,255,255,0.1)' }, 
+                            grid: { color: 'rgba(255,255,255,0.1)' }, 
+                            pointLabels: { color: 'rgba(255,255,255,0.6)', font: { size: 10, weight: '900' } }, 
+                            ticks: { display: false } 
+                        } 
+                    }, 
+                    plugins: { legend: { display: !!friendData, labels: { color: '#fff', font: { size: 10, weight: 'bold' } } } } 
+                } 
+            });
         }
 
+        // --- Rest van de functies identiek aan v2.3 ---
         function showDrillDown(category) { const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - currentRadarDays); let drillData = {}; sessions.forEach(s => { if (new Date(s.rawDate) >= cutoff) { s.exercises.forEach(ex => { if ((exLibrary[category] || []).includes(ex.name.toUpperCase())) { if (!drillData[ex.name]) drillData[ex.name] = 0; ex.sets.forEach(set => { drillData[ex.name] += (parseFloat(set.w) || 0) * (parseInt(set.r) || 0); }); } }); } }); const nav = document.getElementById('drillDownNav'); nav.innerHTML = ""; Object.keys(exLibrary).forEach(cat => { const b = document.createElement('button'); b.className = `overlay-nav-btn ${cat === category ? 'active' : ''}`; b.innerText = cat; b.onclick = () => showDrillDown(cat); nav.appendChild(b); }); document.getElementById('drillDownTitle').innerText = category; document.getElementById('drillDownModal').classList.remove('hidden'); const ctx = document.getElementById('drillDownChart'); if(drillDownChartInstance) drillDownChartInstance.destroy(); drillDownChartInstance = new Chart(ctx, { type: 'bar', data: { labels: Object.keys(drillData), datasets: [{ data: Object.values(drillData), backgroundColor: '#6366f1' }] }, options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { display: false }, ticks: { color: '#fff', font: { size: 9, weight: 'bold' } } } } } }); }
         function renderWeightChart(days = 30) { const ctx = document.getElementById('weightChart'); if(!ctx) return; document.querySelectorAll('.weight-f').forEach(b => { b.classList.remove('active'); if(b.getAttribute('onclick').includes(days)) b.classList.add('active'); }); const filtered = (userData.weightLogs || []).filter(l => l.w).slice(0, days).reverse(); if(weightChartInstance) weightChartInstance.destroy(); weightChartInstance = new Chart(ctx, { type: 'line', data: { labels: filtered.map(l => new Date(l.date).toLocaleDateString('nl-NL', {day:'numeric', month:'short'})), datasets: [{ data: filtered.map(l => l.w), borderColor: '#6366f1', tension: 0.4, fill: true, backgroundColor: 'rgba(99,102,241,0.1)' }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: false } } } }); }
-        function renderFatChart(days = 30) { const ctx = document.getElementById('fatChart'); if(!ctx) return; document.querySelectorAll('.fat-f').forEach(b => { b.classList.remove('active'); if(b.getAttribute('onclick').includes(days)) b.classList.add('active'); }); const filtered = (userData.weightLogs || []).filter(l => l.fat).slice(0, days).reverse(); if(fatChartInstance) fatChartInstance.destroy(); fatChartInstance = new Chart(ctx, { type: 'line', data: { labels: filtered.map(l => new Date(l.date).toLocaleDateString('nl-NL', {day:'numeric', month:'short'})), datasets: [{ data: filtered.map(l => l.fat), borderColor: '#10b981', tension: 0.4, fill: true, backgroundColor: 'rgba(16,185,129,0.1)' }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: false } } } }); }
-        function logWeight() { const w = document.getElementById('profWeightInput').value; const fat = document.getElementById('profFatInput').value; if(w){ userData.weightLogs.unshift({ w: parseFloat(w), fat: fat ? parseFloat(fat) : null, date: new Date().toISOString() }); userData.weightLogs.sort((a,b) => new Date(b.date) - new Date(a.date)); saveAndRender(); document.getElementById('profWeightInput').value = ""; document.getElementById('profFatInput').value = ""; if(!document.getElementById('view-profile').classList.contains('hidden')) { renderWeightChart(30); renderFatChart(30); } } }
-        function renderWeightLogs() { const logs = [...(userData.weightLogs || [])].slice(0,12); document.getElementById('weightLogList').innerHTML = logs.map((l, i) => `<div class="flex justify-between items-center text-[10px] font-bold p-2 bg-white/5 rounded-lg mb-1"><div><span class="text-indigo-400">${l.w} KG</span>${l.fat ? `<span class="text-emerald-400 ml-2 text-[8px] underline decoration-emerald-500/30">${l.fat}% VET</span>` : ""}</div><div class="flex gap-2 items-center"><span class="opacity-40 italic">${new Date(l.date).toLocaleDateString('nl-NL')}</span><button onclick="userData.weightLogs.splice(${i},1); saveAndRender();" class="text-rose-500">✕</button></div></div>`).join(''); }
-        function showView(v) { document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden')); document.getElementById('view-'+v).classList.remove('hidden'); if(v==='charts') renderCharts(); if(v==='profile') { renderWeightChart(30); renderFatChart(30); } }
+        function logWeight() { const w = document.getElementById('profWeightInput').value; if(w){ if(!userData.weightLogs) userData.weightLogs = []; userData.weightLogs.unshift({ w: parseFloat(w), date: new Date().toISOString() }); saveAndRender(); document.getElementById('profWeightInput').value = ""; renderWeightChart(30); } }
+        function renderWeightLogs() { const logs = (userData.weightLogs || []).slice(0,5); document.getElementById('weightLogList').innerHTML = logs.map((l, i) => `<div class="flex justify-between items-center text-[10px] font-bold p-2 bg-white/5 rounded-lg mb-1"><span class="text-indigo-400">${l.w} KG</span><span class="opacity-40">${new Date(l.date).toLocaleDateString('nl-NL')}</span></div>`).join(''); }
+        function showView(v) { document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden')); document.getElementById('view-'+v).classList.remove('hidden'); if(v==='charts') renderCharts(); if(v==='profile') renderWeightChart(30); }
         function updateHeader() { const logs = userData.weightLogs || []; const lastW = (logs.length > 0) ? logs[0].w : "--"; document.getElementById('headerStats').innerText = `${userData.name || "COACH"} • ${lastW} KG`; }
         function populateExerciseSelect() { const u = [...new Set(sessions.flatMap(s => s.exercises.map(e => e.name.toUpperCase())))].sort(); document.getElementById('chartExerciseSelect').innerHTML = u.map(n => `<option value="${n}">${n}</option>`).join(''); }
         function updateChart() { const ctx = document.getElementById('progressionChart'); if(!ctx) return; const name = document.getElementById('chartExerciseSelect').value; if(!name) return; const relevant = sessions.filter(s => s.exercises.some(e => e.name.toUpperCase() === name)).sort((a,b) => new Date(a.rawDate) - new Date(b.rawDate)); if(chartInstance) chartInstance.destroy(); chartInstance = new Chart(ctx, { type: 'line', data: { labels: relevant.map(s => s.rawDate), datasets: [{ data: relevant.map(s => Math.max(...s.exercises.find(e => e.name.toUpperCase() === name).sets.map(st => parseFloat(st.w) || 0))), borderColor: '#6366f1', tension: 0.3 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } } } }); }
-        function renderSessions() { const cont = document.getElementById('sessionContainer'); cont.innerHTML = sessions.slice().reverse().map(session => `<div class="glass p-6 ${activeSessionId === session.id ? 'border-indigo-500/40' : ''}"><div onclick="activeSessionId = activeSessionId === ${session.id} ? null : ${session.id}; renderSessions();"><div class="flex justify-between items-start"><h3 class="text-xl font-black italic uppercase">${session.name}</h3><div class="flex gap-2" onclick="event.stopPropagation()"><button onclick="cloneSession(${session.id})" class="action-btn btn-copy">Kopie</button><button onclick="shareWorkout(${session.id})" class="action-btn btn-share">Deel</button><button onclick="if(confirm('Wissen?')){ sessions=sessions.filter(x=>x.id!==${session.id}); saveAndRender(); }" class="action-btn btn-delete">Wis</button></div></div><div class="text-[9px] font-black opacity-30 uppercase italic">${session.date}</div></div><div class="${activeSessionId === session.id ? 'mt-6' : 'hidden'}">${session.exercises.map((ex, exIdx) => `<div class="mb-6 bg-white/5 p-4 rounded-xl"><div class="flex justify-between mb-4"><button onclick="swapExId=${ex.id}; openExModal(${session.id})" class="ex-name-btn text-[10px] font-black text-indigo-300 uppercase">${ex.name} ↻</button><button onclick="const s=sessions.find(x=>x.id===${session.id}); s.exercises.splice(${exIdx},1); saveAndRender();" class="text-rose-500 text-[9px] font-black">WIS</button></div><div class="space-y-3">${ex.sets.map((s, i) => `<div class="grid grid-cols-5 gap-2 items-center"><span class="text-[9px] opacity-20 font-bold">S${i+1}</span><input type="text" onclick="this.select()" onchange="updSet(${session.id},${ex.id},${i},'w',this.value)" value="${s.w||''}" class="table-input" placeholder="kg"><input type="text" onclick="this.select()" onchange="updSet(${session.id},${ex.id},${i},'r',this.value)" value="${s.r||''}" class="table-input" placeholder="reps"><input type="text" onclick="this.select()" onchange="updSet(${session.id},${ex.id},${i},'bpm',this.value)" value="${s.bpm || s.b || ''}" class="table-input !text-rose-400" placeholder="bpm"><button onclick="const e=sessions.find(s=>s.id===${session.id}).exercises.find(x=>x.id===${ex.id}); e.sets.splice(${i},1); saveAndRender();" class="text-rose-500 font-bold text-xl">×</button></div>`).join('')}</div><button onclick="addSet(${session.id}, ${ex.id})" class="w-full mt-4 py-2 border border-dashed border-white/10 rounded-lg text-[8px] font-black opacity-30 uppercase">+ Set</button></div>`).join('')}<button onclick="swapExId=null; openExModal(${session.id})" class="btn-primary w-full py-3 text-[10px] italic">+ Oefening</button></div></div>`).join(''); }
+        function renderSessions() { const cont = document.getElementById('sessionContainer'); cont.innerHTML = sessions.slice().reverse().map(session => `<div class="glass p-6 ${activeSessionId === session.id ? 'border-indigo-500/40' : ''}"><div onclick="activeSessionId = activeSessionId === ${session.id} ? null : ${session.id}; renderSessions();"><div class="flex justify-between items-start"><h3 class="text-xl font-black italic uppercase">${session.name}</h3><div class="flex gap-2" onclick="event.stopPropagation()"><button onclick="cloneSession(${session.id})" class="action-btn btn-copy">Kopie</button><button onclick="shareWorkout(${session.id})" class="action-btn btn-share">Deel</button><button onclick="if(confirm('Wissen?')){ sessions=sessions.filter(x=>x.id!==${session.id}); saveAndRender(); }" class="action-btn btn-delete">Wis</button></div></div><div class="text-[9px] font-black opacity-30 uppercase italic">${session.date}</div></div><div class="${activeSessionId === session.id ? 'mt-6' : 'hidden'}">${session.exercises.map((ex, exIdx) => `<div class="mb-6 bg-white/5 p-4 rounded-xl"><div class="flex justify-between mb-4"><button onclick="swapExId=${ex.id}; openExModal(${session.id})" class="ex-name-btn text-[10px] font-black text-indigo-300 uppercase">${ex.name} ↻</button><button onclick="const s=sessions.find(x=>x.id===${session.id}); s.exercises.splice(${exIdx},1); saveAndRender();" class="text-rose-500 text-[9px] font-black">WIS</button></div><div class="space-y-3">${ex.sets.map((s, i) => `<div class="grid grid-cols-5 gap-2 items-center"><span class="text-[9px] opacity-20 font-bold">S${i+1}</span><input type="text" onclick="this.select()" onchange="updSet(${session.id},${ex.id},${i},'w',this.value)" value="${s.w||''}" class="table-input" placeholder="kg"><input type="text" onclick="this.select()" onchange="updSet(${session.id},${ex.id},${i},'r',this.value)" value="${s.r||''}" class="table-input" placeholder="reps"><input type="text" onclick="this.select()" onchange="updSet(${session.id},${ex.id},${i},'bpm',this.value)" value="${s.bpm || ''}" class="table-input !text-rose-400" placeholder="bpm"><button onclick="const e=sessions.find(s=>s.id===${session.id}).exercises.find(x=>x.id===${ex.id}); e.sets.splice(${i},1); saveAndRender();" class="text-rose-500 font-bold text-xl">×</button></div>`).join('')}</div><button onclick="addSet(${session.id}, ${ex.id})" class="w-full mt-4 py-2 border border-dashed border-white/10 rounded-lg text-[8px] font-black opacity-30 uppercase">+ Set</button></div>`).join('')}<button onclick="swapExId=null; openExModal(${session.id})" class="btn-primary w-full py-3 text-[10px] italic">+ Oefening</button></div></div>`).join(''); }
         function cloneSession(id) { const old = sessions.find(s => s.id === id); const today = new Date(); const news = { id: Date.now(), name: old.name, date: today.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'short' }), rawDate: today.toISOString().split('T')[0], exercises: old.exercises.map(ex => ({ id: Date.now() + Math.random(), name: ex.name, sets: ex.sets.map(s => ({ w: s.w, r: s.r, bpm: '' })) })) }; sessions.push(news); activeSessionId = news.id; saveAndRender(); }
         function updSet(sId, eId, i, f, v) { const s = sessions.find(x => x.id === sId); if(s) { const e = s.exercises.find(ex => ex.id === eId); if(e) { e.sets[i][f] = v; localStorage.setItem('gym_sessions', JSON.stringify(sessions)); } } }
         function addSet(sId, exId) { const s = sessions.find(x => x.id === sId); const e = s.exercises.find(ex => ex.id === exId); const nextRep = REP_DEFAULTS[e.sets.length] || 6; e.sets.push({w:'', r:nextRep, bpm:''}); saveAndRender(); }
         function exportData() { const blob = new Blob([JSON.stringify({ sessions, exLibrary, user: userData })], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `gymlog_backup.json`; a.click(); }
-        function importData(e) { const reader = new FileReader(); reader.onload = (ev) => { try { const imp = JSON.parse(ev.target.result); if (imp.sessions) sessions = imp.sessions; if (imp.exLibrary) exLibrary = imp.exLibrary; if (imp.user) { userData = imp.user; userData.weightLogs.sort((a,b) => new Date(b.date) - new Date(a.date)); } saveAndRender(); location.reload(); } catch (err) { alert("Fout."); } }; reader.readAsText(e.target.files[0]); }
+        function importData(e) { const reader = new FileReader(); reader.onload = (ev) => { try { const imp = JSON.parse(ev.target.result); if (imp.sessions) sessions = imp.sessions; if (imp.exLibrary) exLibrary = imp.exLibrary; if (imp.user) userData = imp.user; saveAndRender(); location.reload(); } catch (err) { alert("Fout."); } }; reader.readAsText(e.target.files[0]); }
         function renderExLibrary() { const cont = document.getElementById('exLibraryList'); cont.innerHTML = ""; for (const [cat, items] of Object.entries(exLibrary)) { cont.innerHTML += `<span class="text-[9px] font-black text-indigo-400 uppercase mt-8 block mb-3 italic border-b border-indigo-500/20 pb-1">${cat}</span>`; let grid = `<div class="ex-grid">`; [...items].sort().forEach(ex => { grid += `<div onclick="selectEx('${ex}')" class="ex-item"><span>${ex}</span><button onclick="event.stopPropagation(); if(confirm('Wissen?')){ exLibrary['${cat}']=exLibrary['${cat}'].filter(x=>x!=='${ex}'); saveAndRender(); }" class="text-rose-500 text-[8px] self-end opacity-20">WIS</button></div>`; }); grid += `</div>`; cont.innerHTML += grid; } cont.innerHTML += `<button onclick="startCustomEx()" class="btn-primary w-full py-4 mt-8 italic">+ EIGEN OEFENING</button>`; }
-        function renderCharts() { updateChart(); renderRadarChart(7); const volCont = document.getElementById('volumeTracker'); const recCont = document.getElementById('recordsTracker'); volCont.innerHTML = ""; recCont.innerHTML = ""; let volPerCat = {}; let exToCat = {}; let records = {}; for (const [cat, exs] of Object.entries(exLibrary)) { volPerCat[cat] = 0; exs.forEach(e => exToCat[e.toUpperCase()] = cat); } volPerCat["OVERIG"] = 0; let overigeOefeningen = new Set(); const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); sessions.forEach(s => { const isRecent = new Date(s.rawDate) >= sevenDaysAgo; s.exercises.forEach(ex => { const n = ex.name.toUpperCase(); const cat = exToCat[n] || "OVERIG"; if (cat === "OVERIG") overigeOefeningen.add(n); let maxW = 0; ex.sets.forEach(st => { const w = parseFloat(st.w) || 0; const r = parseInt(st.r) || 0; if (isRecent) volPerCat[cat] += (w * r); if (w > maxW) maxW = w; }); if (!records[n] || maxW > records[n]) records[n] = maxW; }); }); const maxVol = Math.max(...Object.values(volPerCat), 1); Object.entries(volPerCat).sort((a,b)=>b[1]-a[1]).forEach(([c, v]) => { if (v === 0 && c !== "OVERIG") return; const p = Math.round((v/maxVol)*100); let extraHtml = (c === "OVERIG" && overigeOefeningen.size > 0) ? `<div class="mt-2 flex flex-wrap gap-1">` + Array.from(overigeOefeningen).map(oef => `<span class="text-[7px] bg-white/10 p-1 rounded uppercase flex items-center">${oef} <button onclick="openLinkModal('${oef}')" class="btn-link">LINK</button></span>`).join('') + `</div>` : ""; volCont.innerHTML += `<div><div class="flex justify-between text-[8px] font-black uppercase"><span>${c}</span><span>${v.toLocaleString()} KG</span></div><div class="bg-slate-900 rounded-full h-2 mt-1 overflow-hidden"><div class="heatmap-bar-fill" style="width: ${p}%"></div></div>${extraHtml}</div>`; }); Object.entries(records).sort((a,b) => a[0].localeCompare(b[0])).forEach(([n, v]) => { if (v > 0) recCont.innerHTML += `<div class="record-tile"><span class="text-[8px] font-black uppercase opacity-40 mb-1 truncate">${n}</span><span class="text-[13px] font-black text-emerald-400">${v}<span class="text-[8px] ml-0.5">KG</span></span></div>`; }); }
+        function renderCharts() { updateChart(); renderRadarChart(7); const volCont = document.getElementById('volumeTracker'); const recCont = document.getElementById('recordsTracker'); volCont.innerHTML = ""; recCont.innerHTML = ""; let volPerCat = {}; let exToCat = {}; let records = {}; for (const [cat, exs] of Object.entries(exLibrary)) { volPerCat[cat] = 0; exs.forEach(e => exToCat[e.toUpperCase()] = cat); } volPerCat["OVERIG"] = 0; let overigeOefeningen = new Set(); const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); sessions.forEach(s => { const isRecent = new Date(s.rawDate) >= sevenDaysAgo; s.exercises.forEach(ex => { const n = ex.name.toUpperCase(); const cat = exToCat[n] || "OVERIG"; if (cat === "OVERIG") overigeOefeningen.add(n); let maxW = 0; ex.sets.forEach(st => { const w = parseFloat(st.w) || 0; const r = parseInt(st.r) || 0; if (isRecent) volPerCat[cat] += (w * r); if (w > maxW) maxW = w; }); if (!records[n] || maxW > records[n]) records[n] = maxW; }); }); const maxVol = Math.max(...Object.values(volPerCat), 1); Object.entries(volPerCat).sort((a,b)=>b[1]-a[1]).forEach(([c, v]) => { if (v === 0 && c !== "OVERIG") return; const p = Math.round((v/maxVol)*100); volCont.innerHTML += `<div><div class="flex justify-between text-[8px] font-black uppercase"><span>${c}</span><span>${v.toLocaleString()} KG</span></div><div class="bg-slate-900 rounded-full h-2 mt-1 overflow-hidden"><div class="heatmap-bar-fill" style="width: ${p}%"></div></div></div>`; }); Object.entries(records).sort((a,b) => a[0].localeCompare(b[0])).forEach(([n, v]) => { if (v > 0) recCont.innerHTML += `<div class="record-tile"><span class="text-[8px] font-black uppercase opacity-40 mb-1 truncate">${n}</span><span class="text-[13px] font-black text-emerald-400">${v}<span class="text-[8px] ml-0.5">KG</span></span></div>`; }); }
         function selectEx(name) { const sess = sessions.find(s => s.id === currentTargetSessionId); if (swapExId) { const ex = sess.exercises.find(e => e.id === swapExId); if (ex) ex.name = name.trim().toUpperCase(); swapExId = null; } else { sess.exercises.push({ id: Date.now(), name: name.trim().toUpperCase(), sets: [{w:'', r:REP_DEFAULTS[0], bpm:''}, {w:'', r:REP_DEFAULTS[1], bpm:''}, {w:'', r:REP_DEFAULTS[2], bpm:''}, {w:'', r:REP_DEFAULTS[3], bpm:''}]}); } saveAndRender(); closeExModal(); }
         function openLinkModal(exName) { pendingExName = exName.toUpperCase(); const btnCont = document.getElementById('catBtnContainer'); btnCont.innerHTML = ""; Object.keys(exLibrary).forEach(cat => { const b = document.createElement('button'); b.className = "glass p-4 text-[10px] font-black uppercase text-white hover:bg-indigo-500/20"; b.innerText = cat; b.onclick = () => finalizeCustomEx(cat); btnCont.appendChild(b); }); document.getElementById('catSelectorModal').classList.remove('hidden'); }
         function finalizeCustomEx(category) { if(!exLibrary[category]) exLibrary[category] = []; if (!exLibrary[category].includes(pendingExName)) exLibrary[category].push(pendingExName); document.getElementById('catSelectorModal').classList.add('hidden'); saveAndRender(); if(!document.getElementById('view-charts').classList.contains('hidden')) renderCharts(); }
@@ -236,9 +266,8 @@
         function closeExModal() { document.getElementById('exModal').classList.add('hidden'); }
         function createNewSession() { const name = (document.getElementById('newWorkoutName').value || "Training").toUpperCase(); const raw = document.getElementById('newWorkoutDate').value; sessions.push({ id: Date.now(), name, date: new Date(raw).toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'short' }), rawDate: raw, exercises: [] }); activeSessionId = sessions[sessions.length-1].id; saveAndRender(); }
         function saveProfileName() { userData.name = document.getElementById('profName').value.toUpperCase(); saveAndRender(); }
-        function resetLibrary() { if(confirm("Herstel bieb?")) { exLibrary = JSON.parse(JSON.stringify(INITIAL_LIB)); saveAndRender(); } }
         function startCustomEx() { const n = prompt("Naam oefening:"); if(!n) return; pendingExName = n.toUpperCase(); openLinkModal(pendingExName); }
-        function shareWorkout(id) { const s = sessions.find(x => x.id === id); if(s) { const text = `GymLog - ${s.name}\n${s.exercises.map(ex => `\n${ex.name}:${ex.sets.map(st => `\n- ${st.w}kg x ${st.r}`).join('')}`).join('\n')}`; navigator.clipboard.writeText(text); alert("Gekopieerd naar klembord!"); } }
+        function shareWorkout(id) { const s = sessions.find(x => x.id === id); if(s) { const text = `GymLog - ${s.name}\n${s.exercises.map(ex => `\n${ex.name}:${ex.sets.map(st => `\n- ${st.w}kg x ${st.r}`).join('')}`).join('\n')}`; navigator.clipboard.writeText(text); alert("Gekopieerd!"); } }
 
         init();
     </script>
