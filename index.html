@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GymLog Pro - v2.3.1</title>
+    <title>GymLog Pro - v2.3.2</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -41,7 +41,7 @@
         <div class="flex items-center">
             <div>
                 <h1 class="text-2xl font-black italic tracking-tighter inline-block">GYM<span class="text-indigo-500">LOG</span></h1>
-                <span class="text-[10px] font-black opacity-20 ml-1">v2.3.1</span>
+                <span class="text-[10px] font-black opacity-20 ml-1">v2.3.2</span>
             </div>
             <button onclick="location.reload(true)" class="reload-btn">↻</button>
         </div>
@@ -118,7 +118,7 @@
         <div class="glass p-6 mb-6">
             <input id="profName" class="input-field mb-6 text-xl" placeholder="JE NAAM" onchange="saveProfileName()">
             <div class="flex justify-between items-center mb-2 px-1">
-                <span class="text-[8px] font-black opacity-40 uppercase">Gewicht Trend</span>
+                <span class="text-[8px] font-black opacity-40 uppercase">Trends (KG & VET %)</span>
                 <div class="flex gap-1">
                     <button onclick="renderWeightChart(7)" class="filter-btn weight-f active">WEEK</button>
                     <button onclick="renderWeightChart(30)" class="filter-btn weight-f">MAAND</button>
@@ -136,7 +136,7 @@
                 <button onclick="document.getElementById('importFile').click()" class="glass p-3 text-[9px] font-black uppercase">📂 Herstel</button>
                 <input type="file" id="importFile" class="hidden" onchange="importData(event)" accept=".json">
             </div>
-            <p class="text-[7px] opacity-30 font-bold uppercase mb-2 text-center">Klik op log om vet % toe te voegen</p>
+            <p class="text-[7px] opacity-30 font-bold uppercase mb-2 text-center">Klik op een log om vet % bij te werken</p>
             <div id="weightLogList" class="space-y-2 mb-8"></div>
         </div>
     </section>
@@ -202,7 +202,35 @@
         }
 
         function showDrillDown(category) { const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - currentRadarDays); let drillData = {}; sessions.forEach(s => { if (new Date(s.rawDate) >= cutoff) { s.exercises.forEach(ex => { if ((exLibrary[category] || []).includes(ex.name.toUpperCase())) { if (!drillData[ex.name]) drillData[ex.name] = 0; ex.sets.forEach(set => { drillData[ex.name] += (parseFloat(set.w) || 0) * (parseInt(set.r) || 0); }); } }); } }); const nav = document.getElementById('drillDownNav'); nav.innerHTML = ""; Object.keys(exLibrary).forEach(cat => { const b = document.createElement('button'); b.className = `overlay-nav-btn ${cat === category ? 'active' : ''}`; b.innerText = cat; b.onclick = () => showDrillDown(cat); nav.appendChild(b); }); document.getElementById('drillDownTitle').innerText = category; document.getElementById('drillDownModal').classList.remove('hidden'); const ctx = document.getElementById('drillDownChart'); if(drillDownChartInstance) drillDownChartInstance.destroy(); drillDownChartInstance = new Chart(ctx, { type: 'bar', data: { labels: Object.keys(drillData), datasets: [{ data: Object.values(drillData), backgroundColor: '#6366f1' }] }, options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { display: false }, ticks: { color: '#fff', font: { size: 9, weight: 'bold' } } } } } }); }
-        function renderWeightChart(days = 30) { const ctx = document.getElementById('weightChart'); if(!ctx) return; document.querySelectorAll('.weight-f').forEach(b => { b.classList.remove('active'); if(b.getAttribute('onclick').includes(days)) b.classList.add('active'); }); const filtered = (userData.weightLogs || []).filter(l => l.w).slice(0, days).reverse(); if(weightChartInstance) weightChartInstance.destroy(); weightChartInstance = new Chart(ctx, { type: 'line', data: { labels: filtered.map(l => new Date(l.date).toLocaleDateString('nl-NL', {day:'numeric', month:'short'})), datasets: [{ data: filtered.map(l => l.w), borderColor: '#6366f1', tension: 0.4, fill: true, backgroundColor: 'rgba(99,102,241,0.1)' }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: false } } } }); }
+        
+        function renderWeightChart(days = 30) {
+            const ctx = document.getElementById('weightChart');
+            if(!ctx) return;
+            document.querySelectorAll('.weight-f').forEach(b => { b.classList.remove('active'); if(b.getAttribute('onclick').includes(days)) b.classList.add('active'); });
+            const logs = (userData.weightLogs || []).filter(l => l.w).slice(0, days).reverse();
+            const labels = logs.map(l => new Date(l.date).toLocaleDateString('nl-NL', {day:'numeric', month:'short'}));
+            
+            if(weightChartInstance) weightChartInstance.destroy();
+            weightChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'KG', data: logs.map(l => l.w), borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', tension: 0.4, fill: true, yAxisID: 'y' },
+                        { label: 'VET %', data: logs.map(l => l.fat), borderColor: '#10b981', tension: 0.4, borderDash: [5,5], yAxisID: 'y1' }
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { type: 'linear', display: true, position: 'left', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#6366f1', font: { size: 9 } } },
+                        y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#10b981', font: { size: 9 } } }
+                    }
+                }
+            });
+        }
+
         function logWeight() { const w = document.getElementById('profWeightInput').value; const fat = document.getElementById('profFatInput').value; if(w){ if(!userData.weightLogs) userData.weightLogs = []; userData.weightLogs.unshift({ w: parseFloat(w), fat: fat ? parseFloat(fat) : null, date: new Date().toISOString() }); saveAndRender(); document.getElementById('profWeightInput').value = ""; document.getElementById('profFatInput').value = ""; renderWeightChart(30); } }
         
         function updateFat(index) {
@@ -211,6 +239,7 @@
             if (newVal !== null) {
                 userData.weightLogs[index].fat = newVal === "" ? null : parseFloat(newVal);
                 saveAndRender();
+                renderWeightChart(30);
             }
         }
 
@@ -219,12 +248,12 @@
             document.getElementById('weightLogList').innerHTML = logs.map((l, i) => `
                 <div onclick="updateFat(${i})" class="flex justify-between items-center text-[10px] font-bold p-3 bg-white/5 rounded-xl mb-1 border border-white/5 hover:border-indigo-500/30">
                     <div>
-                        <span class="text-indigo-400">${l.w} KG</span>
-                        ${l.fat ? `<span class="text-emerald-400 ml-2 font-black italic">${l.fat}%</span>` : `<span class="text-white/20 ml-2 italic">+VET</span>`}
+                        <span class="text-indigo-400 font-black">${l.w} KG</span>
+                        ${l.fat ? `<span class="text-emerald-400 ml-2 italic">${l.fat}% VET</span>` : `<span class="text-white/20 ml-2 italic">+VET %</span>`}
                     </div>
-                    <div class="flex gap-3">
-                        <span class="opacity-40 font-black uppercase">${new Date(l.date).toLocaleDateString('nl-NL', {day:'2-digit', month:'2-digit'})}</span>
-                        <button onclick="event.stopPropagation(); if(confirm('Wissen?')){ userData.weightLogs.splice(${i},1); saveAndRender(); }" class="text-rose-500">✕</button>
+                    <div class="flex gap-3 items-center">
+                        <span class="opacity-40 font-black uppercase text-[8px]">${new Date(l.date).toLocaleDateString('nl-NL', {day:'2-digit', month:'2-digit'})}</span>
+                        <button onclick="event.stopPropagation(); if(confirm('Wissen?')){ userData.weightLogs.splice(${i},1); saveAndRender(); }" class="text-rose-500 font-bold px-2">✕</button>
                     </div>
                 </div>`).join(''); 
         }
