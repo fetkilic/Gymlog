@@ -2,15 +2,29 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GymLog Pro - v2.5.3</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>GymLog Pro - v2.5.4</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root { --accent: #6366f1; --bg: #020617; }
-        body { background-color: var(--bg); color: #ffffff; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background-color: var(--bg); 
+            color: #ffffff; 
+            font-family: 'Inter', sans-serif; 
+            -webkit-tap-highlight-color: transparent; 
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Universele fix voor alle views: ruimte voor de navbar */
+        .view-section { 
+            padding-bottom: 140px !important; 
+        }
+
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.25rem; transition: all 0.2s ease; }
         button, .ex-item, .ex-name-btn, nav button, .glass { transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.1s; cursor: pointer; }
         button:active, .ex-item:active, .ex-name-btn:active, nav button:active { transform: scale(0.96); opacity: 0.8; }
@@ -24,8 +38,42 @@
         .btn-copy { color: #22c55e; border-color: #22c55e; background: rgba(34, 197, 94, 0.1); }
         .btn-share { color: #818cf8; border-color: #818cf8; background: rgba(129, 140, 248, 0.1); }
         .btn-delete { color: #ef4444; border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
-        .ex-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-        .ex-item { background: rgba(51, 65, 85, 0.4); padding: 12px; border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; justify-content: space-between; min-height: 60px; font-size: 11px; font-weight: 800; }
+        
+        #exCategoryScroll { 
+            background: #0f172a; 
+            border-bottom: 1px solid rgba(99, 102, 241, 0.3); 
+            position: sticky; 
+            top: 0; 
+            z-index: 50;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .cat-tab { 
+            padding: 12px 20px; 
+            border-radius: 14px; 
+            white-space: nowrap; 
+            font-size: 11px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            border: 1px solid rgba(255,255,255,0.15); 
+            color: rgba(255,255,255,0.6); 
+            background: #1e293b; 
+        }
+        .cat-tab.active { 
+            background: var(--accent); 
+            color: white; 
+            border-color: #818cf8; 
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4); 
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .ex-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .ex-item { background: #1e293b; padding: 16px; border-radius: 1rem; border: 1px solid rgba(255, 255, 255, 0.08); display: flex; flex-direction: column; justify-content: space-between; min-height: 70px; font-size: 12px; font-weight: 800; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        
         .record-tile { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 0.75rem; padding: 10px; display: flex; flex-direction: column; justify-content: center; }
         .filter-btn { font-size: 8px; font-weight: 900; padding: 4px 8px; border-radius: 4px; background: rgba(255,255,255,0.05); transition: all 0.2s; }
         .filter-btn.active { background: var(--accent); box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4); }
@@ -35,16 +83,26 @@
         .ex-name-btn { text-align: left; padding: 4px 8px; background: rgba(99, 102, 241, 0.1); border-radius: 6px; border: 1px solid rgba(99, 102, 241, 0.2); }
         .month-header { font-size: 11px; font-weight: 900; color: #6366f1; letter-spacing: 1px; margin: 24px 0 12px 4px; display: flex; align-items: center; gap: 8px; opacity: 0.8; }
         .month-header::after { content: ''; height: 1px; background: linear-gradient(90deg, rgba(99,102,241,0.3), transparent); flex: 1; }
-        .overlay-nav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); scrollbar-width: none; }
-        .overlay-nav-btn { font-size: 7px; font-weight: 900; white-space: nowrap; padding: 6px 10px; border-radius: 6px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); text-transform: uppercase; }
-        .overlay-nav-btn.active { background: var(--accent); color: white; }
-        nav { position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; z-index: 9999 !important; transform: translateZ(0); }
 
-        /* FIX VOOR MODAL SCROLL EN NAV OVERLAP */
-        #exModal { padding-bottom: 140px; }
+        /* FIXED NAVBAR */
+        nav { 
+            position: fixed !important; 
+            bottom: 0 !important; 
+            left: 0 !important; 
+            right: 0 !important; 
+            width: 100% !important; 
+            height: 85px !important;
+            z-index: 9999 !important; 
+            background: rgba(15, 23, 42, 0.95) !important;
+            backdrop-filter: blur(15px);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
 
-        /* BMW-Style Infographic */
-        .bmw-wrap { background: linear-gradient(180deg, #0f172a 0%, #020617 100%); position: fixed; inset: 0; z-index: 10000; display: flex; flex-direction: column; padding: 30px; overflow-y: auto; padding-bottom: 140px; }
+        .bmw-wrap { background: #020617; position: fixed; inset: 0; z-index: 10000; display: flex; flex-direction: column; padding: 30px; overflow-y: auto; padding-bottom: 140px; }
         .bmw-capture-area { background: linear-gradient(180deg, #0f172a 0%, #020617 100%); padding: 20px; border-radius: 10px; }
         .bmw-tag { color: #6366f1; font-weight: 900; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
         .bmw-title { font-size: 28px; font-weight: 900; italic; line-height: 1.1; text-transform: uppercase; margin-bottom: 30px; }
@@ -54,20 +112,36 @@
         .bmw-hero-text { font-size: 34px; font-weight: 900; font-style: italic; color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.2); text-transform: uppercase; margin-top: 20px; }
         .bmw-neon-glow { color: #fff; text-shadow: 0 0 10px rgba(99,102,241,0.8); }
         .bmw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border-top: 1px solid rgba(255,255,255,0.1); padding: 18px 0; }
+        
+        .overlay-nav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); scrollbar-width: none; }
+        .overlay-nav-btn { font-size: 7px; font-weight: 900; white-space: nowrap; padding: 6px 10px; border-radius: 6px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); text-transform: uppercase; }
+        .overlay-nav-btn.active { background: var(--accent); color: white; }
     </style>
 </head>
-<body class="p-4 max-w-md mx-auto pb-32">
+<body class="p-4 max-w-md mx-auto">
 
     <header class="flex justify-between items-center mb-8 pt-4">
         <div class="flex items-center">
             <div>
                 <h1 class="text-2xl font-black italic tracking-tighter inline-block">GYM<span class="text-indigo-500">LOG</span></h1>
-                <span class="text-[10px] font-black opacity-20 ml-1">v2.5.3</span>
+                <span class="text-[10px] font-black opacity-20 ml-1">v2.5.4</span>
             </div>
             <button onclick="location.reload(true)" class="reload-btn">↻</button>
         </div>
         <div id="headerStats" class="glass px-4 py-2 text-[10px] font-bold border-indigo-500/30 text-indigo-100 uppercase italic">LADEN...</div>
     </header>
+
+    <div id="exModal" class="hidden fixed inset-0 z-[100] bg-slate-950 flex flex-col">
+        <div class="p-6 flex justify-between items-center bg-slate-950 border-b border-white/10">
+            <h2 class="text-xl font-black italic text-white uppercase tracking-tighter">Kies <span class="text-indigo-500">Oefening</span></h2>
+            <button onclick="closeExModal()" class="glass w-10 h-10 flex items-center justify-center text-rose-500 font-bold">✕</button>
+        </div>
+        <div id="exCategoryScroll" class="no-scrollbar"></div>
+        <div class="flex-1 overflow-y-auto p-6 pb-40 bg-slate-950">
+            <div id="exLibraryList" class="ex-grid"></div>
+            <button onclick="startCustomEx()" class="btn-primary w-full py-4 mt-8 italic text-xs tracking-widest">+ EIGEN OEFENING</button>
+        </div>
+    </div>
 
     <div id="bmwOverlay" class="bmw-wrap hidden">
         <div class="flex justify-end mb-4">
@@ -102,14 +176,6 @@
         </div>
     </div>
 
-    <div id="exModal" class="hidden fixed inset-0 z-[100] bg-slate-950/95 p-6 overflow-y-auto">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-2xl font-black italic text-white text-center w-full uppercase">Kies Oefening</h2>
-            <button onclick="closeExModal()" class="glass w-10 h-10 flex items-center justify-center text-rose-500 font-bold fixed right-6 top-6">✕</button>
-        </div>
-        <div id="exLibraryList"></div>
-    </div>
-
     <div id="catSelectorModal" class="hidden fixed inset-0 z-[110] bg-black/90 flex items-center justify-center p-6">
         <div class="glass p-6 w-full max-w-xs">
             <h3 class="text-center font-black italic mb-6 text-indigo-400 uppercase">Link naar Spiergroep</h3>
@@ -130,8 +196,8 @@
     <section id="view-charts" class="view-section hidden">
         <button onclick="generateBMWRecap()" class="w-full glass p-4 mb-6 border-indigo-500/50 flex items-center justify-between">
             <div class="text-left">
-                <div class="text-[10px] font-black text-indigo-400 uppercase">Monthly Wrap-up</div>
-                <div class="text-sm font-black italic">TERUGBLIK FEBRUARI</div>
+                <div class="text-[10px] font-black text-indigo-400 uppercase italic">Recap</div>
+                <div class="text-sm font-black italic">MAANDOVERZICHT</div>
             </div>
             <span class="text-2xl">⚡</span>
         </button>
@@ -151,7 +217,7 @@
             <div class="h-48 w-full"><canvas id="progressionChart"></canvas></div>
         </div>
         <div class="glass p-6 mb-6">
-            <h3 class="text-[10px] font-black text-indigo-400 mb-4 uppercase italic">Pomp Meter (7d Volume)</h3>
+            <h3 class="text-[10px] font-black text-indigo-400 mb-4 uppercase italic">Pomp Meter</h3>
             <div id="volumeTracker" class="space-y-4 mb-10"></div>
             <h3 class="text-[10px] font-black text-emerald-400 mb-4 uppercase italic">Personal Records</h3>
             <div id="recordsTracker" class="ex-grid pr-1"></div>
@@ -184,17 +250,17 @@
         </div>
     </section>
 
-    <nav class="glass rounded-none border-t border-white/5 flex justify-around p-4 pb-8">
-        <button onclick="showView('training')" class="text-center"><span class="block text-xl">🏋️</span><span class="text-[8px] font-black">TRAIN</span></button>
-        <button onclick="showView('charts')" class="text-center"><span class="block text-xl">📈</span><span class="text-[8px] font-black">STATS</span></button>
-        <button onclick="showView('profile')" class="text-center"><span class="block text-xl">👤</span><span class="text-[8px] font-black">PROFIEL</span></button>
+    <nav>
+        <button onclick="showView('training')" class="text-center"><span class="block text-2xl">🏋️</span><span class="text-[10px] font-black">TRAIN</span></button>
+        <button onclick="showView('charts')" class="text-center"><span class="block text-2xl">📈</span><span class="text-[10px] font-black">STATS</span></button>
+        <button onclick="showView('profile')" class="text-center"><span class="block text-2xl">👤</span><span class="text-[10px] font-black">PROFIEL</span></button>
     </nav>
 
     <script>
         const INITIAL_LIB = { "Borst": ["BENCH PRESS", "PEC FLY"], "Rug": ["LAT PULLDOWN", "DEADLIFT"], "Benen": ["SQUAT", "LEG PRESS"], "Schouders": ["OHP"], "Triceps": ["CABLE PUSH DOWN"], "Armen": ["BICEP CURL"], "Buik / Core": ["PLANK"] };
         const REP_DEFAULTS = [12, 10, 8, 6];
         let exLibrary = INITIAL_LIB, sessions = [], userData = { name: "GEBRUIKER", weightLogs: [] };
-        let activeSessionId = null, chartInstance = null, weightChartInstance = null, radarChartInstance = null, drillDownChartInstance = null, currentTargetSessionId = null, pendingExName = "", swapExId = null, currentRadarDays = 7, activeMonths = new Set();
+        let activeSessionId = null, chartInstance = null, weightChartInstance = null, radarChartInstance = null, drillDownChartInstance = null, currentTargetSessionId = null, pendingExName = "", swapExId = null, currentRadarDays = 7, activeMonths = new Set(), currentSelectedCat = "Borst";
 
         function init() { 
             sessions = JSON.parse(localStorage.getItem('gym_sessions')) || [];
@@ -203,14 +269,113 @@
             document.getElementById('newWorkoutDate').valueAsDate = new Date();
             document.getElementById('profName').value = userData.name || "";
             if (sessions.length > 0) {
-                const latest = new Date(sessions[sessions.length-1].rawDate);
+                const latest = new Date(sessions[0].rawDate);
                 activeMonths.add(`${latest.getFullYear()}-${latest.getMonth()}`);
             }
             saveAndRender(); 
         }
 
-        function saveAndRender() { localStorage.setItem('gym_sessions', JSON.stringify(sessions)); localStorage.setItem('gym_user', JSON.stringify(userData)); localStorage.setItem('gym_ex_library', JSON.stringify(exLibrary)); updateHeader(); renderSessions(); renderWeightLogs(); populateExerciseSelect(); renderExLibrary(); }
+        function saveAndRender() { 
+            localStorage.setItem('gym_sessions', JSON.stringify(sessions)); 
+            localStorage.setItem('gym_user', JSON.stringify(userData)); 
+            localStorage.setItem('gym_ex_library', JSON.stringify(exLibrary)); 
+            updateHeader(); renderSessions(); renderWeightLogs(); populateExerciseSelect(); 
+        }
         
+        function openExModal(sId) { 
+            currentTargetSessionId = sId; 
+            document.getElementById('exModal').classList.remove('hidden'); 
+            renderExTabs();
+            filterExLibrary(currentSelectedCat);
+        }
+
+        function closeExModal() { document.getElementById('exModal').classList.add('hidden'); }
+
+        function renderExTabs() {
+            const cont = document.getElementById('exCategoryScroll');
+            cont.innerHTML = Object.keys(exLibrary).map(cat => `
+                <button onclick="filterExLibrary('${cat}')" class="cat-tab ${cat === currentSelectedCat ? 'active' : ''}" id="tab-${cat}">
+                    ${cat}
+                </button>
+            `).join('');
+        }
+
+        function filterExLibrary(cat) {
+            currentSelectedCat = cat;
+            document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+            const activeTab = document.getElementById(`tab-${cat}`);
+            if(activeTab) {
+                activeTab.classList.add('active');
+                activeTab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            }
+            const cont = document.getElementById('exLibraryList');
+            const items = exLibrary[cat] || [];
+            cont.innerHTML = items.sort().map(ex => `
+                <div onclick="selectEx('${ex}')" class="ex-item">
+                    <span>${ex}</span>
+                    <button onclick="event.stopPropagation(); if(confirm('Wissen?')){ exLibrary['${cat}']=exLibrary['${cat}'].filter(x=>x!=='${ex}'); saveAndRender(); filterExLibrary('${cat}'); }" class="text-rose-500 text-[8px] self-end opacity-40">WIS</button>
+                </div>
+            `).join('');
+        }
+
+        function selectEx(name) { 
+            const sess = sessions.find(s => s.id === currentTargetSessionId); 
+            if (swapExId) { 
+                sess.exercises.find(e => e.id === swapExId).name = name.toUpperCase(); 
+                swapExId = null; 
+            } else { 
+                sess.exercises.push({ id: Date.now(), name: name.toUpperCase(), sets: [{w:'', r:12, bpm:''}, {w:'', r:10, bpm:''}, {w:'', r:8, bpm:''}, {w:'', r:6, bpm:''}]}); 
+            } 
+            saveAndRender(); closeExModal(); 
+        }
+
+        function createNewSession() { 
+            const name = (document.getElementById('newWorkoutName').value || "Training").toUpperCase(); 
+            const raw = document.getElementById('newWorkoutDate').value; 
+            const d = new Date(raw); 
+            activeMonths.add(`${d.getFullYear()}-${d.getMonth()}`); 
+            const newSess = { id: Date.now(), name, date: d.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'short' }), rawDate: raw, exercises: [] };
+            sessions.unshift(newSess); 
+            activeSessionId = newSess.id; 
+            saveAndRender(); 
+        }
+
+        function renderSessions() {
+            const cont = document.getElementById('sessionContainer'); cont.innerHTML = "";
+            const sorted = [...sessions].sort((a,b) => {
+                const dateA = new Date(a.rawDate);
+                const dateB = new Date(b.rawDate);
+                if (dateB - dateA !== 0) return dateB - dateA;
+                return b.id - a.id; 
+            });
+            const groups = {};
+            sorted.forEach(s => {
+                const d = new Date(s.rawDate); const key = `${d.getFullYear()}-${d.getMonth()}`;
+                if (!groups[key]) groups[key] = { label: d.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' }).toUpperCase(), sessions: [] };
+                groups[key].sessions.push(s);
+            });
+            Object.keys(groups).forEach(key => {
+                const isOpen = activeMonths.has(key);
+                cont.innerHTML += `<div class="month-header" onclick="if(activeMonths.has('${key}')) activeMonths.delete('${key}'); else activeMonths.add('${key}'); renderSessions();">${groups[key].label} ${isOpen ? '▾' : '▸'}</div>`;
+                if (isOpen) groups[key].sessions.forEach(session => {
+                    cont.innerHTML += `<div class="glass p-6 mb-4 ${activeSessionId === session.id ? 'border-indigo-500/40' : ''}">
+                        <div onclick="activeSessionId = activeSessionId === ${session.id} ? null : ${session.id}; renderSessions();">
+                            <div class="flex justify-between items-start"><h3 class="text-xl font-black italic uppercase">${session.name}</h3><div class="flex gap-2" onclick="event.stopPropagation()"><button onclick="cloneSession(${session.id})" class="action-btn btn-copy">Kopie</button><button onclick="shareWorkout(${session.id})" class="action-btn btn-share">Deel</button><button onclick="if(confirm('Wissen?')){ sessions=sessions.filter(x=>x.id!==${session.id}); saveAndRender(); }" class="action-btn btn-delete">Wis</button></div></div>
+                            <div class="text-[9px] font-black opacity-30 uppercase italic">${session.date}</div>
+                        </div>
+                        <div class="${activeSessionId === session.id ? 'mt-6' : 'hidden'}">
+                            ${session.exercises.map((ex, exIdx) => `<div class="mb-6 bg-white/5 p-4 rounded-xl">
+                                <div class="flex justify-between mb-4"><button onclick="swapExId=${ex.id}; openExModal(${session.id})" class="ex-name-btn text-[10px] font-black text-indigo-300 uppercase">${ex.name} ↻</button><button onclick="const s=sessions.find(x=>x.id===${session.id}); s.exercises.splice(${exIdx},1); saveAndRender();" class="text-rose-500 text-[9px] font-black">WIS</button></div>
+                                <div class="space-y-3">${ex.sets.map((s, i) => `<div class="grid grid-cols-5 gap-2 items-center"><span class="text-[9px] opacity-20 font-bold">S${i+1}</span><input type="text" onclick="this.select()" onchange="updSet(${session.id},${ex.id},${i},'w',this.value)" value="${s.w||''}" class="table-input" placeholder="kg"><input type="text" onclick="this.select()" onchange="updSet(${session.id},${ex.id},${i},'r',this.value)" value="${s.r||''}" class="table-input" placeholder="reps"><input type="text" onclick="this.select()" onchange="updSet(${session.id},${ex.id},${i},'bpm',this.value)" value="${s.bpm || ''}" class="table-input !text-rose-400" placeholder="bpm"><button onclick="const e=sessions.find(s=>s.id===${session.id}).exercises.find(x=>x.id===${ex.id}); e.sets.splice(${i},1); saveAndRender();" class="text-rose-500 font-bold text-xl">×</button></div>`).join('')}</div>
+                                <button onclick="addSet(${session.id}, ${ex.id})" class="w-full mt-4 py-2 border border-dashed border-white/10 rounded-lg text-[8px] font-black opacity-30 uppercase">+ Set</button>
+                            </div>`).join('')}
+                            <button onclick="swapExId=null; openExModal(${session.id})" class="btn-primary w-full py-3 text-[10px] italic">+ Oefening</button>
+                        </div>
+                    </div>`;
+                });
+            });
+        }
+
         function generateBMWRecap() {
             const now = new Date();
             const d = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -281,56 +446,35 @@
 
         function logWeight() { const w = document.getElementById('profWeightInput').value; const fat = document.getElementById('profFatInput').value; if(w){ userData.weightLogs.unshift({ w: parseFloat(w), fat: fat ? parseFloat(fat) : null, date: new Date().toISOString() }); saveAndRender(); document.getElementById('profWeightInput').value = ""; document.getElementById('profFatInput').value = ""; renderWeightChart(30); } }
         function renderWeightLogs() { const logs = (userData.weightLogs || []).slice(0,10); document.getElementById('weightLogList').innerHTML = logs.map((l, i) => `<div class="flex justify-between items-center text-[10px] font-bold p-3 bg-white/5 rounded-xl mb-1 border border-white/5"><div><span class="text-indigo-400 font-black">${l.w} KG</span>${l.fat ? `<span class="text-emerald-400 ml-2 italic">${l.fat}% VET</span>` : ''}</div><div class="flex gap-3 items-center"><span class="opacity-40 uppercase text-[8px]">${new Date(l.date).toLocaleDateString('nl-NL', {day:'2-digit', month:'2-digit'})}</span><button onclick="userData.weightLogs.splice(${i},1); saveAndRender();" class="text-rose-500">✕</button></div></div>`).join(''); }
-
-        function renderSessions() {
-            const cont = document.getElementById('sessionContainer'); cont.innerHTML = "";
-            const sorted = [...sessions].sort((a,b) => new Date(b.rawDate) - new Date(a.rawDate));
-            const groups = {};
-            sorted.forEach(s => {
-                const d = new Date(s.rawDate); const key = `${d.getFullYear()}-${d.getMonth()}`;
-                if (!groups[key]) groups[key] = { label: d.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' }).toUpperCase(), sessions: [] };
-                groups[key].sessions.push(s);
-            });
-            Object.keys(groups).forEach(key => {
-                const isOpen = activeMonths.has(key);
-                cont.innerHTML += `<div class="month-header" onclick="if(activeMonths.has('${key}')) activeMonths.delete('${key}'); else activeMonths.add('${key}'); renderSessions();">${groups[key].label} ${isOpen ? '▾' : '▸'}</div>`;
-                if (isOpen) groups[key].sessions.forEach(session => {
-                    cont.innerHTML += `<div class="glass p-6 mb-4 ${activeSessionId === session.id ? 'border-indigo-500/40' : ''}">
-                        <div onclick="activeSessionId = activeSessionId === ${session.id} ? null : ${session.id}; renderSessions();">
-                            <div class="flex justify-between items-start"><h3 class="text-xl font-black italic uppercase">${session.name}</h3><div class="flex gap-2" onclick="event.stopPropagation()"><button onclick="cloneSession(${session.id})" class="action-btn btn-copy">Kopie</button><button onclick="shareWorkout(${session.id})" class="action-btn btn-share">Deel</button><button onclick="if(confirm('Wissen?')){ sessions=sessions.filter(x=>x.id!==${session.id}); saveAndRender(); }" class="action-btn btn-delete">Wis</button></div></div>
-                            <div class="text-[9px] font-black opacity-30 uppercase italic">${session.date}</div>
-                        </div>
-                        <div class="${activeSessionId === session.id ? 'mt-6' : 'hidden'}">
-                            ${session.exercises.map((ex, exIdx) => `<div class="mb-6 bg-white/5 p-4 rounded-xl">
-                                <div class="flex justify-between mb-4"><button onclick="swapExId=${ex.id}; openExModal(${session.id})" class="ex-name-btn text-[10px] font-black text-indigo-300 uppercase">${ex.name} ↻</button><button onclick="const s=sessions.find(x=>x.id===${session.id}); s.exercises.splice(${exIdx},1); saveAndRender();" class="text-rose-500 text-[9px] font-black">WIS</button></div>
-                                <div class="space-y-3">${ex.sets.map((s, i) => `<div class="grid grid-cols-5 gap-2 items-center"><span class="text-[9px] opacity-20 font-bold">S${i+1}</span><input type="text" onclick="this.select()" onchange="updSet(${session.id},${ex.id},${i},'w',this.value)" value="${s.w||''}" class="table-input" placeholder="kg"><input type="text" onclick="this.select()" onchange="updSet(${session.id},${ex.id},${i},'r',this.value)" value="${s.r||''}" class="table-input" placeholder="reps"><input type="text" onclick="this.select()" onchange="updSet(${session.id},${ex.id},${i},'bpm',this.value)" value="${s.bpm || ''}" class="table-input !text-rose-400" placeholder="bpm"><button onclick="const e=sessions.find(s=>s.id===${session.id}).exercises.find(x=>x.id===${ex.id}); e.sets.splice(${i},1); saveAndRender();" class="text-rose-500 font-bold text-xl">×</button></div>`).join('')}</div>
-                                <button onclick="addSet(${session.id}, ${ex.id})" class="w-full mt-4 py-2 border border-dashed border-white/10 rounded-lg text-[8px] font-black opacity-30 uppercase">+ Set</button>
-                            </div>`).join('')}
-                            <button onclick="swapExId=null; openExModal(${session.id})" class="btn-primary w-full py-3 text-[10px] italic">+ Oefening</button>
-                        </div>
-                    </div>`;
-                });
-            });
-        }
-
         function showView(v) { document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden')); document.getElementById('view-'+v).classList.remove('hidden'); if(v==='charts') renderCharts(); if(v==='profile') renderWeightChart(30); }
         function updateHeader() { const logs = userData.weightLogs || []; const lastW = (logs.length > 0) ? logs[0].w : "--"; document.getElementById('headerStats').innerText = `${userData.name || "GYMLOG"} • ${lastW} KG`; }
         function populateExerciseSelect() { const u = [...new Set(sessions.flatMap(s => s.exercises.map(e => e.name.toUpperCase())))].sort(); document.getElementById('chartExerciseSelect').innerHTML = u.map(n => `<option value="${n}">${n}</option>`).join(''); }
         function updateChart() { const ctx = document.getElementById('progressionChart'); if(!ctx) return; const name = document.getElementById('chartExerciseSelect').value; if(!name) return; const relevant = sessions.filter(s => s.exercises.some(e => e.name.toUpperCase() === name)).sort((a,b) => new Date(a.rawDate) - new Date(b.rawDate)); if(chartInstance) chartInstance.destroy(); chartInstance = new Chart(ctx, { type: 'line', data: { labels: relevant.map(s => s.rawDate), datasets: [{ data: relevant.map(s => Math.max(...s.exercises.find(e => e.name.toUpperCase() === name).sets.map(st => parseFloat(st.w) || 0))), borderColor: '#6366f1', tension: 0.3 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } } } }); }
-        function cloneSession(id) { const old = sessions.find(s => s.id === id); const today = new Date(); const news = { id: Date.now(), name: old.name, date: today.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'short' }), rawDate: today.toISOString().split('T')[0], exercises: old.exercises.map(ex => ({ id: Date.now() + Math.random(), name: ex.name, sets: ex.sets.map(s => ({ w: s.w, r: s.r, bpm: '' })) })) }; sessions.push(news); activeSessionId = news.id; saveAndRender(); }
+        function cloneSession(id) { const old = sessions.find(s => s.id === id); const today = new Date(); const news = { id: Date.now(), name: old.name, date: today.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'short' }), rawDate: today.toISOString().split('T')[0], exercises: old.exercises.map(ex => ({ id: Date.now() + Math.random(), name: ex.name, sets: ex.sets.map(s => ({ w: s.w, r: s.r, bpm: '' })) })) }; sessions.unshift(news); activeSessionId = news.id; saveAndRender(); }
         function updSet(sId, eId, i, f, v) { const s = sessions.find(x => x.id === sId); if(s) { const e = s.exercises.find(ex => ex.id === eId); if(e) { e.sets[i][f] = v; localStorage.setItem('gym_sessions', JSON.stringify(sessions)); } } }
         function addSet(sId, exId) { const s = sessions.find(x => x.id === sId); const e = s.exercises.find(ex => ex.id === exId); e.sets.push({w:'', r:REP_DEFAULTS[e.sets.length] || 6, bpm:''}); saveAndRender(); }
         function exportData() { const blob = new Blob([JSON.stringify({ sessions, exLibrary, user: userData })], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `gymlog_backup.json`; a.click(); }
         function importData(e) { const reader = new FileReader(); reader.onload = (ev) => { try { const imp = JSON.parse(ev.target.result); if (imp.sessions) sessions = imp.sessions; if (imp.exLibrary) exLibrary = imp.exLibrary; if (imp.user) userData = imp.user; saveAndRender(); location.reload(); } catch (err) { alert("Fout."); } }; reader.readAsText(e.target.files[0]); }
-        function renderExLibrary() { const cont = document.getElementById('exLibraryList'); cont.innerHTML = ""; for (const [cat, items] of Object.entries(exLibrary)) { cont.innerHTML += `<span class="text-[9px] font-black text-indigo-400 uppercase mt-8 block mb-3 italic border-b border-indigo-500/20 pb-1">${cat}</span><div class="ex-grid">` + items.sort().map(ex => `<div onclick="selectEx('${ex}')" class="ex-item"><span>${ex}</span><button onclick="event.stopPropagation(); if(confirm('Wissen?')){ exLibrary['${cat}']=exLibrary['${cat}'].filter(x=>x!=='${ex}'); saveAndRender(); }" class="text-rose-500 text-[8px] self-end opacity-20">WIS</button></div>`).join('') + `</div>`; } cont.innerHTML += `<button onclick="startCustomEx()" class="btn-primary w-full py-4 mt-8 italic">+ EIGEN OEFENING</button>`; }
-        function renderCharts() { updateChart(); renderRadarChart(7); const volCont = document.getElementById('volumeTracker'); const recCont = document.getElementById('recordsTracker'); volCont.innerHTML = ""; recCont.innerHTML = ""; let volPerCat = {}; let exToCat = {}; let records = {}; for (const [cat, exs] of Object.entries(exLibrary)) { volPerCat[cat] = 0; exs.forEach(e => exToCat[e.toUpperCase()] = cat); } volPerCat["OVERIG"] = 0; const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); sessions.forEach(s => { const isRecent = new Date(s.rawDate) >= sevenDaysAgo; s.exercises.forEach(ex => { const n = ex.name.toUpperCase(); const cat = exToCat[n] || "OVERIG"; let maxW = 0; ex.sets.forEach(st => { const w = parseFloat(st.w) || 0; const r = parseInt(st.r) || 0; if (isRecent) volPerCat[cat] += (w * r); if (w > maxW) maxW = w; }); if (!records[n] || maxW > records[n]) records[n] = maxW; }); }); const maxVol = Math.max(...Object.values(volPerCat), 1); Object.entries(volPerCat).sort((a,b)=>b[1]-a[1]).forEach(([c, v]) => { if (v > 0 || c !== "OVERIG") volCont.innerHTML += `<div><div class="flex justify-between text-[8px] font-black uppercase"><span>${c}</span><span>${v.toLocaleString()} KG</span></div><div class="bg-slate-900 rounded-full h-2 mt-1 overflow-hidden"><div class="heatmap-bar-fill" style="width: ${Math.round((v/maxVol)*100)}%"></div></div></div>`; }); Object.entries(records).sort((a,b) => a[0].localeCompare(b[0])).forEach(([n, v]) => { if (v > 0) recCont.innerHTML += `<div class="record-tile"><span class="text-[8px] font-black uppercase opacity-40 mb-1 truncate">${n}</span><span class="text-[13px] font-black text-emerald-400">${v}<span class="text-[8px] ml-0.5">KG</span></span></div>`; }); }
-        function selectEx(name) { const sess = sessions.find(s => s.id === currentTargetSessionId); if (swapExId) { sess.exercises.find(e => e.id === swapExId).name = name.toUpperCase(); swapExId = null; } else { sess.exercises.push({ id: Date.now(), name: name.toUpperCase(), sets: [{w:'', r:12, bpm:''}, {w:'', r:10, bpm:''}, {w:'', r:8, bpm:''}, {w:'', r:6, bpm:''}]}); } saveAndRender(); closeExModal(); }
-        function openExModal(sId) { currentTargetSessionId = sId; document.getElementById('exModal').classList.remove('hidden'); }
-        function closeExModal() { document.getElementById('exModal').classList.add('hidden'); }
-        function createNewSession() { const name = (document.getElementById('newWorkoutName').value || "Training").toUpperCase(); const raw = document.getElementById('newWorkoutDate').value; const d = new Date(raw); activeMonths.add(`${d.getFullYear()}-${d.getMonth()}`); sessions.push({ id: Date.now(), name, date: d.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'short' }), rawDate: raw, exercises: [] }); activeSessionId = sessions[sessions.length-1].id; saveAndRender(); }
+        
+        function renderCharts() { 
+            updateChart(); 
+            renderRadarChart(currentRadarDays); 
+            const volCont = document.getElementById('volumeTracker'); 
+            const recCont = document.getElementById('recordsTracker'); 
+            volCont.innerHTML = ""; recCont.innerHTML = ""; 
+            let volPerCat = {}; let exToCat = {}; let records = {}; 
+            for (const [cat, exs] of Object.entries(exLibrary)) { volPerCat[cat] = 0; exs.forEach(e => exToCat[e.toUpperCase()] = cat); } 
+            volPerCat["OVERIG"] = 0; const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); 
+            sessions.forEach(s => { const isRecent = new Date(s.rawDate) >= sevenDaysAgo; s.exercises.forEach(ex => { const n = ex.name.toUpperCase(); const cat = exToCat[n] || "OVERIG"; let maxW = 0; ex.sets.forEach(st => { const w = parseFloat(st.w) || 0; const r = parseInt(st.r) || 0; if (isRecent) volPerCat[cat] += (w * r); if (w > maxW) maxW = w; }); if (!records[n] || maxW > records[n]) records[n] = maxW; }); }); 
+            const maxVol = Math.max(...Object.values(volPerCat), 1); 
+            Object.entries(volPerCat).sort((a,b)=>b[1]-a[1]).forEach(([c, v]) => { if (v > 0 || c !== "OVERIG") volCont.innerHTML += `<div><div class="flex justify-between text-[8px] font-black uppercase"><span>${c}</span><span>${v.toLocaleString()} KG</span></div><div class="bg-slate-900 rounded-full h-2 mt-1 overflow-hidden"><div class="heatmap-bar-fill" style="width: ${Math.round((v/maxVol)*100)}%"></div></div></div>`; }); 
+            Object.entries(records).sort((a,b) => a[0].localeCompare(b[0])).forEach(([n, v]) => { if (v > 0) recCont.innerHTML += `<div class="record-tile"><span class="text-[8px] font-black uppercase opacity-40 mb-1 truncate">${n}</span><span class="text-[13px] font-black text-emerald-400">${v}<span class="text-[8px] ml-0.5">KG</span></span></div>`; }); 
+        }
+
         function saveProfileName() { userData.name = document.getElementById('profName').value.toUpperCase(); saveAndRender(); }
-        function startCustomEx() { const n = prompt("Naam oefening:"); if(!n) return; pendingExName = n.toUpperCase(); const btnCont = document.getElementById('catBtnContainer'); btnCont.innerHTML = ""; Object.keys(exLibrary).forEach(cat => { const b = document.createElement('button'); b.className = "glass p-4 text-[10px] font-black uppercase"; b.innerText = cat; b.onclick = () => { if(!exLibrary[cat].includes(pendingExName)) exLibrary[cat].push(pendingExName); document.getElementById('catSelectorModal').classList.add('hidden'); saveAndRender(); }; btnCont.appendChild(b); }); document.getElementById('catSelectorModal').classList.remove('hidden'); }
+        function startCustomEx() { const n = prompt("Naam oefening:"); if(!n) return; pendingExName = n.toUpperCase(); const btnCont = document.getElementById('catBtnContainer'); btnCont.innerHTML = ""; Object.keys(exLibrary).forEach(cat => { const b = document.createElement('button'); b.className = "glass p-4 text-[10px] font-black uppercase"; b.innerText = cat; b.onclick = () => { if(!exLibrary[cat].includes(pendingExName)) exLibrary[cat].push(pendingExName); document.getElementById('catSelectorModal').classList.add('hidden'); saveAndRender(); filterExLibrary(cat); }; btnCont.appendChild(b); }); document.getElementById('catSelectorModal').classList.remove('hidden'); }
         async function shareWorkout(id) { const s = sessions.find(x => x.id === id); const text = `GymLog - ${s.name} (${s.date})\n${s.exercises.map(ex => `\n${ex.name}:${ex.sets.map(st => `\n- ${st.w}kg x ${st.r}`).join('')}`).join('\n')}`; if (navigator.share) await navigator.share({ title: 'Mijn Training', text }); else { navigator.clipboard.writeText(text); alert("Gekopieerd!"); } }
+        
         init();
     </script>
 </body>
