@@ -20,6 +20,7 @@
             overflow-x: hidden;
         }
 
+        /* Universele fix voor alle views: ruimte voor de navbar */
         .view-section { 
             padding-bottom: 140px !important; 
         }
@@ -83,6 +84,7 @@
         .month-header { font-size: 11px; font-weight: 900; color: #6366f1; letter-spacing: 1px; margin: 24px 0 12px 4px; display: flex; align-items: center; gap: 8px; opacity: 0.8; }
         .month-header::after { content: ''; height: 1px; background: linear-gradient(90deg, rgba(99,102,241,0.3), transparent); flex: 1; }
 
+        /* FIXED NAVBAR */
         nav { 
             position: fixed !important; 
             bottom: 0 !important; 
@@ -124,20 +126,20 @@
                 <h1 class="text-2xl font-black italic tracking-tighter inline-block">GYM<span class="text-indigo-500">LOG</span></h1>
                 <span class="text-[10px] font-black opacity-20 ml-1">v2.5.4</span>
             </div>
-            <button data-testid="btn-reload" onclick="location.reload(true)" class="reload-btn">↻</button>
+            <button onclick="location.reload(true)" class="reload-btn">↻</button>
         </div>
-        <div id="headerStats" data-testid="header-stats" class="glass px-4 py-2 text-[10px] font-bold border-indigo-500/30 text-indigo-100 uppercase italic">LADEN...</div>
+        <div id="headerStats" class="glass px-4 py-2 text-[10px] font-bold border-indigo-500/30 text-indigo-100 uppercase italic">LADEN...</div>
     </header>
 
-    <div id="exModal" data-testid="modal-exercise" class="hidden fixed inset-0 z-[100] bg-slate-950 flex flex-col">
+    <div id="exModal" class="hidden fixed inset-0 z-[100] bg-slate-950 flex flex-col">
         <div class="p-6 flex justify-between items-center bg-slate-950 border-b border-white/10">
             <h2 class="text-xl font-black italic text-white uppercase tracking-tighter">Kies <span class="text-indigo-500">Oefening</span></h2>
-            <button data-testid="btn-close-ex-modal" onclick="closeExModal()" class="glass w-10 h-10 flex items-center justify-center text-rose-500 font-bold">✕</button>
+            <button onclick="closeExModal()" class="glass w-10 h-10 flex items-center justify-center text-rose-500 font-bold">✕</button>
         </div>
         <div id="exCategoryScroll" class="no-scrollbar"></div>
         <div class="flex-1 overflow-y-auto p-6 pb-40 bg-slate-950">
             <div id="exLibraryList" class="ex-grid"></div>
-            <button data-testid="btn-custom-ex" onclick="startCustomEx()" class="btn-primary w-full py-4 mt-8 italic text-xs tracking-widest">+ EIGEN OEFENING</button>
+            <button onclick="startCustomEx()" class="btn-primary w-full py-4 mt-8 italic text-xs tracking-widest">+ EIGEN OEFENING</button>
         </div>
     </div>
 
@@ -165,16 +167,33 @@
         </div>
     </div>
 
-    <section id="view-training" data-testid="view-training" class="view-section">
-        <div class="glass p-6 mb-8 border-indigo-500/20">
-            <input id="newWorkoutName" data-testid="input-workout-name" class="input-field mb-4" placeholder="NAAM TRAINING">
-            <input id="newWorkoutDate" data-testid="input-workout-date" type="date" class="input-field mb-6">
-            <button data-testid="btn-start-session" onclick="createNewSession()" class="btn-primary w-full py-4 italic">Sessie Starten</button>
+    <div id="drillDownModal" class="hidden fixed inset-0 z-[120] bg-slate-950/98 p-6 flex flex-col items-center justify-center">
+        <div class="glass p-6 w-full max-w-sm relative flex flex-col">
+            <button onclick="document.getElementById('drillDownModal').classList.add('hidden')" class="absolute top-4 right-4 text-rose-500 font-bold z-10">✕</button>
+            <h3 id="drillDownTitle" class="text-center font-black italic mb-4 text-indigo-400 uppercase">DETAILS</h3>
+            <div id="drillDownNav" class="overlay-nav"></div>
+            <div class="h-64 w-full"><canvas id="drillDownChart"></canvas></div>
         </div>
-        <div id="sessionContainer" data-testid="session-container"></div>
+    </div>
+
+    <div id="catSelectorModal" class="hidden fixed inset-0 z-[110] bg-black/90 flex items-center justify-center p-6">
+        <div class="glass p-6 w-full max-w-xs">
+            <h3 class="text-center font-black italic mb-6 text-indigo-400 uppercase">Link naar Spiergroep</h3>
+            <div id="catBtnContainer" class="grid grid-cols-1 gap-3"></div>
+            <button onclick="document.getElementById('catSelectorModal').classList.add('hidden')" class="w-full mt-6 text-[10px] font-bold opacity-40 uppercase">Annuleren</button>
+        </div>
+    </div>
+
+    <section id="view-training" class="view-section">
+        <div class="glass p-6 mb-8 border-indigo-500/20">
+            <input id="newWorkoutName" class="input-field mb-4" placeholder="NAAM TRAINING">
+            <input id="newWorkoutDate" type="date" class="input-field mb-6">
+            <button onclick="createNewSession()" class="btn-primary w-full py-4 italic">Sessie Starten</button>
+        </div>
+        <div id="sessionContainer"></div>
     </section>
 
-    <section id="view-charts" data-testid="view-charts" class="view-section hidden">
+    <section id="view-charts" class="view-section hidden">
         <button onclick="generateBMWRecap()" class="w-full glass p-4 mb-6 border-indigo-500/50 flex items-center justify-between">
             <div class="text-left">
                 <div class="text-[10px] font-black text-indigo-400 uppercase italic">Recap</div>
@@ -205,26 +224,26 @@
         </div>
     </section>
 
-    <section id="view-profile" data-testid="view-profile" class="view-section hidden">
+    <section id="view-profile" class="view-section hidden">
         <div class="glass p-6 mb-6">
-            <input id="profName" data-testid="input-user-name" class="input-field mb-6 text-xl" placeholder="JE NAAM" onchange="saveProfileName()">
+            <input id="profName" class="input-field mb-6 text-xl" placeholder="JE NAAM" onchange="saveProfileName()">
             <div class="flex justify-between items-center mb-2 px-1">
                 <span class="text-[8px] font-black opacity-40 uppercase">Trends</span>
                 <div class="flex gap-1">
-                    <button data-testid="btn-weight-7" onclick="renderWeightChart(7)" class="filter-btn weight-f active">WEEK</button>
-                    <button data-testid="btn-weight-30" onclick="renderWeightChart(30)" class="filter-btn weight-f">MAAND</button>
-                    <button data-testid="btn-weight-365" onclick="renderWeightChart(365)" class="filter-btn weight-f">JAAR</button>
+                    <button onclick="renderWeightChart(7)" class="filter-btn weight-f active">WEEK</button>
+                    <button onclick="renderWeightChart(30)" class="filter-btn weight-f">MAAND</button>
+                    <button onclick="renderWeightChart(365)" class="filter-btn weight-f">JAAR</button>
                 </div>
             </div>
             <div class="h-40 w-full mb-8"><canvas id="weightChart"></canvas></div>
             <div class="flex gap-2 mb-6">
-                <input id="profWeightInput" data-testid="input-weight" type="number" step="0.1" class="input-field flex-1" placeholder="KG">
-                <input id="profFatInput" data-testid="input-fat" type="number" step="0.1" class="input-field flex-1" placeholder="VET %">
-                <button data-testid="btn-log-weight" onclick="logWeight()" class="btn-primary px-6 font-black italic">LOG</button>
+                <input id="profWeightInput" type="number" step="0.1" class="input-field flex-1" placeholder="KG">
+                <input id="profFatInput" type="number" step="0.1" class="input-field flex-1" placeholder="VET %">
+                <button onclick="logWeight()" class="btn-primary px-6 font-black italic">LOG</button>
             </div>
             <div class="grid grid-cols-2 gap-3 mb-8">
-                <button data-testid="btn-export" onclick="exportData()" class="glass p-3 text-[9px] font-black uppercase">💾 Backup</button>
-                <button data-testid="btn-import" onclick="document.getElementById('importFile').click()" class="glass p-3 text-[9px] font-black uppercase">📂 Herstel</button>
+                <button onclick="exportData()" class="glass p-3 text-[9px] font-black uppercase">💾 Backup</button>
+                <button onclick="document.getElementById('importFile').click()" class="glass p-3 text-[9px] font-black uppercase">📂 Herstel</button>
                 <input type="file" id="importFile" class="hidden" onchange="importData(event)" accept=".json">
             </div>
             <div id="weightLogList" class="space-y-2 mb-8"></div>
@@ -232,9 +251,9 @@
     </section>
 
     <nav>
-        <button data-testid="nav-training" onclick="showView('training')" class="text-center"><span class="block text-2xl">🏋️</span><span class="text-[10px] font-black">TRAIN</span></button>
-        <button data-testid="nav-charts" onclick="showView('charts')" class="text-center"><span class="block text-2xl">📈</span><span class="text-[10px] font-black">STATS</span></button>
-        <button data-testid="nav-profile" onclick="showView('profile')" class="text-center"><span class="block text-2xl">👤</span><span class="text-[10px] font-black">PROFIEL</span></button>
+        <button onclick="showView('training')" class="text-center"><span class="block text-2xl">🏋️</span><span class="text-[10px] font-black">TRAIN</span></button>
+        <button onclick="showView('charts')" class="text-center"><span class="block text-2xl">📈</span><span class="text-[10px] font-black">STATS</span></button>
+        <button onclick="showView('profile')" class="text-center"><span class="block text-2xl">👤</span><span class="text-[10px] font-black">PROFIEL</span></button>
     </nav>
 
     <script>
@@ -357,70 +376,72 @@
             });
         }
 
-        // --- FIX VOOR VETPERCENTAGE GRAFIEK ---
+        function generateBMWRecap() {
+            const now = new Date();
+            const d = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            const targetMonth = d.getMonth();
+            const targetYear = d.getFullYear();
+            const monthLabel = d.toLocaleDateString('nl-NL', { month: 'long' }).toUpperCase();
+            const monthSessions = sessions.filter(s => { const sd = new Date(s.rawDate); return sd.getMonth() === targetMonth && sd.getFullYear() === targetYear; });
+            let totalVol = 0; let catCount = {}; let exToCat = {};
+            Object.keys(exLibrary).forEach(cat => catCount[cat] = 0);
+            Object.entries(exLibrary).forEach(([cat, exs]) => exs.forEach(e => exToCat[e.toUpperCase()] = cat));
+            monthSessions.forEach(s => { s.exercises.forEach(ex => { const cat = exToCat[ex.name.toUpperCase()]; if(cat) catCount[cat]++; ex.sets.forEach(st => { totalVol += (parseFloat(st.w) || 0) * (parseInt(st.r) || 0); }); }); });
+            document.getElementById('recapMonth').innerText = monthLabel;
+            document.getElementById('recapSessions').innerText = monthSessions.length;
+            document.getElementById('recapVolume').innerText = totalVol.toLocaleString() + " KG";
+            const grid = document.getElementById('recapMuscleGrid'); grid.innerHTML = "";
+            Object.entries(catCount).forEach(([cat, count]) => { if(count > 0) grid.innerHTML += `<div><span class="bmw-val text-indigo-400">${count}</span><span class="bmw-label">${cat}</span></div>`; });
+            document.getElementById('bmwOverlay').classList.remove('hidden');
+        }
+
+        async function shareAsImage() {
+            const btn = document.getElementById('btnImgShare'); btn.innerText = "GENEREREN...";
+            const target = document.getElementById('captureTarget');
+            try {
+                const canvas = await html2canvas(target, { backgroundColor: '#020617', scale: 2, logging: false });
+                canvas.toBlob(async (blob) => {
+                    const file = new File([blob], 'gymlog_recap.png', { type: 'image/png' });
+                    if (navigator.share && navigator.canShare({ files: [file] })) {
+                        await navigator.share({ files: [file], title: 'Mijn GymLog Recap', text: 'Mijn progressie van afgelopen maand!' });
+                    } else {
+                        const link = document.createElement('a'); link.download = 'gymlog_recap.png'; link.href = canvas.toDataURL(); link.click();
+                        alert("Afbeelding opgeslagen.");
+                    }
+                    btn.innerText = "AFBEELDING DELEN 📸";
+                });
+            } catch (err) { alert("Fout bij genereren afbeelding."); btn.innerText = "AFBEELDING DELEN 📸"; }
+        }
+
+        function renderRadarChart(days = 7) {
+            currentRadarDays = days; const ctx = document.getElementById('radarChart'); if(!ctx) return;
+            document.querySelectorAll('#radarFilters .filter-btn').forEach(b => { b.classList.remove('active'); if(b.getAttribute('onclick').includes(days)) b.classList.add('active'); });
+            const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - days);
+            const categories = Object.keys(exLibrary);
+            let exToCat = {}; Object.entries(exLibrary).forEach(([cat, exs]) => exs.forEach(e => exToCat[e.toUpperCase()] = cat));
+            let dataMap = {}; categories.forEach(cat => dataMap[cat] = 0);
+            sessions.forEach(s => { if (new Date(s.rawDate) >= cutoff) { s.exercises.forEach(ex => { const cat = exToCat[ex.name.toUpperCase()]; if (cat && dataMap.hasOwnProperty(cat)) { ex.sets.forEach(set => { dataMap[cat] += (parseFloat(set.w) || 0) * (parseInt(set.r) || 0); }); } }); } });
+            if(radarChartInstance) radarChartInstance.destroy();
+            radarChartInstance = new Chart(ctx, { type: 'radar', data: { labels: categories, datasets: [{ data: categories.map(c => dataMap[c]), backgroundColor: 'rgba(99, 102, 241, 0.25)', borderColor: '#6366f1', pointBackgroundColor: '#6366f1', borderWidth: 3, pointRadius: 4 }] }, options: { maintainAspectRatio: false, onClick: (e, elements) => { if(elements.length > 0) showDrillDown(categories[elements[0].index]); }, scales: { r: { beginAtZero: true, angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: 'rgba(255,255,255,0.6)', font: { size: 10, weight: '900' } }, ticks: { display: false } } }, plugins: { legend: { display: false } } } });
+        }
+
+        function showDrillDown(category) { 
+            const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - currentRadarDays); 
+            let drillData = {}; 
+            sessions.forEach(s => { if (new Date(s.rawDate) >= cutoff) { s.exercises.forEach(ex => { if ((exLibrary[category] || []).includes(ex.name.toUpperCase())) { if (!drillData[ex.name]) drillData[ex.name] = 0; ex.sets.forEach(set => { drillData[ex.name] += (parseFloat(set.w) || 0) * (parseInt(set.r) || 0); }); } }); } }); 
+            const nav = document.getElementById('drillDownNav'); nav.innerHTML = ""; 
+            Object.keys(exLibrary).forEach(cat => { const b = document.createElement('button'); b.className = `overlay-nav-btn ${cat === category ? 'active' : ''}`; b.innerText = cat; b.onclick = () => showDrillDown(cat); nav.appendChild(b); }); 
+            document.getElementById('drillDownTitle').innerText = category; document.getElementById('drillDownModal').classList.remove('hidden'); 
+            if(drillDownChartInstance) drillDownChartInstance.destroy(); 
+            drillDownChartInstance = new Chart(document.getElementById('drillDownChart'), { type: 'bar', data: { labels: Object.keys(drillData), datasets: [{ data: Object.values(drillData), backgroundColor: '#6366f1' }] }, options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { display: false }, ticks: { color: '#fff', font: { size: 9, weight: 'bold' } } } } } }); 
+        }
+
         function renderWeightChart(days = 30) {
             const ctx = document.getElementById('weightChart'); if(!ctx) return;
-            document.querySelectorAll('.weight-f').forEach(b => { 
-                b.classList.remove('active'); 
-                if(b.getAttribute('onclick').includes(days)) b.classList.add('active'); 
-            });
-
-            // Sorteer data chronologisch voor grafiek en filter op periode
-            const cutoffDate = new Date();
-            cutoffDate.setDate(cutoffDate.getDate() - days);
-            
-            const logs = [...(userData.weightLogs || [])]
-                .filter(l => new Date(l.date) >= cutoffDate)
-                .sort((a,b) => new Date(a.date) - new Date(b.date));
-
+            document.querySelectorAll('.weight-f').forEach(b => { b.classList.remove('active'); if(b.getAttribute('onclick').includes(days)) b.classList.add('active'); });
+            const logs = (userData.weightLogs || []).slice(0, days).reverse();
             if(weightChartInstance) weightChartInstance.destroy();
-            
-            weightChartInstance = new Chart(ctx, { 
-                type: 'line', 
-                data: { 
-                    labels: logs.map(l => new Date(l.date).toLocaleDateString('nl-NL', {day:'numeric', month:'short'})), 
-                    datasets: [ 
-                        { 
-                            label: 'KG', 
-                            data: logs.map(l => l.w), 
-                            borderColor: '#6366f1', 
-                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                            tension: 0.4, 
-                            yAxisID: 'y',
-                            fill: true
-                        }, 
-                        { 
-                            label: 'VET %', 
-                            data: logs.map(l => l.fat), 
-                            borderColor: '#10b981', 
-                            borderDash: [5,5], 
-                            tension: 0.4,
-                            yAxisID: 'y1',
-                            spanGaps: true // Cruciaal als er logs zonder vet% zijn
-                        } 
-                    ] 
-                }, 
-                options: { 
-                    maintainAspectRatio: false, 
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: { legend: { display: false } }, 
-                    scales: { 
-                        y: { 
-                            display: true, 
-                            position: 'left', 
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: '#6366f1' }
-                        }, 
-                        y1: { 
-                            display: true, 
-                            position: 'right', 
-                            grid: { display: false },
-                            ticks: { color: '#10b981' },
-                            beginAtZero: false
-                        } 
-                    } 
-                } 
-            });
+            weightChartInstance = new Chart(ctx, { type: 'line', data: { labels: logs.map(l => new Date(l.date).toLocaleDateString('nl-NL', {day:'numeric', month:'short'})), datasets: [ { label: 'KG', data: logs.map(l => l.w), borderColor: '#6366f1', tension: 0.4, yAxisID: 'y' }, { label: 'VET %', data: logs.map(l => l.fat), borderColor: '#10b981', borderDash: [5,5], yAxisID: 'y1' } ] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: true, position: 'left', grid: { color: 'rgba(255,255,255,0.05)' } }, y1: { display: true, position: 'right', grid: { display: false } } } } });
         }
 
         function logWeight() { const w = document.getElementById('profWeightInput').value; const fat = document.getElementById('profFatInput').value; if(w){ userData.weightLogs.unshift({ w: parseFloat(w), fat: fat ? parseFloat(fat) : null, date: new Date().toISOString() }); saveAndRender(); document.getElementById('profWeightInput').value = ""; document.getElementById('profFatInput').value = ""; renderWeightChart(30); } }
