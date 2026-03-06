@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GymLog Pro - v2.5.4</title>
+    <title>GymLog Pro - v2.6.0</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -122,7 +122,7 @@
         <div class="flex items-center">
             <div>
                 <h1 class="text-2xl font-black italic tracking-tighter inline-block">GYM<span class="text-indigo-500">LOG</span></h1>
-                <span class="text-[10px] font-black opacity-20 ml-1">v2.5.4</span>
+                <span class="text-[10px] font-black opacity-20 ml-1">v2.6.0</span>
             </div>
             <button data-testid="btn-app-reload" onclick="location.reload(true)" class="reload-btn">↻</button>
         </div>
@@ -255,7 +255,15 @@
     </nav>
 
     <script>
-        const INITIAL_LIB = { "Borst": ["BENCH PRESS", "PEC FLY"], "Rug": ["LAT PULLDOWN", "DEADLIFT"], "Benen": ["SQUAT", "LEG PRESS"], "Schouders": ["OHP"], "Triceps": ["CABLE PUSH DOWN"], "Armen": ["BICEP CURL"], "Buik / Core": ["PLANK"] };
+        const INITIAL_LIB = { 
+            "Borst": ["BENCH PRESS", "INCLINE DB PRESS", "PEC FLY", "DIPS", "PUSH UPS", "CABLE CROSSOVER"], 
+            "Rug": ["LAT PULLDOWN", "DEADLIFT", "BENT OVER ROW", "PULL UPS", "SEATED CABLE ROW", "FACE PULLS", "T-BAR ROW"], 
+            "Benen": ["SQUAT", "LEG PRESS", "LEG EXTENSION", "LEG CURL", "ROMANIAN DEADLIFT", "CALF RAISES", "LUNGES"], 
+            "Schouders": ["OHP", "SIDE LATERAL RAISE", "FRONT RAISE", "DB SHOULDER PRESS", "REAR DELT FLY"], 
+            "Triceps": ["CABLE PUSH DOWN", "SKULL CRUSHERS", "OVERHEAD EXTENSION", "CLOSE GRIP BENCH"], 
+            "Armen": ["BICEP CURL", "HAMMER CURL", "PREACHER CURL", "CONCENTRATION CURL", "21S"], 
+            "Buik / Core": ["PLANK", "CRUNCHES", "LEG RAISES", "RUSSIAN TWIST", "AB WHEEL"] 
+        };
         const REP_DEFAULTS = [12, 10, 8, 6];
         let exLibrary = INITIAL_LIB, sessions = [], userData = { name: "GEBRUIKER", weightLogs: [] };
         let activeSessionId = null, chartInstance = null, weightChartInstance = null, radarChartInstance = null, drillDownChartInstance = null, currentTargetSessionId = null, pendingExName = "", swapExId = null, currentRadarDays = 7, activeMonths = new Set(), currentSelectedCat = "Borst";
@@ -278,6 +286,16 @@
             localStorage.setItem('gym_user', JSON.stringify(userData)); 
             localStorage.setItem('gym_ex_library', JSON.stringify(exLibrary)); 
             updateHeader(); renderSessions(); renderWeightLogs(); populateExerciseSelect(); 
+        }
+
+        // --- 1RM CALCULATOR LOGIC ---
+        function calc1RM(w, r) {
+            const weight = parseFloat(w);
+            const reps = parseInt(r);
+            if (!weight || !reps || reps < 1) return 0;
+            if (reps === 1) return weight;
+            // Brzycki Formula: Weight * (36 / (37 - Reps))
+            return weight * (36 / (37 - reps));
         }
         
         function openExModal(sId) { 
@@ -364,7 +382,21 @@
                         <div class="${activeSessionId === session.id ? 'mt-6' : 'hidden'}">
                             ${session.exercises.map((ex, exIdx) => `<div data-testid="session-ex-${ex.id}" class="mb-6 bg-white/5 p-4 rounded-xl">
                                 <div class="flex justify-between mb-4"><button data-testid="btn-swap-ex-${ex.id}" onclick="swapExId=${ex.id}; openExModal(${session.id})" class="ex-name-btn text-[10px] font-black text-indigo-300 uppercase">${ex.name} ↻</button><button data-testid="btn-remove-ex-${ex.id}" onclick="const s=sessions.find(x=>x.id===${session.id}); s.exercises.splice(${exIdx},1); saveAndRender();" class="text-rose-500 text-[9px] font-black">WIS</button></div>
-                                <div class="space-y-3">${ex.sets.map((s, i) => `<div data-testid="set-row-${ex.id}-${i}" class="grid grid-cols-5 gap-2 items-center"><span class="text-[9px] opacity-20 font-bold">S${i+1}</span><input data-testid="input-set-w-${ex.id}-${i}" type="text" onclick="this.select()" onchange="updSet(${session.id},${ex.id},${i},'w',this.value)" value="${s.w||''}" class="table-input" placeholder="kg"><input data-testid="input-set-r-${ex.id}-${i}" type="text" onclick="this.select()" onchange="updSet(${session.id},${ex.id},${i},'r',this.value)" value="${s.r||''}" class="table-input" placeholder="reps"><input data-testid="input-set-bpm-${ex.id}-${i}" type="text" onclick="this.select()" onchange="updSet(${session.id},${ex.id},${i},'bpm',this.value)" value="${s.bpm || ''}" class="table-input !text-rose-400" placeholder="bpm"><button data-testid="btn-remove-set-${ex.id}-${i}" onclick="const e=sessions.find(s=>s.id===${session.id}).exercises.find(x=>x.id===${ex.id}); e.sets.splice(${i},1); saveAndRender();" class="text-rose-500 font-bold text-xl">×</button></div>`).join('')}</div>
+                                <div class="space-y-3">
+                                    ${ex.sets.map((s, i) => {
+                                        const orm = Math.round(calc1RM(s.w, s.r));
+                                        return `<div data-testid="set-row-${ex.id}-${i}" class="grid grid-cols-5 gap-2 items-center">
+                                            <div class="flex flex-col">
+                                                <span class="text-[9px] opacity-20 font-bold">S${i+1}</span>
+                                                <span data-testid="stat-live-1rm-${ex.id}-${i}" class="text-[7px] text-indigo-400 font-black">${orm > 0 ? orm + ' 1RM' : ''}</span>
+                                            </div>
+                                            <input data-testid="input-set-w-${ex.id}-${i}" type="text" onclick="this.select()" onchange="updSet(${session.id},${ex.id},${i},'w',this.value)" value="${s.w||''}" class="table-input" placeholder="kg">
+                                            <input data-testid="input-set-r-${ex.id}-${i}" type="text" onclick="this.select()" onchange="updSet(${session.id},${ex.id},${i},'r',this.value)" value="${s.r||''}" class="table-input" placeholder="reps">
+                                            <input data-testid="input-set-bpm-${ex.id}-${i}" type="text" onclick="this.select()" onchange="updSet(${session.id},${ex.id},${i},'bpm',this.value)" value="${s.bpm || ''}" class="table-input !text-rose-400" placeholder="bpm">
+                                            <button data-testid="btn-remove-set-${ex.id}-${i}" onclick="const e=sessions.find(s=>s.id===${session.id}).exercises.find(x=>x.id===${ex.id}); e.sets.splice(${i},1); saveAndRender();" class="text-rose-500 font-bold text-xl">×</button>
+                                        </div>`;
+                                    }).join('')}
+                                </div>
                                 <button data-testid="btn-add-set-${ex.id}" onclick="addSet(${session.id}, ${ex.id})" class="w-full mt-4 py-2 border border-dashed border-white/10 rounded-lg text-[8px] font-black opacity-30 uppercase">+ Set</button>
                             </div>`).join('')}
                             <button data-testid="btn-add-ex-${session.id}" onclick="swapExId=null; openExModal(${session.id})" class="btn-primary w-full py-3 text-[10px] italic">+ Oefening</button>
@@ -449,7 +481,7 @@
         function populateExerciseSelect() { const u = [...new Set(sessions.flatMap(s => s.exercises.map(e => e.name.toUpperCase())))].sort(); document.getElementById('chartExerciseSelect').innerHTML = u.map(n => `<option value="${n}">${n}</option>`).join(''); }
         function updateChart() { const ctx = document.getElementById('progressionChart'); if(!ctx) return; const name = document.getElementById('chartExerciseSelect').value; if(!name) return; const relevant = sessions.filter(s => s.exercises.some(e => e.name.toUpperCase() === name)).sort((a,b) => new Date(a.rawDate) - new Date(b.rawDate)); if(chartInstance) chartInstance.destroy(); chartInstance = new Chart(ctx, { type: 'line', data: { labels: relevant.map(s => s.rawDate), datasets: [{ data: relevant.map(s => Math.max(...s.exercises.find(e => e.name.toUpperCase() === name).sets.map(st => parseFloat(st.w) || 0))), borderColor: '#6366f1', tension: 0.3 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } } } }); }
         function cloneSession(id) { const old = sessions.find(s => s.id === id); const today = new Date(); const news = { id: Date.now(), name: old.name, date: today.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'short' }), rawDate: today.toISOString().split('T')[0], exercises: old.exercises.map(ex => ({ id: Date.now() + Math.random(), name: ex.name, sets: ex.sets.map(s => ({ w: s.w, r: s.r, bpm: '' })) })) }; sessions.unshift(news); activeSessionId = news.id; saveAndRender(); }
-        function updSet(sId, eId, i, f, v) { const s = sessions.find(x => x.id === sId); if(s) { const e = s.exercises.find(ex => ex.id === eId); if(e) { e.sets[i][f] = v; localStorage.setItem('gym_sessions', JSON.stringify(sessions)); } } }
+        function updSet(sId, eId, i, f, v) { const s = sessions.find(x => x.id === sId); if(s) { const e = s.exercises.find(ex => ex.id === eId); if(e) { e.sets[i][f] = v; renderSessions(); localStorage.setItem('gym_sessions', JSON.stringify(sessions)); } } }
         function addSet(sId, exId) { const s = sessions.find(x => x.id === sId); const e = s.exercises.find(ex => ex.id === exId); e.sets.push({w:'', r:REP_DEFAULTS[e.sets.length] || 6, bpm:''}); saveAndRender(); }
         function exportData() { const blob = new Blob([JSON.stringify({ sessions, exLibrary, user: userData })], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `gymlog_backup.json`; a.click(); }
         function importData(e) { const reader = new FileReader(); reader.onload = (ev) => { try { const imp = JSON.parse(ev.target.result); if (imp.sessions) sessions = imp.sessions; if (imp.exLibrary) exLibrary = imp.exLibrary; if (imp.user) userData = imp.user; saveAndRender(); location.reload(); } catch (err) { alert("Fout."); } }; reader.readAsText(e.target.files[0]); }
@@ -460,13 +492,45 @@
             const volCont = document.getElementById('volumeTracker'); 
             const recCont = document.getElementById('recordsTracker'); 
             volCont.innerHTML = ""; recCont.innerHTML = ""; 
-            let volPerCat = {}; let exToCat = {}; let records = {}; 
+            let volPerCat = {}; let exToCat = {}; let records = {}; let best1RM = {};
+            
             for (const [cat, exs] of Object.entries(exLibrary)) { volPerCat[cat] = 0; exs.forEach(e => exToCat[e.toUpperCase()] = cat); } 
             volPerCat["OVERIG"] = 0; const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); 
-            sessions.forEach(s => { const isRecent = new Date(s.rawDate) >= sevenDaysAgo; s.exercises.forEach(ex => { const n = ex.name.toUpperCase(); const cat = exToCat[n] || "OVERIG"; let maxW = 0; ex.sets.forEach(st => { const w = parseFloat(st.w) || 0; const r = parseInt(st.r) || 0; if (isRecent) volPerCat[cat] += (w * r); if (w > maxW) maxW = w; }); if (!records[n] || maxW > records[n]) records[n] = maxW; }); }); 
+            
+            sessions.forEach(s => { 
+                const isRecent = new Date(s.rawDate) >= sevenDaysAgo; 
+                s.exercises.forEach(ex => { 
+                    const n = ex.name.toUpperCase(); 
+                    const cat = exToCat[n] || "OVERIG"; 
+                    let maxW = 0; 
+                    ex.sets.forEach(st => { 
+                        const w = parseFloat(st.w) || 0; 
+                        const r = parseInt(st.r) || 0; 
+                        const orm = calc1RM(w, r);
+                        if (isRecent) volPerCat[cat] += (w * r); 
+                        if (w > maxW) maxW = w; 
+                        if (!best1RM[n] || orm > best1RM[n]) best1RM[n] = orm;
+                    }); 
+                    if (!records[n] || maxW > records[n]) records[n] = maxW; 
+                }); 
+            }); 
+            
             const maxVol = Math.max(...Object.values(volPerCat), 1); 
-            Object.entries(volPerCat).sort((a,b)=>b[1]-a[1]).forEach(([c, v]) => { if (v > 0 || c !== "OVERIG") volCont.innerHTML += `<div data-testid="volume-bar-${c.toLowerCase()}"><div class="flex justify-between text-[8px] font-black uppercase"><span>${c}</span><span>${v.toLocaleString()} KG</span></div><div class="bg-slate-900 rounded-full h-2 mt-1 overflow-hidden"><div data-testid="volume-fill-${c.toLowerCase()}" class="heatmap-bar-fill" style="width: ${Math.round((v/maxVol)*100)}%"></div></div></div>`; }); 
-            Object.entries(records).sort((a,b) => a[0].localeCompare(b[0])).forEach(([n, v]) => { if (v > 0) recCont.innerHTML += `<div data-testid="record-tile-${n.toLowerCase().replace(/\s/g, '-')}" class="record-tile"><span class="text-[8px] font-black uppercase opacity-40 mb-1 truncate">${n}</span><span class="text-[13px] font-black text-emerald-400">${v}<span class="text-[8px] ml-0.5">KG</span></span></div>`; }); 
+            Object.entries(volPerCat).sort((a,b)=>b[1]-a[1]).forEach(([c, v]) => { 
+                if (v > 0 || c !== "OVERIG") volCont.innerHTML += `<div data-testid="volume-bar-${c.toLowerCase()}"><div class="flex justify-between text-[8px] font-black uppercase"><span>${c}</span><span>${v.toLocaleString()} KG</span></div><div class="bg-slate-900 rounded-full h-2 mt-1 overflow-hidden"><div data-testid="volume-fill-${c.toLowerCase()}" class="heatmap-bar-fill" style="width: ${Math.round((v/maxVol)*100)}%"></div></div></div>`; 
+            }); 
+            
+            Object.entries(records).sort((a,b) => a[0].localeCompare(b[0])).forEach(([n, v]) => { 
+                if (v > 0) {
+                    const orm = Math.round(best1RM[n] || 0);
+                    recCont.innerHTML += `
+                    <div data-testid="record-tile-${n.toLowerCase().replace(/\s/g, '-')}" class="record-tile">
+                        <span class="text-[8px] font-black uppercase opacity-40 mb-1 truncate">${n}</span>
+                        <span class="text-[13px] font-black text-emerald-400">${v}<span class="text-[8px] ml-0.5">KG</span></span>
+                        ${orm > 0 ? `<span data-testid="stat-1rm-val-${n.toLowerCase().replace(/\s/g, '-')}" class="text-[7px] font-bold text-indigo-400 mt-1 uppercase italic">${orm}KG EST. 1RM</span>` : ''}
+                    </div>`; 
+                }
+            }); 
         }
 
         function saveProfileName() { userData.name = document.getElementById('profName').value.toUpperCase(); saveAndRender(); }
