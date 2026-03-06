@@ -3,13 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GymLog Pro - v2.6.2</title>
-    
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%236366f1%22/><path d=%22M30 40h10v20H30zM60 40h10v20H60zM35 48h30v4H35z%22 fill=%22white%22/></svg>">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#020617">
-
+    <title>GymLog Pro - v2.6.0</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -62,12 +56,11 @@
     </style>
 </head>
 <body class="p-4 max-w-md mx-auto">
-
     <header class="flex justify-between items-center mb-8 pt-4">
         <div class="flex items-center">
             <div>
                 <h1 class="text-2xl font-black italic tracking-tighter inline-block">GYM<span class="text-indigo-500">LOG</span></h1>
-                <span class="text-[10px] font-black opacity-20 ml-1">v2.6.2</span>
+                <span class="text-[10px] font-black opacity-20 ml-1">v2.6.0</span>
             </div>
             <button data-testid="btn-app-reload" onclick="location.reload(true)" class="reload-btn">↻</button>
         </div>
@@ -240,7 +233,7 @@
             if (reps === 1) return weight;
             return weight * (36 / (37 - reps));
         }
-        
+
         function openExModal(sId) { 
             currentTargetSessionId = sId; 
             document.getElementById('exModal').classList.remove('hidden'); 
@@ -252,29 +245,17 @@
 
         function renderExTabs() {
             const cont = document.getElementById('exCategoryScroll');
-            cont.innerHTML = Object.keys(exLibrary).map(cat => `
-                <button data-testid="tab-cat-${cat.toLowerCase()}" onclick="filterExLibrary('${cat}')" class="cat-tab ${cat === currentSelectedCat ? 'active' : ''}" id="tab-${cat}">
-                    ${cat}
-                </button>
-            `).join('');
+            cont.innerHTML = Object.keys(exLibrary).map(cat => `<button data-testid="tab-cat-${cat.toLowerCase()}" onclick="filterExLibrary('${cat}')" class="cat-tab ${cat === currentSelectedCat ? 'active' : ''}" id="tab-${cat}">${cat}</button>`).join('');
         }
 
         function filterExLibrary(cat) {
             currentSelectedCat = cat;
             document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
             const activeTab = document.getElementById(`tab-${cat}`);
-            if(activeTab) {
-                activeTab.classList.add('active');
-                activeTab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-            }
+            if(activeTab) activeTab.classList.add('active');
             const cont = document.getElementById('exLibraryList');
             const items = exLibrary[cat] || [];
-            cont.innerHTML = items.sort().map(ex => `
-                <div data-testid="ex-item-${ex.toLowerCase().replace(/\s/g, '-')}" onclick="selectEx('${ex}')" class="ex-item">
-                    <span>${ex}</span>
-                    <button data-testid="btn-delete-lib-ex-${ex.toLowerCase().replace(/\s/g, '-')}" onclick="event.stopPropagation(); if(confirm('Wissen?')){ exLibrary['${cat}']=exLibrary['${cat}'].filter(x=>x!=='${ex}'); saveAndRender(); filterExLibrary('${cat}'); }" class="text-rose-500 text-[8px] self-end opacity-40">WIS</button>
-                </div>
-            `).join('');
+            cont.innerHTML = items.sort().map(ex => `<div data-testid="ex-item-${ex.toLowerCase().replace(/\s/g, '-')}" onclick="selectEx('${ex}')" class="ex-item"><span>${ex}</span><button data-testid="btn-delete-lib-ex-${ex.toLowerCase().replace(/\s/g, '-')}" onclick="event.stopPropagation(); if(confirm('Wissen?')){ exLibrary['${cat}']=exLibrary['${cat}'].filter(x=>x!=='${ex}'); saveAndRender(); filterExLibrary('${cat}'); }" class="text-rose-500 text-[8px] self-end opacity-40">WIS</button></div>`).join('');
         }
 
         function selectEx(name) { 
@@ -419,14 +400,12 @@
         function updateChart() { const ctx = document.getElementById('progressionChart'); if(!ctx) return; const name = document.getElementById('chartExerciseSelect').value; if(!name) return; const relevant = sessions.filter(s => s.exercises.some(e => e.name.toUpperCase() === name)).sort((a,b) => new Date(a.rawDate) - new Date(b.rawDate)); if(chartInstance) chartInstance.destroy(); chartInstance = new Chart(ctx, { type: 'line', data: { labels: relevant.map(s => s.rawDate), datasets: [{ data: relevant.map(s => Math.max(...s.exercises.find(e => e.name.toUpperCase() === name).sets.map(st => parseFloat(st.w) || 0))), borderColor: '#6366f1', tension: 0.3 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } } } }); }
         function cloneSession(id) { const old = sessions.find(s => s.id === id); const today = new Date(); const news = { id: Date.now(), name: old.name, date: today.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'short' }), rawDate: today.toISOString().split('T')[0], exercises: old.exercises.map(ex => ({ id: Date.now() + Math.random(), name: ex.name, sets: ex.sets.map(s => ({ w: s.w, r: s.r, bpm: '' })) })) }; sessions.unshift(news); activeSessionId = news.id; saveAndRender(); }
         
-        // --- UPDSET FIXED FOR v2.6.2 ---
         function updSet(sId, eId, i, f, v) { 
             const s = sessions.find(x => x.id === sId); 
             if(s) { 
                 const e = s.exercises.find(ex => ex.id === eId); 
                 if(e) { 
                     e.sets[i][f] = v; 
-                    // Update alleen de 1RM display live, niet de hele sessie view om focus te behouden
                     const orm = Math.round(calc1RM(e.sets[i].w, e.sets[i].r));
                     const ormEl = document.querySelector(`[data-testid="stat-live-1rm-${eId}-${i}"]`);
                     if(ormEl) ormEl.innerText = orm > 0 ? orm + ' 1RM' : '';
@@ -471,12 +450,7 @@
             Object.entries(records).sort((a,b) => a[0].localeCompare(b[0])).forEach(([n, v]) => { 
                 if (v > 0) {
                     const orm = Math.round(best1RM[n] || 0);
-                    recCont.innerHTML += `
-                    <div data-testid="record-tile-${n.toLowerCase().replace(/\s/g, '-')}" class="record-tile">
-                        <span class="text-[8px] font-black uppercase opacity-40 mb-1 truncate">${n}</span>
-                        <span class="text-[13px] font-black text-emerald-400">${v}<span class="text-[8px] ml-0.5">KG</span></span>
-                        ${orm > 0 ? `<span data-testid="stat-1rm-val-${n.toLowerCase().replace(/\s/g, '-')}" class="text-[7px] font-bold text-indigo-400 mt-1 uppercase italic">${orm}KG EST. 1RM</span>` : ''}
-                    </div>`; 
+                    recCont.innerHTML += `<div data-testid="record-tile-${n.toLowerCase().replace(/\s/g, '-')}" class="record-tile"><span class="text-[8px] font-black uppercase opacity-40 mb-1 truncate">${n}</span><span class="text-[13px] font-black text-emerald-400">${v}<span class="text-[8px] ml-0.5">KG</span></span>${orm > 0 ? `<span data-testid="stat-1rm-val-${n.toLowerCase().replace(/\s/g, '-')}" class="text-[7px] font-bold text-indigo-400 mt-1 uppercase italic">${orm}KG EST. 1RM</span>` : ''}</div>`; 
                 }
             }); 
         }
