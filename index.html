@@ -353,4 +353,139 @@
             const monthSessions = sessions.filter(s => { const sd = new Date(s.rawDate); return sd.getMonth() === targetMonth && sd.getFullYear() === targetYear; });
             let totalVol = 0; let catCount = {}; let exToCat = {};
             Object.keys(exLibrary).forEach(cat => catCount[cat] = 0);
-            Object.entries(exLibrary).forEach((
+            Object.entries(exLibrary).forEach(([cat, exs]) => exs.forEach(e => exToCat[e.toUpperCase()] = cat));
+            monthSessions.forEach(s => { s.exercises.forEach(ex => { const cat = exToCat[ex.name.toUpperCase()]; if(cat) catCount[cat]++; ex.sets.forEach(st => { totalVol += (parseFloat(st.w) || 0) * (parseInt(st.r) || 0); }); }); });
+            document.getElementById('recapMonth').innerText = monthLabel;
+            document.getElementById('recapSessions').innerText = monthSessions.length;
+            document.getElementById('recapVolume').innerText = totalVol.toLocaleString() + " KG";
+            const grid = document.getElementById('recapMuscleGrid'); grid.innerHTML = "";
+            Object.entries(catCount).forEach(([cat, count]) => { if(count > 0) grid.innerHTML += `<div><span class="bmw-val text-indigo-400">${count}</span><span class="bmw-label">${cat}</span></div>`; });
+            document.getElementById('bmwOverlay').classList.remove('hidden');
+        }
+
+        async function shareAsImage() {
+            const btn = document.getElementById('btnImgShare'); btn.innerText = "GENEREREN...";
+            const target = document.getElementById('captureTarget');
+            try {
+                const canvas = await html2canvas(target, { backgroundColor: '#020617', scale: 2, logging: false });
+                canvas.toBlob(async (blob) => {
+                    const file = new File([blob], 'gymlog_recap.png', { type: 'image/png' });
+                    if (navigator.share && navigator.canShare({ files: [file] })) {
+                        await navigator.share({ files: [file], title: 'Mijn GymLog Recap', text: 'Mijn progressie van afgelopen maand!' });
+                    } else {
+                        const link = document.createElement('a'); link.download = 'gymlog_recap.png'; link.href = canvas.toDataURL(); link.click();
+                    }
+                    btn.innerText = "AFBEELDING DELEN 📸";
+                });
+            } catch (err) { btn.innerText = "AFBEELDING DELEN 📸"; }
+        }
+
+        function renderRadarChart(days = 7) {
+            currentRadarDays = days; const ctx = document.getElementById('radarChart'); if(!ctx) return;
+            document.querySelectorAll('#radarFilters .filter-btn').forEach(b => { b.classList.remove('active'); if(b.getAttribute('onclick').includes(days)) b.classList.add('active'); });
+            const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - days);
+            const categories = Object.keys(exLibrary);
+            let exToCat = {}; Object.entries(exLibrary).forEach(([cat, exs]) => exs.forEach(e => exToCat[e.toUpperCase()] = cat));
+            let dataMap = {}; categories.forEach(cat => dataMap[cat] = 0);
+            sessions.forEach(s => { if (new Date(s.rawDate) >= cutoff) { s.exercises.forEach(ex => { const cat = exToCat[ex.name.toUpperCase()]; if (cat && dataMap.hasOwnProperty(cat)) { ex.sets.forEach(set => { dataMap[cat] += (parseFloat(set.w) || 0) * (parseInt(set.r) || 0); }); } }); } });
+            if(radarChartInstance) radarChartInstance.destroy();
+            radarChartInstance = new Chart(ctx, { type: 'radar', data: { labels: categories, datasets: [{ data: categories.map(c => dataMap[c]), backgroundColor: 'rgba(99, 102, 241, 0.25)', borderColor: '#6366f1', pointBackgroundColor: '#6366f1', borderWidth: 3, pointRadius: 4 }] }, options: { maintainAspectRatio: false, onClick: (e, elements) => { if(elements.length > 0) showDrillDown(categories[elements[0].index]); }, scales: { r: { beginAtZero: true, angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: 'rgba(255,255,255,0.6)', font: { size: 10, weight: '900' } }, ticks: { display: false } } }, plugins: { legend: { display: false } } } });
+        }
+
+        function showDrillDown(category) { 
+            const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - currentRadarDays); 
+            let drillData = {}; 
+            sessions.forEach(s => { if (new Date(s.rawDate) >= cutoff) { s.exercises.forEach(ex => { if ((exLibrary[category] || []).includes(ex.name.toUpperCase())) { if (!drillData[ex.name]) drillData[ex.name] = 0; ex.sets.forEach(set => { drillData[ex.name] += (parseFloat(set.w) || 0) * (parseInt(set.r) || 0); }); } }); } }); 
+            const nav = document.getElementById('drillDownNav'); nav.innerHTML = ""; 
+            Object.keys(exLibrary).forEach(cat => { const b = document.createElement('button'); b.className = `overlay-nav-btn ${cat === category ? 'active' : ''}`; b.innerText = cat; b.onclick = () => showDrillDown(cat); nav.appendChild(b); }); 
+            document.getElementById('drillDownTitle').innerText = category; document.getElementById('drillDownModal').classList.remove('hidden'); 
+            if(drillDownChartInstance) drillDownChartInstance.destroy(); 
+            drillDownChartInstance = new Chart(document.getElementById('drillDownChart'), { type: 'bar', data: { labels: Object.keys(drillData), datasets: [{ data: Object.values(drillData), backgroundColor: '#6366f1' }] }, options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { display: false }, ticks: { color: '#fff', font: { size: 9, weight: 'bold' } } } } } }); 
+        }
+
+        function renderWeightChart(days = 30) {
+            const ctx = document.getElementById('weightChart'); if(!ctx) return;
+            document.querySelectorAll('.weight-f').forEach(b => { b.classList.remove('active'); if(b.getAttribute('onclick').includes(days)) b.classList.add('active'); });
+            const logs = (userData.weightLogs || []).slice(0, days).reverse();
+            if(weightChartInstance) weightChartInstance.destroy();
+            weightChartInstance = new Chart(ctx, { type: 'line', data: { labels: logs.map(l => new Date(l.date).toLocaleDateString('nl-NL', {day:'numeric', month:'short'})), datasets: [ { label: 'KG', data: logs.map(l => l.w), borderColor: '#6366f1', tension: 0.4, yAxisID: 'y' }, { label: 'VET %', data: logs.map(l => l.fat), borderColor: '#10b981', borderDash: [5,5], yAxisID: 'y1' } ] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: true, position: 'left', grid: { color: 'rgba(255,255,255,0.05)' } }, y1: { display: true, position: 'right', grid: { display: false } } } } });
+        }
+
+        function logWeight() { const w = document.getElementById('profWeightInput').value; const fat = document.getElementById('profFatInput').value; if(w){ userData.weightLogs.unshift({ w: parseFloat(w), fat: fat ? parseFloat(fat) : null, date: new Date().toISOString() }); saveAndRender(); document.getElementById('profWeightInput').value = ""; document.getElementById('profFatInput').value = ""; renderWeightChart(30); } }
+        function renderWeightLogs() { const logs = (userData.weightLogs || []).slice(0,10); document.getElementById('weightLogList').innerHTML = logs.map((l, i) => `<div data-testid="weight-log-item-${i}" class="flex justify-between items-center text-[10px] font-bold p-3 bg-white/5 rounded-xl mb-1 border border-white/5"><div><span class="text-indigo-400 font-black">${l.w} KG</span>${l.fat ? `<span class="text-emerald-400 ml-2 italic">${l.fat}% VET</span>` : ''}</div><div class="flex gap-3 items-center"><span class="opacity-40 uppercase text-[8px]">${new Date(l.date).toLocaleDateString('nl-NL', {day:'2-digit', month:'2-digit'})}</span><button data-testid="btn-delete-weight-log-${i}" onclick="userData.weightLogs.splice(${i},1); saveAndRender();" class="text-rose-500">✕</button></div></div>`).join(''); }
+        function showView(v) { document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden')); document.getElementById('view-'+v).classList.remove('hidden'); if(v==='charts') renderCharts(); if(v==='profile') renderWeightChart(30); }
+        function updateHeader() { const logs = userData.weightLogs || []; const lastW = (logs.length > 0) ? logs[0].w : "--"; document.getElementById('headerStats').innerText = `${userData.name || "GYMLOG"} • ${lastW} KG`; }
+        function populateExerciseSelect() { const u = [...new Set(sessions.flatMap(s => s.exercises.map(e => e.name.toUpperCase())))].sort(); document.getElementById('chartExerciseSelect').innerHTML = u.map(n => `<option value="${n}">${n}</option>`).join(''); }
+        function updateChart() { const ctx = document.getElementById('progressionChart'); if(!ctx) return; const name = document.getElementById('chartExerciseSelect').value; if(!name) return; const relevant = sessions.filter(s => s.exercises.some(e => e.name.toUpperCase() === name)).sort((a,b) => new Date(a.rawDate) - new Date(b.rawDate)); if(chartInstance) chartInstance.destroy(); chartInstance = new Chart(ctx, { type: 'line', data: { labels: relevant.map(s => s.rawDate), datasets: [{ data: relevant.map(s => Math.max(...s.exercises.find(e => e.name.toUpperCase() === name).sets.map(st => parseFloat(st.w) || 0))), borderColor: '#6366f1', tension: 0.3 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } } } }); }
+        function cloneSession(id) { const old = sessions.find(s => s.id === id); const today = new Date(); const news = { id: Date.now(), name: old.name, date: today.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'short' }), rawDate: today.toISOString().split('T')[0], exercises: old.exercises.map(ex => ({ id: Date.now() + Math.random(), name: ex.name, sets: ex.sets.map(s => ({ w: s.w, r: s.r, bpm: '' })) })) }; sessions.unshift(news); activeSessionId = news.id; saveAndRender(); }
+        
+        // --- UPDSET FIXED FOR v2.6.2 ---
+        function updSet(sId, eId, i, f, v) { 
+            const s = sessions.find(x => x.id === sId); 
+            if(s) { 
+                const e = s.exercises.find(ex => ex.id === eId); 
+                if(e) { 
+                    e.sets[i][f] = v; 
+                    // Update alleen de 1RM display live, niet de hele sessie view om focus te behouden
+                    const orm = Math.round(calc1RM(e.sets[i].w, e.sets[i].r));
+                    const ormEl = document.querySelector(`[data-testid="stat-live-1rm-${eId}-${i}"]`);
+                    if(ormEl) ormEl.innerText = orm > 0 ? orm + ' 1RM' : '';
+                    localStorage.setItem('gym_sessions', JSON.stringify(sessions)); 
+                } 
+            } 
+        }
+
+        function addSet(sId, exId) { const s = sessions.find(x => x.id === sId); const e = s.exercises.find(ex => ex.id === exId); e.sets.push({w:'', r:REP_DEFAULTS[e.sets.length] || 6, bpm:''}); saveAndRender(); }
+        function exportData() { const blob = new Blob([JSON.stringify({ sessions, exLibrary, user: userData })], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `gymlog_backup.json`; a.click(); }
+        function importData(e) { const reader = new FileReader(); reader.onload = (ev) => { try { const imp = JSON.parse(ev.target.result); if (imp.sessions) sessions = imp.sessions; if (imp.exLibrary) exLibrary = imp.exLibrary; if (imp.user) userData = imp.user; saveAndRender(); location.reload(); } catch (err) { alert("Fout."); } }; reader.readAsText(e.target.files[0]); }
+        
+        function renderCharts() { 
+            updateChart(); 
+            renderRadarChart(currentRadarDays); 
+            const volCont = document.getElementById('volumeTracker'); 
+            const recCont = document.getElementById('recordsTracker'); 
+            volCont.innerHTML = ""; recCont.innerHTML = ""; 
+            let volPerCat = {}; let exToCat = {}; let records = {}; let best1RM = {};
+            for (const [cat, exs] of Object.entries(exLibrary)) { volPerCat[cat] = 0; exs.forEach(e => exToCat[e.toUpperCase()] = cat); } 
+            volPerCat["OVERIG"] = 0; const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); 
+            sessions.forEach(s => { 
+                const isRecent = new Date(s.rawDate) >= sevenDaysAgo; 
+                s.exercises.forEach(ex => { 
+                    const n = ex.name.toUpperCase(); 
+                    const cat = exToCat[n] || "OVERIG"; 
+                    let maxW = 0; 
+                    ex.sets.forEach(st => { 
+                        const w = parseFloat(st.w) || 0; const r = parseInt(st.r) || 0; 
+                        const orm = calc1RM(w, r);
+                        if (isRecent) volPerCat[cat] += (w * r); 
+                        if (w > maxW) maxW = w; 
+                        if (!best1RM[n] || orm > best1RM[n]) best1RM[n] = orm;
+                    }); 
+                    if (!records[n] || maxW > records[n]) records[n] = maxW; 
+                }); 
+            }); 
+            const maxVol = Math.max(...Object.values(volPerCat), 1); 
+            Object.entries(volPerCat).sort((a,b)=>b[1]-a[1]).forEach(([c, v]) => { 
+                if (v > 0 || c !== "OVERIG") volCont.innerHTML += `<div data-testid="volume-bar-${c.toLowerCase()}"><div class="flex justify-between text-[8px] font-black uppercase"><span>${c}</span><span>${v.toLocaleString()} KG</span></div><div class="bg-slate-900 rounded-full h-2 mt-1 overflow-hidden"><div data-testid="volume-fill-${c.toLowerCase()}" class="heatmap-bar-fill" style="width: ${Math.round((v/maxVol)*100)}%"></div></div></div>`; 
+            }); 
+            Object.entries(records).sort((a,b) => a[0].localeCompare(b[0])).forEach(([n, v]) => { 
+                if (v > 0) {
+                    const orm = Math.round(best1RM[n] || 0);
+                    recCont.innerHTML += `
+                    <div data-testid="record-tile-${n.toLowerCase().replace(/\s/g, '-')}" class="record-tile">
+                        <span class="text-[8px] font-black uppercase opacity-40 mb-1 truncate">${n}</span>
+                        <span class="text-[13px] font-black text-emerald-400">${v}<span class="text-[8px] ml-0.5">KG</span></span>
+                        ${orm > 0 ? `<span data-testid="stat-1rm-val-${n.toLowerCase().replace(/\s/g, '-')}" class="text-[7px] font-bold text-indigo-400 mt-1 uppercase italic">${orm}KG EST. 1RM</span>` : ''}
+                    </div>`; 
+                }
+            }); 
+        }
+
+        function saveProfileName() { userData.name = document.getElementById('profName').value.toUpperCase(); saveAndRender(); }
+        function startCustomEx() { const n = prompt("Naam oefening:"); if(!n) return; pendingExName = n.toUpperCase(); const btnCont = document.getElementById('catBtnContainer'); btnCont.innerHTML = ""; Object.keys(exLibrary).forEach(cat => { const b = document.createElement('button'); b.setAttribute('data-testid', `btn-link-cat-${cat.toLowerCase()}`); b.className = "glass p-4 text-[10px] font-black uppercase"; b.innerText = cat; b.onclick = () => { if(!exLibrary[cat].includes(pendingExName)) exLibrary[cat].push(pendingExName); document.getElementById('catSelectorModal').classList.add('hidden'); saveAndRender(); filterExLibrary(cat); }; btnCont.appendChild(b); }); document.getElementById('catSelectorModal').classList.remove('hidden'); }
+        async function shareWorkout(id) { const s = sessions.find(x => x.id === id); const text = `GymLog - ${s.name} (${s.date})\n${s.exercises.map(ex => `\n${ex.name}:${ex.sets.map(st => `\n- ${st.w}kg x ${st.r}`).join('')}`).join('\n')}`; if (navigator.share) await navigator.share({ title: 'Mijn Training', text }); else { navigator.clipboard.writeText(text); alert("Gekopieerd!"); } }
+        
+        init();
+    </script>
+</body>
+</html>
