@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GymLog Pro - v2.6.0</title>
-<link rel="icon" type="image/jpeg" href="IMG_2930.jpeg?v=12">
-<link rel="apple-touch-icon" href="IMG_2930.jpeg?v=12">
+    <title>GymLog Pro - v2.6.1</title>
+    <link rel="icon" type="image/jpeg" href="IMG_2930.jpeg?v=12">
+    <link rel="apple-touch-icon" href="IMG_2930.jpeg?v=12">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -63,7 +62,7 @@
         <div class="flex items-center">
             <div>
                 <h1 class="text-2xl font-black italic tracking-tighter inline-block">GYM<span class="text-indigo-500">LOG</span></h1>
-                <span class="text-[10px] font-black opacity-20 ml-1">v2.6.0</span>
+                <span class="text-[10px] font-black opacity-20 ml-1">v2.6.1</span>
             </div>
             <button data-testid="btn-app-reload" onclick="location.reload(true)" class="reload-btn">↻</button>
         </div>
@@ -208,6 +207,7 @@
         const REP_DEFAULTS = [12, 10, 8, 6];
         let exLibrary = INITIAL_LIB, sessions = [], userData = { name: "GEBRUIKER", weightLogs: [] };
         let activeSessionId = null, chartInstance = null, weightChartInstance = null, radarChartInstance = null, drillDownChartInstance = null, currentTargetSessionId = null, pendingExName = "", swapExId = null, currentRadarDays = 7, activeMonths = new Set(), currentSelectedCat = "Borst";
+        let openExIds = new Set(); // Voor in-/uitklappen oefeningen
 
         function init() { 
             sessions = JSON.parse(localStorage.getItem('gym_sessions')) || [];
@@ -235,6 +235,21 @@
             if (!weight || !reps || reps < 1) return 0;
             if (reps === 1) return weight;
             return weight * (36 / (37 - reps));
+        }
+
+        function editSessionName(id) {
+            const s = sessions.find(x => x.id === id);
+            const newName = prompt("Nieuwe naam voor training:", s.name);
+            if (newName) {
+                s.name = newName.toUpperCase();
+                saveAndRender();
+            }
+        }
+
+        function toggleExSets(exId) {
+            if (openExIds.has(exId)) openExIds.delete(exId);
+            else openExIds.add(exId);
+            renderSessions();
         }
 
         function openExModal(sId) { 
@@ -267,7 +282,9 @@
                 sess.exercises.find(e => e.id === swapExId).name = name.toUpperCase(); 
                 swapExId = null; 
             } else { 
-                sess.exercises.push({ id: Date.now(), name: name.toUpperCase(), sets: [{w:'', r:12, bpm:''}, {w:'', r:10, bpm:''}, {w:'', r:8, bpm:''}, {w:'', r:6, bpm:''}]}); 
+                const newExId = Date.now();
+                sess.exercises.push({ id: newExId, name: name.toUpperCase(), sets: [{w:'', r:12, bpm:''}, {w:'', r:10, bpm:''}, {w:'', r:8, bpm:''}, {w:'', r:6, bpm:''}]}); 
+                openExIds.add(newExId); // Nieuwe oefening direct uitgeklapt tonen
             } 
             saveAndRender(); closeExModal(); 
         }
@@ -298,13 +315,33 @@
                 if (isOpen) groups[key].sessions.forEach(session => {
                     cont.innerHTML += `<div data-testid="session-card-${session.id}" class="glass p-6 mb-4 ${activeSessionId === session.id ? 'border-indigo-500/40' : ''}">
                         <div onclick="activeSessionId = activeSessionId === ${session.id} ? null : ${session.id}; renderSessions();">
-                            <div class="flex justify-between items-start"><h3 data-testid="session-title-${session.id}" class="text-xl font-black italic uppercase">${session.name}</h3><div class="flex gap-2" onclick="event.stopPropagation()"><button data-testid="btn-clone-session-${session.id}" onclick="cloneSession(${session.id})" class="action-btn btn-copy">Kopie</button><button data-testid="btn-share-text-session-${session.id}" onclick="shareWorkout(${session.id})" class="action-btn btn-share">Deel</button><button data-testid="btn-delete-session-${session.id}" onclick="if(confirm('Wissen?')){ sessions=sessions.filter(x=>x.id!==${session.id}); saveAndRender(); }" class="action-btn btn-delete">Wis</button></div></div>
+                            <div class="flex justify-between items-start">
+                                <h3 data-testid="session-title-${session.id}" class="text-xl font-black italic uppercase flex items-center gap-2">
+                                    ${session.name}
+                                    <button data-testid="btn-edit-session-name-${session.id}" onclick="event.stopPropagation(); editSessionName(${session.id})" class="text-[12px] opacity-40">✎</button>
+                                </h3>
+                                <div class="flex gap-2" onclick="event.stopPropagation()">
+                                    <button data-testid="btn-clone-session-${session.id}" onclick="cloneSession(${session.id})" class="action-btn btn-copy">Kopie</button>
+                                    <button data-testid="btn-share-text-session-${session.id}" onclick="shareWorkout(${session.id})" class="action-btn btn-share">Deel</button>
+                                    <button data-testid="btn-delete-session-${session.id}" onclick="if(confirm('Wissen?')){ sessions=sessions.filter(x=>x.id!==${session.id}); saveAndRender(); }" class="action-btn btn-delete">Wis</button>
+                                </div>
+                            </div>
                             <div class="text-[9px] font-black opacity-30 uppercase italic">${session.date}</div>
                         </div>
                         <div class="${activeSessionId === session.id ? 'mt-6' : 'hidden'}">
-                            ${session.exercises.map((ex, exIdx) => `<div data-testid="session-ex-${ex.id}" class="mb-6 bg-white/5 p-4 rounded-xl">
-                                <div class="flex justify-between mb-4"><button data-testid="btn-swap-ex-${ex.id}" onclick="swapExId=${ex.id}; openExModal(${session.id})" class="ex-name-btn text-[10px] font-black text-indigo-300 uppercase">${ex.name} ↻</button><button data-testid="btn-remove-ex-${ex.id}" onclick="const s=sessions.find(x=>x.id===${session.id}); s.exercises.splice(${exIdx},1); saveAndRender();" class="text-rose-500 text-[9px] font-black">WIS</button></div>
-                                <div class="space-y-3">
+                            ${session.exercises.map((ex, exIdx) => {
+                                const isExOpen = openExIds.has(ex.id);
+                                return `<div data-testid="session-ex-${ex.id}" class="mb-4 bg-white/5 p-4 rounded-xl">
+                                <div class="flex justify-between items-center">
+                                    <button data-testid="btn-toggle-ex-${ex.id}" onclick="toggleExSets(${ex.id})" class="text-[10px] font-black text-indigo-300 uppercase flex items-center gap-2">
+                                        ${isExOpen ? '▾' : '▸'} ${ex.name}
+                                    </button>
+                                    <div class="flex gap-4">
+                                        <button data-testid="btn-swap-ex-${ex.id}" onclick="swapExId=${ex.id}; openExModal(${session.id})" class="text-[9px] font-black opacity-30">SWAP</button>
+                                        <button data-testid="btn-remove-ex-${ex.id}" onclick="const s=sessions.find(x=>x.id===${session.id}); s.exercises.splice(${exIdx},1); saveAndRender();" class="text-rose-500 text-[9px] font-black">WIS</button>
+                                    </div>
+                                </div>
+                                <div class="${isExOpen ? 'mt-4 space-y-3' : 'hidden'}">
                                     ${ex.sets.map((s, i) => {
                                         const orm = Math.round(calc1RM(s.w, s.r));
                                         return `<div data-testid="set-row-${ex.id}-${i}" class="grid grid-cols-5 gap-2 items-center">
@@ -318,9 +355,9 @@
                                             <button data-testid="btn-remove-set-${ex.id}-${i}" onclick="const e=sessions.find(s=>s.id===${session.id}).exercises.find(x=>x.id===${ex.id}); e.sets.splice(${i},1); saveAndRender();" class="text-rose-500 font-bold text-xl">×</button>
                                         </div>`;
                                     }).join('')}
+                                    <button data-testid="btn-add-set-${ex.id}" onclick="addSet(${session.id}, ${ex.id})" class="w-full mt-4 py-2 border border-dashed border-white/10 rounded-lg text-[8px] font-black opacity-30 uppercase">+ Set</button>
                                 </div>
-                                <button data-testid="btn-add-set-${ex.id}" onclick="addSet(${session.id}, ${ex.id})" class="w-full mt-4 py-2 border border-dashed border-white/10 rounded-lg text-[8px] font-black opacity-30 uppercase">+ Set</button>
-                            </div>`).join('')}
+                            </div>`}).join('')}
                             <button data-testid="btn-add-ex-${session.id}" onclick="swapExId=null; openExModal(${session.id})" class="btn-primary w-full py-3 text-[10px] italic">+ Oefening</button>
                         </div>
                     </div>`;
