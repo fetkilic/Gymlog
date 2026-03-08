@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GymLog Pro - v2.6.1</title>
+    <title>GymLog Pro - v2.6.2</title>
     <link rel="icon" type="image/jpeg" href="IMG_2930.jpeg?v=12">
     <link rel="apple-touch-icon" href="IMG_2930.jpeg?v=12">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -55,6 +55,7 @@
         .overlay-nav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); scrollbar-width: none; }
         .overlay-nav-btn { font-size: 7px; font-weight: 900; white-space: nowrap; padding: 6px 10px; border-radius: 6px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); text-transform: uppercase; }
         .overlay-nav-btn.active { background: var(--accent); color: white; }
+        .edit-session-input { background: transparent; border-bottom: 1px solid var(--accent); color: white; font-style: italic; font-weight: 900; text-transform: uppercase; outline: none; width: 100%; }
     </style>
 </head>
 <body class="p-4 max-w-md mx-auto">
@@ -62,7 +63,7 @@
         <div class="flex items-center">
             <div>
                 <h1 class="text-2xl font-black italic tracking-tighter inline-block">GYM<span class="text-indigo-500">LOG</span></h1>
-                <span class="text-[10px] font-black opacity-20 ml-1">v2.6.1</span>
+                <span class="text-[10px] font-black opacity-20 ml-1">v2.6.2</span>
             </div>
             <button data-testid="btn-app-reload" onclick="location.reload(true)" class="reload-btn">↻</button>
         </div>
@@ -207,7 +208,8 @@
         const REP_DEFAULTS = [12, 10, 8, 6];
         let exLibrary = INITIAL_LIB, sessions = [], userData = { name: "GEBRUIKER", weightLogs: [] };
         let activeSessionId = null, chartInstance = null, weightChartInstance = null, radarChartInstance = null, drillDownChartInstance = null, currentTargetSessionId = null, pendingExName = "", swapExId = null, currentRadarDays = 7, activeMonths = new Set(), currentSelectedCat = "Borst";
-        let openExIds = new Set(); // Voor in-/uitklappen oefeningen
+        let openExIds = new Set();
+        let editingSessionId = null; // Voor inline naamwijziging
 
         function init() { 
             sessions = JSON.parse(localStorage.getItem('gym_sessions')) || [];
@@ -237,13 +239,25 @@
             return weight * (36 / (37 - reps));
         }
 
-        function editSessionName(id) {
-            const s = sessions.find(x => x.id === id);
-            const newName = prompt("Nieuwe naam voor training:", s.name);
-            if (newName) {
-                s.name = newName.toUpperCase();
-                saveAndRender();
+        function startEditingSession(id) {
+            editingSessionId = id;
+            renderSessions();
+            setTimeout(() => {
+                const input = document.getElementById(`edit-input-${id}`);
+                if (input) {
+                    input.focus();
+                    input.select();
+                }
+            }, 50);
+        }
+
+        function saveSessionName(id, newName) {
+            if (newName && newName.trim() !== "") {
+                const s = sessions.find(x => x.id === id);
+                if (s) s.name = newName.toUpperCase();
             }
+            editingSessionId = null;
+            saveAndRender();
         }
 
         function toggleExSets(exId) {
@@ -284,7 +298,7 @@
             } else { 
                 const newExId = Date.now();
                 sess.exercises.push({ id: newExId, name: name.toUpperCase(), sets: [{w:'', r:12, bpm:''}, {w:'', r:10, bpm:''}, {w:'', r:8, bpm:''}, {w:'', r:6, bpm:''}]}); 
-                openExIds.add(newExId); // Nieuwe oefening direct uitgeklapt tonen
+                openExIds.add(newExId);
             } 
             saveAndRender(); closeExModal(); 
         }
@@ -313,13 +327,19 @@
                 const isOpen = activeMonths.has(key);
                 cont.innerHTML += `<div data-testid="header-month-${key}" class="month-header" onclick="if(activeMonths.has('${key}')) activeMonths.delete('${key}'); else activeMonths.add('${key}'); renderSessions();">${groups[key].label} ${isOpen ? '▾' : '▸'}</div>`;
                 if (isOpen) groups[key].sessions.forEach(session => {
+                    const isEditing = editingSessionId === session.id;
                     cont.innerHTML += `<div data-testid="session-card-${session.id}" class="glass p-6 mb-4 ${activeSessionId === session.id ? 'border-indigo-500/40' : ''}">
-                        <div onclick="activeSessionId = activeSessionId === ${session.id} ? null : ${session.id}; renderSessions();">
+                        <div onclick="if(!editingSessionId) { activeSessionId = activeSessionId === ${session.id} ? null : ${session.id}; renderSessions(); }">
                             <div class="flex justify-between items-start">
-                                <h3 data-testid="session-title-${session.id}" class="text-xl font-black italic uppercase flex items-center gap-2">
-                                    ${session.name}
-                                    <button data-testid="btn-edit-session-name-${session.id}" onclick="event.stopPropagation(); editSessionName(${session.id})" class="text-[12px] opacity-40">✎</button>
-                                </h3>
+                                <div class="flex-1 mr-2" onclick="event.stopPropagation()">
+                                    ${isEditing ? 
+                                        `<input data-testid="input-edit-session-name-${session.id}" id="edit-input-${session.id}" class="edit-session-input" value="${session.name}" onblur="saveSessionName(${session.id}, this.value)" onkeydown="if(event.key==='Enter') saveSessionName(${session.id}, this.value)">` : 
+                                        `<h3 data-testid="session-title-${session.id}" class="text-xl font-black italic uppercase flex items-center gap-2">
+                                            ${session.name}
+                                            <button data-testid="btn-edit-session-name-${session.id}" onclick="event.stopPropagation(); startEditingSession(${session.id})" class="text-[12px] opacity-40">✎</button>
+                                        </h3>`
+                                    }
+                                </div>
                                 <div class="flex gap-2" onclick="event.stopPropagation()">
                                     <button data-testid="btn-clone-session-${session.id}" onclick="cloneSession(${session.id})" class="action-btn btn-copy">Kopie</button>
                                     <button data-testid="btn-share-text-session-${session.id}" onclick="shareWorkout(${session.id})" class="action-btn btn-share">Deel</button>
@@ -365,6 +385,7 @@
             });
         }
 
+        // Rest van de bestaande functies (geen wijzigingen)
         function generateBMWRecap() {
             const now = new Date();
             const d = new Date(now.getFullYear(), now.getMonth() - 1, 1);
