@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GymLog Pro - v2.6.6</title>
+    <title>GymLog Pro - v2.6.7</title>
     <link rel="icon" type="image/jpeg" href="IMG_2930.jpeg?v=12">
     <link rel="apple-touch-icon" href="IMG_2930.jpeg?v=12">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -55,6 +55,8 @@
         .overlay-nav-btn { font-size: 7px; font-weight: 900; white-space: nowrap; padding: 6px 10px; border-radius: 6px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); text-transform: uppercase; }
         .overlay-nav-btn.active { background: var(--accent); color: white; }
         .edit-session-input { background: rgba(15, 23, 42, 0.9); border: 1px solid var(--accent); color: white; font-style: italic; font-weight: 900; text-transform: uppercase; outline: none; width: 100%; padding: 4px 8px; border-radius: 8px; }
+        .order-btn { font-size: 14px; opacity: 0.3; padding: 0 4px; }
+        .order-btn:hover { opacity: 1; color: var(--accent); }
     </style>
 </head>
 <body class="p-4 max-w-md mx-auto">
@@ -62,7 +64,7 @@
         <div class="flex items-center">
             <div>
                 <h1 class="text-2xl font-black italic tracking-tighter inline-block">GYM<span class="text-indigo-500">LOG</span></h1>
-                <span class="text-[10px] font-black opacity-20 ml-1">v2.6.6</span>
+                <span class="text-[10px] font-black opacity-20 ml-1">v2.6.7</span>
             </div>
             <button data-testid="btn-app-reload" onclick="location.reload(true)" class="reload-btn">↻</button>
         </div>
@@ -246,6 +248,16 @@
             renderSessions();
         }
 
+        function moveExercise(sessId, fromIdx, direction) {
+            const sess = sessions.find(s => s.id === sessId);
+            const toIdx = fromIdx + direction;
+            if (toIdx < 0 || toIdx >= sess.exercises.length) return;
+            const temp = sess.exercises[fromIdx];
+            sess.exercises[fromIdx] = sess.exercises[toIdx];
+            sess.exercises[toIdx] = temp;
+            saveAndRender();
+        }
+
         function editSessionName(id) {
             editingSessionId = id;
             renderSessions();
@@ -315,12 +327,18 @@
                                 const isExOpen = openExIds.has(ex.id);
                                 return `<div class="mb-4 bg-white/5 p-4 rounded-xl border border-white/5">
                                 <div class="flex justify-between items-center">
-                                    <button onclick="toggleExSets(${ex.id})" class="text-[10px] font-black text-indigo-300 uppercase flex items-center gap-2">
-                                        <span class="text-xs">${isExOpen ? '▾' : '▸'}</span> ${ex.name}
-                                    </button>
+                                    <div class="flex items-center gap-1">
+                                        <button onclick="toggleExSets(${ex.id})" class="text-[10px] font-black text-indigo-300 uppercase flex items-center gap-2">
+                                            <span class="text-xs">${isExOpen ? '▾' : '▸'}</span> ${ex.name}
+                                        </button>
+                                        <div class="flex ml-2">
+                                            <button onclick="moveExercise(${session.id}, ${exIdx}, -1)" class="order-btn" data-testid="btn-move-up-${ex.id}">↑</button>
+                                            <button onclick="moveExercise(${session.id}, ${exIdx}, 1)" class="order-btn" data-testid="btn-move-down-${ex.id}">↓</button>
+                                        </div>
+                                    </div>
                                     <div class="flex gap-4">
-                                        <button onclick="swapExId=${ex.id}; openExModal(${session.id})" class="text-[9px] font-black opacity-30">SWAP</button>
-                                        <button onclick="const s=sessions.find(x=>x.id===${session.id}); s.exercises.splice(${exIdx},1); saveAndRender();" class="text-rose-500 text-[9px] font-black">WIS</button>
+                                        <button onclick="swapExId=${ex.id}; openExModal(${session.id})" class="text-[9px] font-black opacity-30 uppercase tracking-tighter">SWAP</button>
+                                        <button onclick="const s=sessions.find(x=>x.id===${session.id}); s.exercises.splice(${exIdx},1); saveAndRender();" class="text-rose-500 text-[9px] font-black uppercase tracking-tighter">WIS</button>
                                     </div>
                                 </div>
                                 <div class="${isExOpen ? 'mt-6 space-y-3' : 'hidden'}">
