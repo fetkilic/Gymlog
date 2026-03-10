@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GymLog Pro - v2.7.2</title>
+    <title>GymLog Pro - v2.7.4</title>
     <link rel="icon" type="image/jpeg" href="IMG_2930.jpeg?v=12">
     <link rel="apple-touch-icon" href="IMG_2930.jpeg?v=12">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -41,7 +41,6 @@
         .month-header { font-size: 11px; font-weight: 900; color: #6366f1; letter-spacing: 1px; margin: 24px 0 12px 4px; display: flex; align-items: center; gap: 8px; opacity: 0.8; cursor: pointer; }
         .month-header::after { content: ''; height: 1px; background: linear-gradient(90deg, rgba(99,102,241,0.3), transparent); flex: 1; }
         
-        /* Fixed Nav specifically targeting the jump bug */
         nav { position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; width: 100vw !important; height: 85px !important; z-index: 9999 !important; background: rgba(15, 23, 42, 0.95) !important; backdrop-filter: blur(15px); border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); transform: translateZ(0); }
         
         .overlay-nav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); scrollbar-width: none; }
@@ -58,7 +57,7 @@
         <div class="flex items-center">
             <div>
                 <h1 class="text-2xl font-black italic tracking-tighter inline-block">GYM<span class="text-indigo-500">LOG</span></h1>
-                <span class="text-[10px] font-black opacity-20 ml-1">v2.7.2</span>
+                <span class="text-[10px] font-black opacity-20 ml-1">v2.7.4</span>
             </div>
             <button data-testid="btn-app-reload" onclick="location.reload(true)" class="reload-btn">↻</button>
         </div>
@@ -313,7 +312,7 @@
                                                 <span class="text-[9px] opacity-20 font-bold">S${i+1}</span>
                                                 <span class="text-[7px] text-indigo-400 font-black">${orm > 0 ? orm + ' 1RM' : ''}</span>
                                             </div>
-                                            <input type="text" inputmode="decimal" onclick="this.select()" onchange="updSet(${session.id},${ex.id},${i},'w',this.value)" value="${s.w||''}" class="table-input" placeholder="kg">
+                                            <input type="text" inputmode="decimal" onclick="this.select()" oninput="this.value = this.value.replace(/,/g, '.')" onchange="updSet(${session.id},${ex.id},${i},'w',this.value)" value="${s.w||''}" class="table-input" placeholder="kg">
                                             <input type="text" inputmode="numeric" onclick="this.select()" onchange="updSet(${session.id},${ex.id},${i},'r',this.value)" value="${s.r||''}" class="table-input" placeholder="reps">
                                             <input type="text" inputmode="numeric" onclick="this.select()" onchange="updSet(${session.id},${ex.id},${i},'bpm',this.value)" value="${s.bpm || ''}" class="table-input !text-rose-400" placeholder="bpm">
                                             <button onclick="const e=sessions.find(s=>s.id===${session.id}).exercises.find(x=>x.id===${ex.id}); e.sets.splice(${i},1); saveAndRender();" class="text-rose-500 font-bold text-xl">×</button>
@@ -339,14 +338,15 @@
             sessions.forEach(s => { 
                 const isRecent = new Date(s.rawDate) >= sevenDaysAgo; 
                 s.exercises.forEach(ex => { 
-                    const n = ex.name.toUpperCase(); const cat = exToCat[n] || "OTHER"; let maxW = 0; 
+                    const n = ex.name.toUpperCase(); const cat = exToCat[n] || "OTHER"; 
                     ex.sets.forEach(st => { 
                         const weight = parseFloat(st.w) || 0; const reps = parseInt(st.r) || 0; const orm = calc1RM(weight, reps);
                         if (isRecent) volPerCat[cat] += (weight * reps); 
-                        if (weight > maxW) maxW = weight; 
+                        if (!records[n] || weight > records[n].val) {
+                            records[n] = { val: weight, reps: reps };
+                        }
                         if (!best1RM[n] || orm > best1RM[n]) best1RM[n] = orm;
                     }); 
-                    if (!records[n] || maxW > records[n]) records[n] = maxW; 
                 }); 
             }); 
             const maxVol = Math.max(...Object.values(volPerCat), 1); 
@@ -354,16 +354,16 @@
                 if (v > 0 || c !== "OTHER") volCont.innerHTML += `<div><div class="flex justify-between text-[8px] font-black uppercase"><span>${c}</span><span>${v.toLocaleString()} KG</span></div><div class="bg-slate-900 rounded-full h-2 mt-1 overflow-hidden"><div class="heatmap-bar-fill" style="width: ${Math.round((v/maxVol)*100)}%"></div></div></div>`; 
             }); 
             const catsWithRecords = {};
-            Object.entries(records).forEach(([name, val]) => {
+            Object.entries(records).forEach(([name, data]) => {
                 const cat = exToCat[name] || "OTHER";
                 if(!catsWithRecords[cat]) catsWithRecords[cat] = [];
-                catsWithRecords[cat].push({ name, val, orm: Math.round(best1RM[name] || 0) });
+                catsWithRecords[cat].push({ name, val: data.val, reps: data.reps, orm: Math.round(best1RM[name] || 0) });
             });
             Object.keys(catsWithRecords).sort().forEach(cat => {
                 recCont.innerHTML += `<div class="record-cat-header">${cat}</div>`;
                 const grid = document.createElement('div'); grid.className = "ex-grid";
                 catsWithRecords[cat].sort((a,b) => a.name.localeCompare(b.name)).forEach(rec => {
-                    grid.innerHTML += `<div class="record-tile"><span class="text-[8px] font-black uppercase opacity-40 mb-1 truncate">${rec.name}</span><span class="text-[13px] font-black text-emerald-400">${rec.val}<span class="text-[8px] ml-0.5">KG</span></span>${rec.orm > 0 ? `<span class="text-[7px] font-bold text-indigo-400 mt-1 uppercase italic">${rec.orm}KG EST. 1RM</span>` : ''}</div>`;
+                    grid.innerHTML += `<div class="record-tile"><span class="text-[8px] font-black uppercase opacity-40 mb-1 truncate">${rec.name}</span><span class="text-[13px] font-black text-emerald-400">${rec.val}<span class="text-[8px] ml-0.5">KG</span> <span class="text-[9px] text-rose-500">x ${rec.reps}</span></span>${rec.orm > 0 ? `<span class="text-[7px] font-bold text-indigo-400 mt-1 uppercase italic">${rec.orm}KG EST. 1RM</span>` : ''}</div>`;
                 });
                 recCont.appendChild(grid);
             });
@@ -449,7 +449,6 @@
         function logWeight() { const w = document.getElementById('profWeightInput').value; const fat = document.getElementById('profFatInput').value; if(w){ userData.weightLogs.unshift({ w: parseFloat(w), fat: fat ? parseFloat(fat) : null, date: new Date().toISOString() }); saveAndRender(); document.getElementById('profWeightInput').value = ""; document.getElementById('profFatInput').value = ""; renderWeightChart(30); } }
         function exportData() { const blob = new Blob([JSON.stringify({ sessions, exLibrary, user: userData })], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `gymlog_backup.json`; a.click(); }
         
-        // BUG FIX: Navigation Jump Fix
         function importData(e) { 
             const reader = new FileReader(); 
             reader.onload = (ev) => { 
@@ -458,13 +457,9 @@
                     if (imp.sessions) sessions = imp.sessions; 
                     if (imp.exLibrary) exLibrary = imp.exLibrary; 
                     if (imp.user) userData = imp.user; 
-                    
-                    // Force final save before reload
                     localStorage.setItem('gym_sessions', JSON.stringify(sessions)); 
                     localStorage.setItem('gym_user', JSON.stringify(userData)); 
                     localStorage.setItem('gym_ex_library', JSON.stringify(exLibrary));
-                    
-                    // Short delay to allow layout stability before reload
                     setTimeout(() => { location.reload(true); }, 150);
                 } catch (err) { alert("Invalid file."); } 
             }; 
