@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GymLog Pro - v2.6.7</title>
+    <title>GymLog Pro - v2.6.8</title>
     <link rel="icon" type="image/jpeg" href="IMG_2930.jpeg?v=12">
     <link rel="apple-touch-icon" href="IMG_2930.jpeg?v=12">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -41,16 +41,6 @@
         .month-header { font-size: 11px; font-weight: 900; color: #6366f1; letter-spacing: 1px; margin: 24px 0 12px 4px; display: flex; align-items: center; gap: 8px; opacity: 0.8; cursor: pointer; }
         .month-header::after { content: ''; height: 1px; background: linear-gradient(90deg, rgba(99,102,241,0.3), transparent); flex: 1; }
         nav { position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; height: 85px !important; z-index: 9999 !important; background: rgba(15, 23, 42, 0.95) !important; backdrop-filter: blur(15px); border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); }
-        .bmw-wrap { background: #020617; position: fixed; inset: 0; z-index: 10000; display: flex; flex-direction: column; padding: 30px; overflow-y: auto; padding-bottom: 140px; }
-        .bmw-capture-area { background: linear-gradient(180deg, #0f172a 0%, #020617 100%); padding: 20px; border-radius: 10px; }
-        .bmw-tag { color: #6366f1; font-weight: 900; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
-        .bmw-title { font-size: 28px; font-weight: 900; font-style: italic; line-height: 1.1; text-transform: uppercase; margin-bottom: 30px; }
-        .bmw-stat-row { border-top: 1px solid rgba(255,255,255,0.1); padding: 18px 0; }
-        .bmw-val { font-size: 22px; font-weight: 900; display: block; margin-bottom: 2px; }
-        .bmw-label { font-size: 10px; font-weight: 700; opacity: 0.5; text-transform: uppercase; }
-        .bmw-hero-text { font-size: 34px; font-weight: 900; font-style: italic; color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.2); text-transform: uppercase; margin-top: 20px; }
-        .bmw-neon-glow { color: #fff; text-shadow: 0 0 10px rgba(99,102,241,0.8); }
-        .bmw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border-top: 1px solid rgba(255,255,255,0.1); padding: 18px 0; }
         .overlay-nav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); scrollbar-width: none; }
         .overlay-nav-btn { font-size: 7px; font-weight: 900; white-space: nowrap; padding: 6px 10px; border-radius: 6px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); text-transform: uppercase; }
         .overlay-nav-btn.active { background: var(--accent); color: white; }
@@ -64,46 +54,22 @@
         <div class="flex items-center">
             <div>
                 <h1 class="text-2xl font-black italic tracking-tighter inline-block">GYM<span class="text-indigo-500">LOG</span></h1>
-                <span class="text-[10px] font-black opacity-20 ml-1">v2.6.7</span>
+                <span class="text-[10px] font-black opacity-20 ml-1">v2.6.8</span>
             </div>
             <button data-testid="btn-app-reload" onclick="location.reload(true)" class="reload-btn">↻</button>
         </div>
-        <div id="headerStats" data-testid="stat-header-summary" class="glass px-4 py-2 text-[10px] font-bold border-indigo-500/30 text-indigo-100 uppercase italic">LADEN...</div>
+        <div id="headerStats" data-testid="stat-header-summary" class="glass px-4 py-2 text-[10px] font-bold border-indigo-500/30 text-indigo-100 uppercase italic">LOADING...</div>
     </header>
 
     <div id="exModal" data-testid="modal-exercise-library" class="hidden fixed inset-0 z-[100] bg-slate-950 flex flex-col">
         <div class="p-6 flex justify-between items-center bg-slate-950 border-b border-white/10">
-            <h2 class="text-xl font-black italic text-white uppercase tracking-tighter">Kies <span class="text-indigo-500">Oefening</span></h2>
+            <h2 class="text-xl font-black italic text-white uppercase tracking-tighter">Choose <span class="text-indigo-500">Exercise</span></h2>
             <button data-testid="btn-close-ex-modal" onclick="closeExModal()" class="glass w-10 h-10 flex items-center justify-center text-rose-500 font-bold">✕</button>
         </div>
         <div id="exCategoryScroll" data-testid="list-exercise-categories" class="no-scrollbar"></div>
         <div class="flex-1 overflow-y-auto p-6 pb-40 bg-slate-950">
             <div id="exLibraryList" data-testid="grid-exercise-items" class="ex-grid"></div>
-            <button data-testid="btn-start-custom-ex" onclick="startCustomEx()" class="btn-primary w-full py-4 mt-8 italic text-xs tracking-widest">+ EIGEN OEFENING</button>
-        </div>
-    </div>
-
-    <div id="bmwOverlay" data-testid="overlay-monthly-recap" class="bmw-wrap hidden">
-        <div class="flex justify-end mb-4">
-             <button data-testid="btn-close-bmw" onclick="document.getElementById('bmwOverlay').classList.add('hidden')" class="glass w-10 h-10 flex items-center justify-center text-rose-500 font-bold">✕</button>
-        </div>
-        <div id="captureTarget" data-testid="capture-area-recap" class="bmw-capture-area">
-            <div class="bmw-tag">GymLog Recap</div>
-            <h2 class="bmw-title">Terugblik <span id="recapMonth" class="text-indigo-500">MAART</span></h2>
-            <div class="bmw-stat-row">
-                <span class="bmw-val" id="recapSessions" data-testid="stat-recap-sessions">0</span>
-                <span class="bmw-label">Gym sessies bezocht</span>
-            </div>
-            <div class="bmw-stat-row">
-                <span class="bmw-val" id="recapVolume" data-testid="stat-recap-volume">0 KG</span>
-                <span class="bmw-label">Totaal Volume Verplaatst</span>
-            </div>
-            <div class="bmw-grid" id="recapMuscleGrid" data-testid="grid-recap-muscles"></div>
-            <div class="bmw-hero-text">PROGRESSIE <span class="bmw-neon-glow">GEBOEKT</span></div>
-            <p class="text-[7px] opacity-20 uppercase mt-4">Genereerd door GymLog Pro © 2026</p>
-        </div>
-        <div class="mt-8 px-2">
-            <button id="btnImgShare" data-testid="btn-share-recap-image" onclick="shareAsImage()" class="btn-primary w-full py-5 italic text-sm shadow-xl shadow-indigo-500/20">AFBEELDING DELEN 📸</button>
+            <button data-testid="btn-start-custom-ex" onclick="startCustomEx()" class="btn-primary w-full py-4 mt-8 italic text-xs tracking-widest">+ CUSTOM EXERCISE</button>
         </div>
     </div>
 
@@ -118,72 +84,80 @@
 
     <div id="catSelectorModal" data-testid="modal-category-link" class="hidden fixed inset-0 z-[110] bg-black/90 flex items-center justify-center p-6">
         <div class="glass p-6 w-full max-w-xs">
-            <h3 class="text-center font-black italic mb-6 text-indigo-400 uppercase">Link naar Spiergroep</h3>
+            <h3 class="text-center font-black italic mb-6 text-indigo-400 uppercase">Link to Muscle Group</h3>
             <div id="catBtnContainer" data-testid="list-category-links" class="grid grid-cols-1 gap-3"></div>
-            <button data-testid="btn-cancel-cat-link" onclick="document.getElementById('catSelectorModal').classList.add('hidden')" class="w-full mt-6 text-[10px] font-bold opacity-40 uppercase">Annuleren</button>
+            <button data-testid="btn-cancel-cat-link" onclick="document.getElementById('catSelectorModal').classList.add('hidden')" class="w-full mt-6 text-[10px] font-bold opacity-40 uppercase">Cancel</button>
         </div>
     </div>
 
     <section id="view-training" data-testid="view-training" class="view-section">
         <div class="glass p-6 mb-8 border-indigo-500/20">
-            <input id="newWorkoutName" data-testid="input-session-name" class="input-field mb-4" placeholder="NAAM TRAINING">
+            <input id="newWorkoutName" data-testid="input-session-name" class="input-field mb-4" placeholder="WORKOUT NAME">
             <input id="newWorkoutDate" data-testid="input-session-date" type="date" class="input-field mb-6">
-            <button data-testid="btn-create-session" onclick="createNewSession()" class="btn-primary w-full py-4 italic">Sessie Starten</button>
+            <button data-testid="btn-create-session" onclick="createNewSession()" class="btn-primary w-full py-4 italic">Start Session</button>
         </div>
         <div id="sessionContainer" data-testid="container-sessions"></div>
     </section>
 
     <section id="view-charts" data-testid="view-charts" class="view-section hidden">
-        <button data-testid="btn-open-recap" onclick="generateBMWRecap()" class="w-full glass p-4 mb-6 border-indigo-500/50 flex items-center justify-between">
-            <div class="text-left">
-                <div class="text-[10px] font-black text-indigo-400 uppercase italic">Recap</div>
-                <div class="text-sm font-black italic">MAANDOVERZICHT</div>
-            </div>
-            <span class="text-2xl">⚡</span>
-        </button>
-        <div class="glass p-6 mb-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-[10px] font-black text-indigo-400 uppercase italic">Spiergroep Balans</h3>
-                <div class="flex gap-1" id="radarFilters">
-                    <button data-testid="btn-filter-radar-week" onclick="renderRadarChart(7)" class="filter-btn active">WEEK</button>
-                    <button data-testid="btn-filter-radar-month" onclick="renderRadarChart(30)" class="filter-btn">MAAND</button>
-                    <button data-testid="btn-filter-radar-year" onclick="renderRadarChart(9999)" class="filter-btn">JAAR</button>
+        <div id="statsCaptureArea" class="bg-[#020617] p-2 rounded-3xl">
+            <div class="glass p-6 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-[10px] font-black text-indigo-400 uppercase italic">Muscle Balance</h3>
+                    <div class="flex gap-1" id="radarFilters">
+                        <button data-testid="btn-filter-radar-week" onclick="renderRadarChart(7)" class="filter-btn active">WEEK</button>
+                        <button data-testid="btn-filter-radar-month" onclick="renderRadarChart(30)" class="filter-btn">MONTH</button>
+                        <button data-testid="btn-filter-radar-year" onclick="renderRadarChart(9999)" class="filter-btn">YEAR</button>
+                    </div>
                 </div>
+                <div class="h-64 w-full"><canvas id="radarChart" data-testid="chart-radar-balance"></canvas></div>
             </div>
-            <div class="h-64 w-full"><canvas id="radarChart" data-testid="chart-radar-balance"></canvas></div>
+            <div class="glass p-6 mb-6">
+                <h3 class="text-[10px] font-black text-indigo-400 mb-4 uppercase italic">Pump Meter</h3>
+                <div id="volumeTracker" data-testid="list-volume-bars" class="space-y-4 mb-10"></div>
+                <h3 class="text-[10px] font-black text-emerald-400 mb-4 uppercase italic">Personal Records</h3>
+                <div id="recordsTracker" data-testid="grid-pr-tiles" class="ex-grid pr-1"></div>
+            </div>
         </div>
+
+        <button data-testid="btn-share-stats" onclick="shareStatsImage()" class="btn-primary w-full py-4 mb-8 italic text-xs tracking-widest flex items-center justify-center gap-2">
+            SHARE STATS 📸
+        </button>
+
         <div class="glass p-6 mb-6">
             <select id="chartExerciseSelect" data-testid="select-chart-exercise" onchange="updateChart()" class="input-field mb-6 text-sm"></select>
             <div class="h-48 w-full"><canvas id="progressionChart" data-testid="chart-exercise-progression"></canvas></div>
-        </div>
-        <div class="glass p-6 mb-6">
-            <h3 class="text-[10px] font-black text-indigo-400 mb-4 uppercase italic">Pomp Meter</h3>
-            <div id="volumeTracker" data-testid="list-volume-bars" class="space-y-4 mb-10"></div>
-            <h3 class="text-[10px] font-black text-emerald-400 mb-4 uppercase italic">Personal Records</h3>
-            <div id="recordsTracker" data-testid="grid-pr-tiles" class="ex-grid pr-1"></div>
         </div>
     </section>
 
     <section id="view-profile" data-testid="view-profile" class="view-section hidden">
         <div class="glass p-6 mb-6">
-            <input id="profName" data-testid="input-profile-name" class="input-field mb-6 text-xl" placeholder="JE NAAM" onchange="saveProfileName()">
-            <div class="flex justify-between items-center mb-2 px-1">
-                <span class="text-[8px] font-black opacity-40 uppercase">Trends</span>
-                <div class="flex gap-1">
-                    <button data-testid="btn-filter-weight-week" onclick="renderWeightChart(7)" class="filter-btn weight-f active">WEEK</button>
-                    <button data-testid="btn-filter-weight-month" onclick="renderWeightChart(30)" class="filter-btn weight-f">MAAND</button>
-                    <button data-testid="btn-filter-weight-year" onclick="renderWeightChart(365)" class="filter-btn weight-f">JAAR</button>
+            <input id="profName" data-testid="input-profile-name" class="input-field mb-6 text-xl" placeholder="YOUR NAME" onchange="saveProfileName()">
+            
+            <div id="weightCaptureArea" class="bg-[#020617] p-2 rounded-2xl mb-4">
+                <div class="flex justify-between items-center mb-2 px-1">
+                    <span class="text-[8px] font-black opacity-40 uppercase">Trends</span>
+                    <div class="flex gap-1">
+                        <button data-testid="btn-filter-weight-week" onclick="renderWeightChart(7)" class="filter-btn weight-f active">WEEK</button>
+                        <button data-testid="btn-filter-weight-month" onclick="renderWeightChart(30)" class="filter-btn weight-f">MONTH</button>
+                        <button data-testid="btn-filter-weight-year" onclick="renderWeightChart(365)" class="filter-btn weight-f">YEAR</button>
+                    </div>
                 </div>
+                <div class="h-40 w-full mb-2"><canvas id="weightChart" data-testid="chart-weight-trends"></canvas></div>
             </div>
-            <div class="h-40 w-full mb-8"><canvas id="weightChart" data-testid="chart-weight-trends"></canvas></div>
+
+            <button data-testid="btn-share-weight-trends" onclick="shareWeightTrendsImage()" class="btn-primary w-full py-3 mb-6 italic text-[10px] tracking-widest flex items-center justify-center gap-2">
+                SHARE TRENDS 📸
+            </button>
+
             <div class="flex gap-2 mb-6">
                 <input id="profWeightInput" data-testid="input-log-weight" type="number" step="0.1" class="input-field flex-1" placeholder="KG">
-                <input id="profFatInput" data-testid="input-log-fat" type="number" step="0.1" class="input-field flex-1" placeholder="VET %">
+                <input id="profFatInput" data-testid="input-log-fat" type="number" step="0.1" class="input-field flex-1" placeholder="FAT %">
                 <button data-testid="btn-submit-weight" onclick="logWeight()" class="btn-primary px-6 font-black italic">LOG</button>
             </div>
             <div class="grid grid-cols-2 gap-3 mb-8">
                 <button data-testid="btn-backup-export" onclick="exportData()" class="glass p-3 text-[9px] font-black uppercase">💾 Backup</button>
-                <button data-testid="btn-backup-import" onclick="document.getElementById('importFile').click()" class="glass p-3 text-[9px] font-black uppercase">📂 Herstel</button>
+                <button data-testid="btn-backup-import" onclick="document.getElementById('importFile').click()" class="glass p-3 text-[9px] font-black uppercase">📂 Restore</button>
                 <input type="file" id="importFile" data-testid="input-file-import" class="hidden" onchange="importData(event)" accept=".json">
             </div>
             <div id="weightLogList" data-testid="list-weight-history" class="space-y-2 mb-8"></div>
@@ -193,29 +167,49 @@
     <nav data-testid="nav-main">
         <button data-testid="nav-item-training" onclick="showView('training')" class="text-center"><span class="block text-2xl">🏋️</span><span class="text-[10px] font-black">TRAIN</span></button>
         <button data-testid="nav-item-stats" onclick="showView('charts')" class="text-center"><span class="block text-2xl">📈</span><span class="text-[10px] font-black">STATS</span></button>
-        <button data-testid="nav-item-profile" onclick="showView('profile')" class="text-center"><span class="block text-2xl">👤</span><span class="text-[10px] font-black">PROFIEL</span></button>
+        <button data-testid="nav-item-profile" onclick="showView('profile')" class="text-center"><span class="block text-2xl">👤</span><span class="text-[10px] font-black">PROFILE</span></button>
     </nav>
 
     <script>
         const INITIAL_LIB = { 
-            "Borst": ["BENCH PRESS", "INCLINE DB PRESS", "PEC FLY", "DIPS", "PUSH UPS", "CABLE CROSSOVER"], 
-            "Rug": ["LAT PULLDOWN", "DEADLIFT", "BENT OVER ROW", "PULL UPS", "SEATED CABLE ROW", "FACE PULLS", "T-BAR ROW"], 
-            "Benen": ["SQUAT", "LEG PRESS", "LEG EXTENSION", "LEG CURL", "ROMANIAN DEADLIFT", "CALF RAISES", "LUNGES"], 
-            "Schouders": ["OHP", "SIDE LATERAL RAISE", "FRONT RAISE", "DB SHOULDER PRESS", "REAR DELT FLY"], 
+            "Chest": ["BENCH PRESS", "INCLINE DB PRESS", "PEC FLY", "DIPS", "PUSH UPS", "CABLE CROSSOVER"], 
+            "Back": ["LAT PULLDOWN", "DEADLIFT", "BENT OVER ROW", "PULL UPS", "SEATED CABLE ROW", "FACE PULLS", "T-BAR ROW"], 
+            "Legs": ["SQUAT", "LEG PRESS", "LEG EXTENSION", "LEG CURL", "ROMANIAN DEADLIFT", "CALF RAISES", "LUNGES"], 
+            "Shoulders": ["OHP", "SIDE LATERAL RAISE", "FRONT RAISE", "DB SHOULDER PRESS", "REAR DELT FLY"], 
             "Triceps": ["CABLE PUSH DOWN", "SKULL CRUSHERS", "OVERHEAD EXTENSION", "CLOSE GRIP BENCH"], 
-            "Armen": ["BICEP CURL", "HAMMER CURL", "PREACHER CURL", "CONCENTRATION CURL", "21S"], 
-            "Buik / Core": ["PLANK", "CRUNCHES", "LEG RAISES", "RUSSIAN TWIST", "AB WHEEL"] 
+            "Arms": ["BICEP CURL", "HAMMER CURL", "PREACHER CURL", "CONCENTRATION CURL", "21S"], 
+            "Abs / Core": ["PLANK", "CRUNCHES", "LEG RAISES", "RUSSIAN TWIST", "AB WHEEL"] 
         };
         const REP_DEFAULTS = [12, 10, 8, 6];
-        let exLibrary = INITIAL_LIB, sessions = [], userData = { name: "GEBRUIKER", weightLogs: [] };
+        let exLibrary = INITIAL_LIB, sessions = [], userData = { name: "USER", weightLogs: [] };
         let activeSessionIds = new Set(), openExIds = new Set(), editingSessionId = null, activeMonths = new Set();
         let chartInstance = null, weightChartInstance = null, radarChartInstance = null, drillDownChartInstance = null;
-        let currentRadarDays = 7, currentTargetSessionId = null, swapExId = null, currentSelectedCat = "Borst", pendingExName = "";
+        let currentRadarDays = 7, currentTargetSessionId = null, swapExId = null, currentSelectedCat = "Chest", pendingExName = "";
 
         function init() { 
-            sessions = JSON.parse(localStorage.getItem('gym_sessions')) || [];
-            userData = JSON.parse(localStorage.getItem('gym_user')) || { name: "GEBRUIKER", weightLogs: [] };
-            exLibrary = JSON.parse(localStorage.getItem('gym_ex_library')) || INITIAL_LIB;
+            const savedSessions = JSON.parse(localStorage.getItem('gym_sessions')) || [];
+            const savedUser = JSON.parse(localStorage.getItem('gym_user')) || { name: "USER", weightLogs: [] };
+            const savedLib = JSON.parse(localStorage.getItem('gym_ex_library'));
+
+            const translationMap = {
+                "Borst": "Chest", "Rug": "Back", "Benen": "Legs", 
+                "Schouders": "Shoulders", "Triceps": "Triceps", 
+                "Armen": "Arms", "Buik / Core": "Abs / Core"
+            };
+
+            if (savedLib) {
+                exLibrary = {};
+                Object.keys(savedLib).forEach(oldKey => {
+                    const newKey = translationMap[oldKey] || oldKey;
+                    exLibrary[newKey] = savedLib[oldKey];
+                });
+            } else {
+                exLibrary = INITIAL_LIB;
+            }
+
+            sessions = savedSessions;
+            userData = savedUser;
+            
             document.getElementById('newWorkoutDate').valueAsDate = new Date();
             document.getElementById('profName').value = userData.name || "";
             if (sessions.length > 0) {
@@ -233,20 +227,9 @@
             updateHeader(); renderSessions(); renderWeightLogs(); populateExerciseSelect(); 
         }
 
-        // --- CORE LOGIC ---
         function calc1RM(w, r) { const weight = parseFloat(w); const reps = parseInt(r); if (!weight || !reps || reps < 1) return 0; if (reps === 1) return weight; return weight * (36 / (37 - reps)); }
-        
-        function toggleSession(id) {
-            if (activeSessionIds.has(id)) activeSessionIds.delete(id);
-            else activeSessionIds.add(id);
-            renderSessions();
-        }
-
-        function toggleExSets(exId) {
-            if (openExIds.has(exId)) openExIds.delete(exId);
-            else openExIds.add(exId);
-            renderSessions();
-        }
+        function toggleSession(id) { if (activeSessionIds.has(id)) activeSessionIds.delete(id); else activeSessionIds.add(id); renderSessions(); }
+        function toggleExSets(exId) { if (openExIds.has(exId)) openExIds.delete(exId); else openExIds.add(exId); renderSessions(); }
 
         function moveExercise(sessId, fromIdx, direction) {
             const sess = sessions.find(s => s.id === sessId);
@@ -278,10 +261,8 @@
             const raw = document.getElementById('newWorkoutDate').value; 
             const d = new Date(raw); 
             activeMonths.add(`${d.getFullYear()}-${d.getMonth()}`); 
-            const newSess = { id: Date.now(), name, date: d.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'short' }), rawDate: raw, exercises: [] };
-            sessions.unshift(newSess); 
-            activeSessionIds.add(newSess.id); 
-            saveAndRender(); 
+            const newSess = { id: Date.now(), name, date: d.toLocaleDateString('en-US', { weekday:'long', day:'numeric', month:'short' }), rawDate: raw, exercises: [] };
+            sessions.unshift(newSess); activeSessionIds.add(newSess.id); saveAndRender(); 
         }
 
         function renderSessions() {
@@ -290,7 +271,7 @@
             const groups = {};
             sorted.forEach(s => {
                 const d = new Date(s.rawDate); const key = `${d.getFullYear()}-${d.getMonth()}`;
-                if (!groups[key]) groups[key] = { label: d.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' }).toUpperCase(), sessions: [] };
+                if (!groups[key]) groups[key] = { label: d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase(), sessions: [] };
                 groups[key].sessions.push(s);
             });
             Object.keys(groups).forEach(key => {
@@ -311,26 +292,22 @@
                                 }
                             </div>
                             <div class="flex gap-2">
-                                <button onclick="cloneSession(${session.id})" class="action-btn btn-copy">Kopie</button>
-                                <button onclick="shareWorkout(${session.id})" class="action-btn btn-share">Deel</button>
-                                <button onclick="if(confirm('Wissen?')){ sessions=sessions.filter(x=>x.id!==${session.id}); saveAndRender(); }" class="action-btn btn-delete">Wis</button>
+                                <button onclick="cloneSession(${session.id})" class="action-btn btn-copy">Copy</button>
+                                <button onclick="shareWorkout(${session.id})" class="action-btn btn-share">Share</button>
+                                <button onclick="if(confirm('Delete?')){ sessions=sessions.filter(x=>x.id!==${session.id}); saveAndRender(); }" class="action-btn btn-delete">Del</button>
                             </div>
                         </div>
-                        
                         <div class="flex items-center gap-2 mb-4 cursor-pointer" onclick="toggleSession(${session.id})">
                             <span class="text-indigo-400 font-black text-xs">${isOpen ? '▾' : '▸'}</span>
                             <span class="text-[9px] font-black opacity-30 uppercase italic tracking-widest">${session.date}</span>
                         </div>
-
                         <div class="${isOpen ? 'block' : 'hidden'} border-t border-white/5 pt-4">
                             ${session.exercises.map((ex, exIdx) => {
                                 const isExOpen = openExIds.has(ex.id);
                                 return `<div class="mb-4 bg-white/5 p-4 rounded-xl border border-white/5">
                                 <div class="flex justify-between items-center">
                                     <div class="flex items-center gap-1">
-                                        <button onclick="toggleExSets(${ex.id})" class="text-[10px] font-black text-indigo-300 uppercase flex items-center gap-2">
-                                            <span class="text-xs">${isExOpen ? '▾' : '▸'}</span> ${ex.name}
-                                        </button>
+                                        <button onclick="toggleExSets(${ex.id})" class="text-[10px] font-black text-indigo-300 uppercase flex items-center gap-2"><span class="text-xs">${isExOpen ? '▾' : '▸'}</span> ${ex.name}</button>
                                         <div class="flex ml-2">
                                             <button onclick="moveExercise(${session.id}, ${exIdx}, -1)" class="order-btn" data-testid="btn-move-up-${ex.id}">↑</button>
                                             <button onclick="moveExercise(${session.id}, ${exIdx}, 1)" class="order-btn" data-testid="btn-move-down-${ex.id}">↓</button>
@@ -338,7 +315,7 @@
                                     </div>
                                     <div class="flex gap-4">
                                         <button onclick="swapExId=${ex.id}; openExModal(${session.id})" class="text-[9px] font-black opacity-30 uppercase tracking-tighter">SWAP</button>
-                                        <button onclick="const s=sessions.find(x=>x.id===${session.id}); s.exercises.splice(${exIdx},1); saveAndRender();" class="text-rose-500 text-[9px] font-black uppercase tracking-tighter">WIS</button>
+                                        <button onclick="const s=sessions.find(x=>x.id===${session.id}); s.exercises.splice(${exIdx},1); saveAndRender();" class="text-rose-500 text-[9px] font-black uppercase tracking-tighter">DEL</button>
                                     </div>
                                 </div>
                                 <div class="${isExOpen ? 'mt-6 space-y-3' : 'hidden'}">
@@ -358,14 +335,13 @@
                                     <button onclick="addSet(${session.id}, ${ex.id})" class="w-full mt-4 py-2 border border-dashed border-white/10 rounded-lg text-[8px] font-black opacity-30 uppercase">+ Set</button>
                                 </div>
                             </div>`}).join('')}
-                            <button onclick="swapExId=null; openExModal(${session.id})" class="btn-primary w-full py-3 text-[10px] italic">+ Oefening</button>
+                            <button onclick="swapExId=null; openExModal(${session.id})" class="btn-primary w-full py-3 text-[10px] italic">+ Exercise</button>
                         </div>
                     </div>`;
                 });
             });
         }
 
-        // --- STATS LOGIC ---
         function renderCharts() { 
             updateChart(); 
             renderRadarChart(currentRadarDays); 
@@ -374,11 +350,11 @@
             volCont.innerHTML = ""; recCont.innerHTML = ""; 
             let volPerCat = {}; let exToCat = {}; let records = {}; let best1RM = {};
             for (const [cat, exs] of Object.entries(exLibrary)) { volPerCat[cat] = 0; exs.forEach(e => exToCat[e.toUpperCase()] = cat); } 
-            volPerCat["OVERIG"] = 0; const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); 
+            volPerCat["OTHER"] = 0; const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); 
             sessions.forEach(s => { 
                 const isRecent = new Date(s.rawDate) >= sevenDaysAgo; 
                 s.exercises.forEach(ex => { 
-                    const n = ex.name.toUpperCase(); const cat = exToCat[n] || "OVERIG"; let maxW = 0; 
+                    const n = ex.name.toUpperCase(); const cat = exToCat[n] || "OTHER"; let maxW = 0; 
                     ex.sets.forEach(st => { 
                         const w = parseFloat(st.w) || 0; const r = parseInt(st.r) || 0; const orm = calc1RM(w, r);
                         if (isRecent) volPerCat[cat] += (w * r); if (w > maxW) maxW = w; if (!best1RM[n] || orm > best1RM[n]) best1RM[n] = orm;
@@ -388,7 +364,7 @@
             }); 
             const maxVol = Math.max(...Object.values(volPerCat), 1); 
             Object.entries(volPerCat).sort((a,b)=>b[1]-a[1]).forEach(([c, v]) => { 
-                if (v > 0 || c !== "OVERIG") volCont.innerHTML += `<div><div class="flex justify-between text-[8px] font-black uppercase"><span>${c}</span><span>${v.toLocaleString()} KG</span></div><div class="bg-slate-900 rounded-full h-2 mt-1 overflow-hidden"><div class="heatmap-bar-fill" style="width: ${Math.round((v/maxVol)*100)}%"></div></div></div>`; 
+                if (v > 0 || c !== "OTHER") volCont.innerHTML += `<div><div class="flex justify-between text-[8px] font-black uppercase"><span>${c}</span><span>${v.toLocaleString()} KG</span></div><div class="bg-slate-900 rounded-full h-2 mt-1 overflow-hidden"><div class="heatmap-bar-fill" style="width: ${Math.round((v/maxVol)*100)}%"></div></div></div>`; 
             }); 
             Object.entries(records).sort((a,b) => a[0].localeCompare(b[0])).forEach(([n, v]) => { 
                 if (v > 0) {
@@ -434,53 +410,71 @@
             document.querySelectorAll('.weight-f').forEach(b => { b.classList.remove('active'); if(b.getAttribute('onclick').includes(days)) b.classList.add('active'); });
             const logs = (userData.weightLogs || []).slice(0, days).reverse();
             if(weightChartInstance) weightChartInstance.destroy();
-            weightChartInstance = new Chart(ctx, { type: 'line', data: { labels: logs.map(l => new Date(l.date).toLocaleDateString('nl-NL', {day:'numeric', month:'short'})), datasets: [ { label: 'KG', data: logs.map(l => l.w), borderColor: '#6366f1', tension: 0.4, yAxisID: 'y' }, { label: 'VET %', data: logs.map(l => l.fat), borderColor: '#10b981', borderDash: [5,5], yAxisID: 'y1' } ] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: true, position: 'left', grid: { color: 'rgba(255,255,255,0.05)' } }, y1: { display: true, position: 'right', grid: { display: false } } } } });
+            weightChartInstance = new Chart(ctx, { type: 'line', data: { labels: logs.map(l => new Date(l.date).toLocaleDateString('en-US', {day:'numeric', month:'short'})), datasets: [ { label: 'KG', data: logs.map(l => l.w), borderColor: '#6366f1', tension: 0.4, yAxisID: 'y' }, { label: 'FAT %', data: logs.map(l => l.fat), borderColor: '#10b981', borderDash: [5,5], yAxisID: 'y1' } ] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: true, position: 'left', grid: { color: 'rgba(255,255,255,0.05)' } }, y1: { display: true, position: 'right', grid: { display: false } } } } });
         }
 
-        // --- UTILS ---
-        function generateBMWRecap() {
-            const now = new Date(); const d = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-            const targetMonth = d.getMonth(); const targetYear = d.getFullYear(); const monthLabel = d.toLocaleDateString('nl-NL', { month: 'long' }).toUpperCase();
-            const monthSessions = sessions.filter(s => { const sd = new Date(s.rawDate); return sd.getMonth() === targetMonth && sd.getFullYear() === targetYear; });
-            let totalVol = 0; let catCount = {}; let exToCat = {}; Object.keys(exLibrary).forEach(cat => catCount[cat] = 0);
-            Object.entries(exLibrary).forEach(([cat, exs]) => exs.forEach(e => exToCat[e.toUpperCase()] = cat));
-            monthSessions.forEach(s => { s.exercises.forEach(ex => { const cat = exToCat[ex.name.toUpperCase()]; if(cat) catCount[cat]++; ex.sets.forEach(st => { totalVol += (parseFloat(st.w) || 0) * (parseInt(st.r) || 0); }); }); });
-            document.getElementById('recapMonth').innerText = monthLabel; document.getElementById('recapSessions').innerText = monthSessions.length; document.getElementById('recapVolume').innerText = totalVol.toLocaleString() + " KG";
-            const grid = document.getElementById('recapMuscleGrid'); grid.innerHTML = ""; Object.entries(catCount).forEach(([cat, count]) => { if(count > 0) grid.innerHTML += `<div><span class="bmw-val text-indigo-400">${count}</span><span class="bmw-label">${cat}</span></div>`; });
-            document.getElementById('bmwOverlay').classList.remove('hidden');
-        }
-
-        async function shareAsImage() {
-            const btn = document.getElementById('btnImgShare'); btn.innerText = "GENEREREN..."; const target = document.getElementById('captureTarget');
+        async function shareStatsImage() {
+            const btn = document.querySelector('[data-testid="btn-share-stats"]');
+            const originalText = btn.innerText;
+            btn.innerText = "GENERATING...";
+            const target = document.getElementById('statsCaptureArea');
             try {
                 const canvas = await html2canvas(target, { backgroundColor: '#020617', scale: 2, logging: false });
                 canvas.toBlob(async (blob) => {
-                    const file = new File([blob], 'gymlog_recap.png', { type: 'image/png' });
-                    if (navigator.share && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'Mijn GymLog Recap', text: 'Progressie!' }); } 
-                    else { const link = document.createElement('a'); link.download = 'gymlog_recap.png'; link.href = canvas.toDataURL(); link.click(); }
-                    btn.innerText = "AFBEELDING DELEN 📸";
+                    const file = new File([blob], 'gymlog_stats.png', { type: 'image/png' });
+                    if (navigator.share && navigator.canShare({ files: [file] })) {
+                        await navigator.share({ files: [file], title: 'My GymLog Stats', text: 'Tracking my muscle balance and PRs!' });
+                    } else {
+                        const link = document.createElement('a');
+                        link.download = 'gymlog_stats.png';
+                        link.href = canvas.toDataURL();
+                        link.click();
+                    }
+                    btn.innerText = originalText;
                 });
-            } catch (err) { btn.innerText = "AFBEELDING DELEN 📸"; }
+            } catch (err) { btn.innerText = originalText; }
+        }
+
+        async function shareWeightTrendsImage() {
+            const btn = document.querySelector('[data-testid="btn-share-weight-trends"]');
+            const originalText = btn.innerText;
+            btn.innerText = "GENERATING...";
+            const target = document.getElementById('weightCaptureArea');
+            try {
+                const canvas = await html2canvas(target, { backgroundColor: '#020617', scale: 2, logging: false });
+                canvas.toBlob(async (blob) => {
+                    const file = new File([blob], 'gymlog_trends.png', { type: 'image/png' });
+                    if (navigator.share && navigator.canShare({ files: [file] })) {
+                        await navigator.share({ files: [file], title: 'My Weight Trends', text: 'Checking my progress on GymLog!' });
+                    } else {
+                        const link = document.createElement('a');
+                        link.download = 'gymlog_trends.png';
+                        link.href = canvas.toDataURL();
+                        link.click();
+                    }
+                    btn.innerText = originalText;
+                });
+            } catch (err) { btn.innerText = originalText; }
         }
 
         function populateExerciseSelect() { const u = [...new Set(sessions.flatMap(s => s.exercises.map(e => e.name.toUpperCase())))].sort(); document.getElementById('chartExerciseSelect').innerHTML = u.map(n => `<option value="${n}">${n}</option>`).join(''); }
         function saveProfileName() { userData.name = document.getElementById('profName').value.toUpperCase(); saveAndRender(); }
         function showView(v) { document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden')); document.getElementById('view-'+v).classList.remove('hidden'); if(v==='charts') renderCharts(); if(v==='profile') renderWeightChart(30); }
         function updateHeader() { const logs = userData.weightLogs || []; const lastW = (logs.length > 0) ? logs[0].w : "--"; document.getElementById('headerStats').innerText = `${userData.name || "GYMLOG"} • ${lastW} KG`; }
-        function renderWeightLogs() { const logs = (userData.weightLogs || []).slice(0,10); document.getElementById('weightLogList').innerHTML = logs.map((l, i) => `<div class="flex justify-between items-center text-[10px] font-bold p-3 bg-white/5 rounded-xl mb-1 border border-white/5"><div><span class="text-indigo-400 font-black">${l.w} KG</span>${l.fat ? `<span class="text-emerald-400 ml-2 italic">${l.fat}% VET</span>` : ''}</div><div class="flex gap-3 items-center"><span class="opacity-40 uppercase text-[8px]">${new Date(l.date).toLocaleDateString('nl-NL', {day:'2-digit', month:'2-digit'})}</span><button onclick="userData.weightLogs.splice(${i},1); saveAndRender();" class="text-rose-500">✕</button></div></div>`).join(''); }
+        function renderWeightLogs() { const logs = (userData.weightLogs || []).slice(0,10); document.getElementById('weightLogList').innerHTML = logs.map((l, i) => `<div class="flex justify-between items-center text-[10px] font-bold p-3 bg-white/5 rounded-xl mb-1 border border-white/5"><div><span class="text-indigo-400 font-black">${l.w} KG</span>${l.fat ? `<span class="text-emerald-400 ml-2 italic">${l.fat}% FAT</span>` : ''}</div><div class="flex gap-3 items-center"><span class="opacity-40 uppercase text-[8px]">${new Date(l.date).toLocaleDateString('en-US', {day:'2-digit', month:'2-digit'})}</span><button onclick="userData.weightLogs.splice(${i},1); saveAndRender();" class="text-rose-500">✕</button></div></div>`).join(''); }
         function logWeight() { const w = document.getElementById('profWeightInput').value; const fat = document.getElementById('profFatInput').value; if(w){ userData.weightLogs.unshift({ w: parseFloat(w), fat: fat ? parseFloat(fat) : null, date: new Date().toISOString() }); saveAndRender(); document.getElementById('profWeightInput').value = ""; document.getElementById('profFatInput').value = ""; renderWeightChart(30); } }
         function exportData() { const blob = new Blob([JSON.stringify({ sessions, exLibrary, user: userData })], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `gymlog_backup.json`; a.click(); }
-        function importData(e) { const reader = new FileReader(); reader.onload = (ev) => { try { const imp = JSON.parse(ev.target.result); if (imp.sessions) sessions = imp.sessions; if (imp.exLibrary) exLibrary = imp.exLibrary; if (imp.user) userData = imp.user; saveAndRender(); location.reload(); } catch (err) { alert("Fout."); } }; reader.readAsText(e.target.files[0]); }
-        function cloneSession(id) { const old = sessions.find(s => s.id === id); const today = new Date(); const news = { id: Date.now(), name: old.name, date: today.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'short' }), rawDate: today.toISOString().split('T')[0], exercises: old.exercises.map(ex => ({ id: Date.now() + Math.random(), name: ex.name, sets: ex.sets.map(s => ({ w: s.w, r: s.r, bpm: '' })) })) }; sessions.unshift(news); activeSessionIds.add(news.id); saveAndRender(); }
+        function importData(e) { const reader = new FileReader(); reader.onload = (ev) => { try { const imp = JSON.parse(ev.target.result); if (imp.sessions) sessions = imp.sessions; if (imp.exLibrary) exLibrary = imp.exLibrary; if (imp.user) userData = imp.user; saveAndRender(); location.reload(); } catch (err) { alert("Error."); } }; reader.readAsText(e.target.files[0]); }
+        function cloneSession(id) { const old = sessions.find(s => s.id === id); const today = new Date(); const news = { id: Date.now(), name: old.name, date: today.toLocaleDateString('en-US', { weekday:'long', day:'numeric', month:'short' }), rawDate: today.toISOString().split('T')[0], exercises: old.exercises.map(ex => ({ id: Date.now() + Math.random(), name: ex.name, sets: ex.sets.map(s => ({ w: s.w, r: s.r, bpm: '' })) })) }; sessions.unshift(news); activeSessionIds.add(news.id); saveAndRender(); }
         function updSet(sId, eId, i, f, v) { const s = sessions.find(x => x.id === sId); if(s) { const e = s.exercises.find(ex => ex.id === eId); if(e) { e.sets[i][f] = v; localStorage.setItem('gym_sessions', JSON.stringify(sessions)); } } }
         function addSet(sId, exId) { const s = sessions.find(x => x.id === sId); const e = s.exercises.find(ex => ex.id === exId); e.sets.push({w:'', r:REP_DEFAULTS[e.sets.length] || 6, bpm:''}); saveAndRender(); }
         function openExModal(sId) { currentTargetSessionId = sId; document.getElementById('exModal').classList.remove('hidden'); renderExTabs(); filterExLibrary(currentSelectedCat); }
         function closeExModal() { document.getElementById('exModal').classList.add('hidden'); }
         function renderExTabs() { const cont = document.getElementById('exCategoryScroll'); cont.innerHTML = Object.keys(exLibrary).map(cat => `<button onclick="filterExLibrary('${cat}')" class="cat-tab ${cat === currentSelectedCat ? 'active' : ''}" id="tab-${cat}">${cat}</button>`).join(''); }
-        function filterExLibrary(cat) { currentSelectedCat = cat; document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active')); const activeTab = document.getElementById(`tab-${cat}`); if(activeTab) activeTab.classList.add('active'); const cont = document.getElementById('exLibraryList'); const items = exLibrary[cat] || []; cont.innerHTML = items.sort().map(ex => `<div onclick="selectEx('${ex}')" class="ex-item"><span>${ex}</span><button onclick="event.stopPropagation(); if(confirm('Wissen?')){ exLibrary['${cat}']=exLibrary['${cat}'].filter(x=>x!=='${ex}'); saveAndRender(); filterExLibrary('${cat}'); }" class="text-rose-500 text-[8px] self-end opacity-40">WIS</button></div>`).join(''); }
+        function filterExLibrary(cat) { currentSelectedCat = cat; document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active')); const activeTab = document.getElementById(`tab-${cat}`); if(activeTab) activeTab.classList.add('active'); const cont = document.getElementById('exLibraryList'); const items = exLibrary[cat] || []; cont.innerHTML = items.sort().map(ex => `<div onclick="selectEx('${ex}')" class="ex-item"><span>${ex}</span><button onclick="event.stopPropagation(); if(confirm('Delete?')){ exLibrary['${cat}']=exLibrary['${cat}'].filter(x=>x!=='${ex}'); saveAndRender(); filterExLibrary('${cat}'); }" class="text-rose-500 text-[8px] self-end opacity-40">DEL</button></div>`).join(''); }
         function selectEx(name) { const sess = sessions.find(s => s.id === currentTargetSessionId); if (swapExId) { sess.exercises.find(e => e.id === swapExId).name = name.toUpperCase(); swapExId = null; } else { const newExId = Date.now(); sess.exercises.push({ id: newExId, name: name.toUpperCase(), sets: [{w:'', r:12, bpm:''}, {w:'', r:10, bpm:''}, {w:'', r:8, bpm:''}, {w:'', r:6, bpm:''}]}); openExIds.add(newExId); } saveAndRender(); closeExModal(); }
-        function startCustomEx() { const n = prompt("Naam oefening:"); if(!n) return; pendingExName = n.toUpperCase(); const btnCont = document.getElementById('catBtnContainer'); btnCont.innerHTML = ""; Object.keys(exLibrary).forEach(cat => { const b = document.createElement('button'); b.className = "glass p-4 text-[10px] font-black uppercase"; b.innerText = cat; b.onclick = () => { if(!exLibrary[cat].includes(pendingExName)) exLibrary[cat].push(pendingExName); document.getElementById('catSelectorModal').classList.add('hidden'); saveAndRender(); filterExLibrary(cat); }; btnCont.appendChild(b); }); document.getElementById('catSelectorModal').classList.remove('hidden'); }
-        async function shareWorkout(id) { const s = sessions.find(x => x.id === id); const text = `GymLog - ${s.name} (${s.date})\n${s.exercises.map(ex => `\n${ex.name}:${ex.sets.map(st => `\n- ${st.w}kg x ${st.r}`).join('')}`).join('\n')}`; if (navigator.share) await navigator.share({ title: 'Mijn Training', text }); else { navigator.clipboard.writeText(text); alert("Gekopieerd!"); } }
+        function startCustomEx() { const n = prompt("Exercise Name:"); if(!n) return; pendingExName = n.toUpperCase(); const btnCont = document.getElementById('catBtnContainer'); btnCont.innerHTML = ""; Object.keys(exLibrary).forEach(cat => { const b = document.createElement('button'); b.className = "glass p-4 text-[10px] font-black uppercase"; b.innerText = cat; b.onclick = () => { if(!exLibrary[cat].includes(pendingExName)) exLibrary[cat].push(pendingExName); document.getElementById('catSelectorModal').classList.add('hidden'); saveAndRender(); filterExLibrary(cat); }; btnCont.appendChild(b); }); document.getElementById('catSelectorModal').classList.remove('hidden'); }
+        async function shareWorkout(id) { const s = sessions.find(x => x.id === id); const text = `GymLog - ${s.name} (${s.date})\n${s.exercises.map(ex => `\n${ex.name}:${ex.sets.map(st => `\n- ${st.w}kg x ${st.r}`).join('')}`).join('\n')}`; if (navigator.share) await navigator.share({ title: 'My Training', text }); else { navigator.clipboard.writeText(text); alert("Copied!"); } }
 
         init();
     </script>
