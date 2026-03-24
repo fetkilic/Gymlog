@@ -2,7 +2,9 @@
   "relation": ["delegate_permission/common.handle_all_urls"],
   "target": {
     "namespace": "android_app",
-    "package_name": "com.kilic.gymlog",
-    "sha256_cert_fingerprints": ["71:26:12:CB:16:9B:7B:F1:3F:6A:05:DA:3C:17:2E:A7:5B:FB:4A:B4:1E:0A:B2:C5:29:AC:41:FF:82:4E:73:64"]
+    "package_name": "com.kilic.gympro",
+    "sha256_cert_fingerprints": [
+      "4C:0F:19:D9:4C:58:3C:10:A6:73:73:78:F0:5D:42:DF:C0:93:BC:E7:CE:A8:EE:47:B9:5A:E6:4C:8B:DB:28:E2"
+    ]
   }
 }]
