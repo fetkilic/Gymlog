@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>GymLog Pro v2.7.9</title>
+    <meta name="theme-color" content="#020617">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    
     <link rel="icon" type="image/jpeg" href="IMG_2930.jpeg?v=12">
     <link rel="apple-touch-icon" href="IMG_2930.jpeg?v=12">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -49,14 +54,12 @@
         .order-btn:hover { opacity: 1; color: var(--accent); }
         .record-cat-header { font-size: 8px; font-weight: 900; color: #10b981; text-transform: uppercase; letter-spacing: 1px; margin: 12px 0 6px 2px; opacity: 0.6; }
         
-        /* Floating Timer Styles v2.7.9 */
         .sticky-timer-bar { position: sticky; top: 10px; left: 0; right: 0; width: 100%; z-index: 80; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(12px); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 1rem; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 20px; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .timer-mini-input { background: transparent; color: var(--accent); width: 35px; text-align: center; font-weight: 900; font-size: 14px; outline: none; }
         .timer-circle-progress { fill: none; stroke: var(--accent); stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
         .timer-ring { transform: rotate(-90deg); transform-origin: 50% 50%; width: 24px; height: 24px; }
         #timerOverlay { background: rgba(2, 6, 23, 0.98); }
         
-        /* Horizontal Collapse Logic */
         .timer-content-wrapper { display: flex; align-items: center; justify-content: space-between; width: 100%; overflow: hidden; transition: all 0.4s ease; }
         .timer-collapsed .hide-on-collapse { width: 0; opacity: 0; margin: 0; padding: 0; pointer-events: none; transform: translateX(-20px); }
         .timer-collapsed { width: fit-content; max-width: 130px; margin-left: auto; margin-right: 0; border-radius: 1rem 0 0 1rem; border-right: none; }
@@ -69,9 +72,9 @@
                 <h1 class="text-2xl font-black italic tracking-tighter inline-block">GYM<span class="text-indigo-500">LOG</span></h1>
                 <span class="text-[10px] font-black opacity-20 ml-1">v2.7.9</span>
             </div>
-            <button data-testid="btn-app-reload" onclick="location.reload(true)" class="reload-btn">↻</button>
+            <button onclick="location.reload(true)" class="reload-btn">↻</button>
         </div>
-        <div id="headerStats" data-testid="stat-header-summary" class="glass px-4 py-2 text-[10px] font-bold border-indigo-500/30 text-indigo-100 uppercase italic">LOADING...</div>
+        <div id="headerStats" class="glass px-4 py-2 text-[10px] font-bold border-indigo-500/30 text-indigo-100 uppercase italic">LOADING...</div>
     </header>
 
     <div id="timerOverlay" class="hidden fixed inset-0 z-[200] flex flex-col items-center justify-center p-8 text-center">
@@ -81,7 +84,7 @@
         <button onclick="stopTimerAlert()" class="btn-primary w-full py-6 text-xl italic">Dismiss</button>
     </div>
 
-    <section id="view-training" data-testid="view-training" class="view-section">
+    <section id="view-training" class="view-section">
         <div id="stickyTimerBar" class="sticky-timer-bar">
             <div class="flex items-center gap-3">
                 <svg class="timer-ring" viewBox="0 0 40 40">
@@ -107,103 +110,103 @@
         </div>
 
         <div class="glass p-6 mb-8 border-indigo-500/20">
-            <input id="newWorkoutName" data-testid="input-session-name" class="input-field mb-4" placeholder="WORKOUT NAME">
-            <input id="newWorkoutDate" data-testid="input-session-date" type="date" class="input-field mb-6">
-            <button data-testid="btn-create-session" onclick="createNewSession()" class="btn-primary w-full py-4 italic">Start Session</button>
+            <input id="newWorkoutName" class="input-field mb-4" placeholder="WORKOUT NAME">
+            <input id="newWorkoutDate" type="date" class="input-field mb-6">
+            <button onclick="createNewSession()" class="btn-primary w-full py-4 italic">Start Session</button>
         </div>
 
-        <div id="sessionContainer" data-testid="container-sessions"></div>
+        <div id="sessionContainer"></div>
     </section>
 
-    <div id="exModal" data-testid="modal-exercise-library" class="hidden fixed inset-0 z-[100] bg-slate-950 flex flex-col">
+    <div id="exModal" class="hidden fixed inset-0 z-[100] bg-slate-950 flex flex-col">
         <div class="p-6 flex justify-between items-center bg-slate-950 border-b border-white/10">
             <h2 class="text-xl font-black italic text-white uppercase tracking-tighter">Choose <span class="text-indigo-500">Exercise</span></h2>
-            <button data-testid="btn-close-ex-modal" onclick="closeExModal()" class="glass w-10 h-10 flex items-center justify-center text-rose-500 font-bold">✕</button>
+            <button onclick="closeExModal()" class="glass w-10 h-10 flex items-center justify-center text-rose-500 font-bold">✕</button>
         </div>
-        <div id="exCategoryScroll" data-testid="list-exercise-categories" class="no-scrollbar"></div>
+        <div id="exCategoryScroll" class="no-scrollbar"></div>
         <div class="flex-1 overflow-y-auto p-6 pb-40 bg-slate-950">
-            <div id="exLibraryList" data-testid="grid-exercise-items" class="ex-grid"></div>
-            <button data-testid="btn-start-custom-ex" onclick="startCustomEx()" class="btn-primary w-full py-4 mt-8 italic text-xs tracking-widest">+ CUSTOM EXERCISE</button>
+            <div id="exLibraryList" class="ex-grid"></div>
+            <button onclick="startCustomEx()" class="btn-primary w-full py-4 mt-8 italic text-xs tracking-widest">+ CUSTOM EXERCISE</button>
         </div>
     </div>
 
-    <div id="drillDownModal" data-testid="modal-drilldown" class="hidden fixed inset-0 z-[120] bg-slate-950/98 p-6 flex flex-col items-center justify-center">
+    <div id="drillDownModal" class="hidden fixed inset-0 z-[120] bg-slate-950/98 p-6 flex flex-col items-center justify-center">
         <div class="glass p-6 w-full max-sm relative flex flex-col">
-            <button data-testid="btn-close-drilldown" onclick="document.getElementById('drillDownModal').classList.add('hidden')" class="absolute top-4 right-4 text-rose-500 font-bold z-10">✕</button>
-            <h3 id="drillDownTitle" data-testid="label-drilldown-title" class="text-center font-black italic mb-4 text-indigo-400 uppercase">DETAILS</h3>
-            <div id="drillDownNav" data-testid="nav-drilldown-categories" class="overlay-nav"></div>
-            <div class="h-64 w-full"><canvas id="drillDownChart" data-testid="chart-drilldown"></canvas></div>
+            <button onclick="document.getElementById('drillDownModal').classList.add('hidden')" class="absolute top-4 right-4 text-rose-500 font-bold z-10">✕</button>
+            <h3 id="drillDownTitle" class="text-center font-black italic mb-4 text-indigo-400 uppercase">DETAILS</h3>
+            <div id="drillDownNav" class="overlay-nav"></div>
+            <div class="h-64 w-full"><canvas id="drillDownChart"></canvas></div>
         </div>
     </div>
 
-    <div id="catSelectorModal" data-testid="modal-category-link" class="hidden fixed inset-0 z-[110] bg-black/90 flex items-center justify-center p-6">
+    <div id="catSelectorModal" class="hidden fixed inset-0 z-[110] bg-black/90 flex items-center justify-center p-6">
         <div class="glass p-6 w-full max-w-xs">
             <h3 class="text-center font-black italic mb-6 text-indigo-400 uppercase">Link to Muscle Group</h3>
-            <div id="catBtnContainer" data-testid="list-category-links" class="grid grid-cols-1 gap-3"></div>
-            <button data-testid="btn-cancel-cat-link" onclick="document.getElementById('catSelectorModal').classList.add('hidden')" class="w-full mt-6 text-[10px] font-bold opacity-40 uppercase">Cancel</button>
+            <div id="catBtnContainer" class="grid grid-cols-1 gap-3"></div>
+            <button onclick="document.getElementById('catSelectorModal').classList.add('hidden')" class="w-full mt-6 text-[10px] font-bold opacity-40 uppercase">Cancel</button>
         </div>
     </div>
 
-    <section id="view-charts" data-testid="view-charts" class="view-section hidden">
+    <section id="view-charts" class="view-section hidden">
         <div id="statsCaptureArea" class="bg-[#020617] p-2 rounded-3xl">
             <div class="glass p-6 mb-6">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-[10px] font-black text-indigo-400 uppercase italic">Muscle Balance</h3>
                     <div class="flex gap-1" id="radarFilters">
-                        <button data-testid="btn-filter-radar-week" onclick="renderRadarChart(7)" class="filter-btn active">WEEK</button>
-                        <button data-testid="btn-filter-radar-month" onclick="renderRadarChart(30)" class="filter-btn">MONTH</button>
-                        <button data-testid="btn-filter-radar-year" onclick="renderRadarChart(9999)" class="filter-btn">YEAR</button>
+                        <button onclick="renderRadarChart(7)" class="filter-btn active">WEEK</button>
+                        <button onclick="renderRadarChart(30)" class="filter-btn">MONTH</button>
+                        <button onclick="renderRadarChart(9999)" class="filter-btn">YEAR</button>
                     </div>
                 </div>
-                <div class="h-64 w-full"><canvas id="radarChart" data-testid="chart-radar-balance"></canvas></div>
+                <div class="h-64 w-full"><canvas id="radarChart"></canvas></div>
             </div>
             <div class="glass p-6 mb-6">
                 <h3 class="text-[10px] font-black text-indigo-400 mb-4 uppercase italic">Pump Meter</h3>
-                <div id="volumeTracker" data-testid="list-volume-bars" class="space-y-4 mb-10"></div>
+                <div id="volumeTracker" class="space-y-4 mb-10"></div>
                 <h3 class="text-[10px] font-black text-emerald-400 mb-4 uppercase italic">Personal Records</h3>
-                <div id="recordsTracker" data-testid="grid-pr-tiles" class="flex flex-col gap-2"></div>
+                <div id="recordsTracker" class="flex flex-col gap-2"></div>
             </div>
         </div>
-        <button data-testid="btn-share-stats" onclick="shareStatsImage()" class="btn-primary w-full py-4 mb-8 italic text-xs tracking-widest flex items-center justify-center gap-2">SHARE STATS 📸</button>
+        <button onclick="shareStatsImage()" class="btn-primary w-full py-4 mb-8 italic text-xs tracking-widest flex items-center justify-center gap-2">SHARE STATS 📸</button>
         <div class="glass p-6 mb-6">
-            <select id="chartExerciseSelect" data-testid="select-chart-exercise" onchange="updateChart()" class="input-field mb-6 text-sm"></select>
-            <div class="h-48 w-full"><canvas id="progressionChart" data-testid="chart-exercise-progression"></canvas></div>
+            <select id="chartExerciseSelect" onchange="updateChart()" class="input-field mb-6 text-sm"></select>
+            <div class="h-48 w-full"><canvas id="progressionChart"></canvas></div>
         </div>
     </section>
 
-    <section id="view-profile" data-testid="view-profile" class="view-section hidden">
+    <section id="view-profile" class="view-section hidden">
         <div class="glass p-6 mb-6">
-            <input id="profName" data-testid="input-profile-name" class="input-field mb-6 text-xl" placeholder="YOUR NAME" onchange="saveProfileName()">
+            <input id="profName" class="input-field mb-6 text-xl" placeholder="YOUR NAME" onchange="saveProfileName()">
             <div id="weightCaptureArea" class="bg-[#020617] p-2 rounded-2xl mb-4">
                 <div class="flex justify-between items-center mb-2 px-1">
                     <span class="text-[8px] font-black opacity-40 uppercase">Trends</span>
                     <div class="flex gap-1">
-                        <button data-testid="btn-filter-weight-week" onclick="renderWeightChart(7)" class="filter-btn weight-f active">WEEK</button>
-                        <button data-testid="btn-filter-weight-month" onclick="renderWeightChart(30)" class="filter-btn weight-f">MONTH</button>
-                        <button data-testid="btn-filter-weight-year" onclick="renderWeightChart(365)" class="filter-btn weight-f">YEAR</button>
+                        <button onclick="renderWeightChart(7)" class="filter-btn weight-f active">WEEK</button>
+                        <button onclick="renderWeightChart(30)" class="filter-btn weight-f">MONTH</button>
+                        <button onclick="renderWeightChart(365)" class="filter-btn weight-f">YEAR</button>
                     </div>
                 </div>
-                <div class="h-40 w-full mb-2"><canvas id="weightChart" data-testid="chart-weight-trends"></canvas></div>
+                <div class="h-40 w-full mb-2"><canvas id="weightChart"></canvas></div>
             </div>
-            <button data-testid="btn-share-weight-trends" onclick="shareWeightTrendsImage()" class="btn-primary w-full py-3 mb-6 italic text-[10px] tracking-widest flex items-center justify-center gap-2">SHARE TRENDS 📸</button>
+            <button onclick="shareWeightTrendsImage()" class="btn-primary w-full py-3 mb-6 italic text-[10px] tracking-widest flex items-center justify-center gap-2">SHARE TRENDS 📸</button>
             <div class="flex gap-2 mb-6">
-                <input id="profWeightInput" data-testid="input-log-weight" type="number" step="0.1" class="input-field flex-1" placeholder="KG">
-                <input id="profFatInput" data-testid="input-log-fat" type="number" step="0.1" class="input-field flex-1" placeholder="FAT %">
-                <button data-testid="btn-submit-weight" onclick="logWeight()" class="btn-primary px-6 font-black italic">LOG</button>
+                <input id="profWeightInput" type="number" step="0.1" class="input-field flex-1" placeholder="KG">
+                <input id="profFatInput" type="number" step="0.1" class="input-field flex-1" placeholder="FAT %">
+                <button onclick="logWeight()" class="btn-primary px-6 font-black italic">LOG</button>
             </div>
             <div class="grid grid-cols-2 gap-3 mb-8">
-                <button data-testid="btn-backup-export" onclick="exportData()" class="glass p-3 text-[9px] font-black uppercase">💾 Backup</button>
-                <button data-testid="btn-backup-import" onclick="document.getElementById('importFile').click()" class="glass p-3 text-[9px] font-black uppercase">📂 Restore</button>
-                <input type="file" id="importFile" data-testid="input-file-import" class="hidden" onchange="importData(event)" accept=".json">
+                <button onclick="exportData()" class="glass p-3 text-[9px] font-black uppercase">💾 Backup</button>
+                <button onclick="document.getElementById('importFile').click()" class="glass p-3 text-[9px] font-black uppercase">📂 Restore</button>
+                <input type="file" id="importFile" class="hidden" onchange="importData(event)" accept=".json">
             </div>
-            <div id="weightLogList" data-testid="list-weight-history" class="space-y-2 mb-8"></div>
+            <div id="weightLogList" class="space-y-2 mb-8"></div>
         </div>
     </section>
 
-    <nav data-testid="nav-main">
-        <button data-testid="nav-item-training" onclick="showView('training')" class="text-center"><span class="block text-2xl">🏋️</span><span class="text-[10px] font-black">TRAIN</span></button>
-        <button data-testid="nav-item-stats" onclick="showView('charts')" class="text-center"><span class="block text-2xl">📈</span><span class="text-[10px] font-black">STATS</span></button>
-        <button data-testid="nav-item-profile" onclick="showView('profile')" class="text-center"><span class="block text-2xl">👤</span><span class="text-[10px] font-black">PROFILE</span></button>
+    <nav>
+        <button onclick="showView('training')" class="text-center"><span class="block text-2xl">🏋️</span><span class="text-[10px] font-black">TRAIN</span></button>
+        <button onclick="showView('charts')" class="text-center"><span class="block text-2xl">📈</span><span class="text-[10px] font-black">STATS</span></button>
+        <button onclick="showView('profile')" class="text-center"><span class="block text-2xl">👤</span><span class="text-[10px] font-black">PROFILE</span></button>
     </nav>
 
     <script>
@@ -220,16 +223,15 @@
         let exLibrary = INITIAL_LIB, sessions = [], userData = { name: "USER", weightLogs: [] };
         let activeSessionIds = new Set(), openExIds = new Set(), editingSessionId = null, activeMonths = new Set();
         let chartInstance = null, weightChartInstance = null, radarChartInstance = null, drillDownChartInstance = null;
-        let currentRadarDays = 7, currentTargetSessionId = null, swapExId = null, currentSelectedCat = "Chest", pendingExName = "";
+        let currentRadarDays = 7, currentTargetSessionId = null, swapExId = null, currentSelectedCat = "Chest";
 
         let timerInterval = null, timerTotalSeconds = 0, timerRemaining = 0;
 
         function init() { 
             const savedSessions = JSON.parse(localStorage.getItem('gym_sessions')) || [];
             const savedUser = JSON.parse(localStorage.getItem('gym_user')) || { name: "USER", weightLogs: [] };
-            const savedLib = JSON.parse(localStorage.getItem('gym_ex_library'));
-            if (savedLib) { exLibrary = savedLib; } else { exLibrary = INITIAL_LIB; }
-            sessions = savedSessions; userData = savedUser;
+            const savedLib = JSON.parse(localStorage.getItem('gym_ex_library')) || INITIAL_LIB;
+            sessions = savedSessions; userData = savedUser; exLibrary = savedLib;
             document.getElementById('newWorkoutDate').valueAsDate = new Date();
             document.getElementById('profName').value = userData.name || "";
             if (sessions.length > 0) {
@@ -238,29 +240,22 @@
                 activeSessionIds.add(sessions[0].id);
             }
             saveAndRender(); 
+
+            // PWA Service Worker Registration
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log("SW failed", err));
+            }
         }
 
-        /* TIMER LOGIC v2.7.9 */
         function toggleTimerCollapse() {
             const bar = document.getElementById('stickyTimerBar');
             const btn = document.getElementById('timerCollapseBtn');
-            
-            if(bar.classList.contains('timer-collapsed')) {
-                bar.classList.remove('timer-collapsed');
-                btn.innerText = "◀";
-            } else {
-                bar.classList.add('timer-collapsed');
-                btn.innerText = "▶";
-            }
+            if(bar.classList.contains('timer-collapsed')) { bar.classList.remove('timer-collapsed'); btn.innerText = "◀"; } 
+            else { bar.classList.add('timer-collapsed'); btn.innerText = "▶"; }
         }
 
         function toggleTimer() {
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-                document.getElementById('timerToggleBtn').innerText = "Resume";
-                return;
-            }
+            if (timerInterval) { clearInterval(timerInterval); timerInterval = null; document.getElementById('timerToggleBtn').innerText = "Resume"; return; }
             if (timerRemaining <= 0) {
                 const mins = parseInt(document.getElementById('timerMin').value) || 0;
                 const secs = parseInt(document.getElementById('timerSec').value) || 0;
@@ -272,17 +267,12 @@
             timerInterval = setInterval(() => {
                 timerRemaining--;
                 updateTimerUI();
-                if (timerRemaining <= 0) {
-                    clearInterval(timerInterval);
-                    timerInterval = null;
-                    showTimerAlert();
-                }
+                if (timerRemaining <= 0) { clearInterval(timerInterval); timerInterval = null; showTimerAlert(); }
             }, 1000);
         }
 
         function updateTimerUI() {
-            const m = Math.floor(timerRemaining / 60);
-            const s = timerRemaining % 60;
+            const m = Math.floor(timerRemaining / 60); const s = timerRemaining % 60;
             document.getElementById('timerDisplay').innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
             const circle = document.getElementById('timerProgress');
             const circumference = 113.1;
@@ -291,9 +281,7 @@
         }
 
         function resetTimer() {
-            clearInterval(timerInterval);
-            timerInterval = null;
-            timerRemaining = 0;
+            clearInterval(timerInterval); timerInterval = null; timerRemaining = 0;
             document.getElementById('timerDisplay').innerText = "00:00";
             document.getElementById('timerToggleBtn').innerText = "Start";
             document.getElementById('timerProgress').style.strokeDashoffset = 113.1;
@@ -304,10 +292,7 @@
             if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
         }
 
-        function stopTimerAlert() {
-            document.getElementById('timerOverlay').classList.add('hidden');
-            resetTimer();
-        }
+        function stopTimerAlert() { document.getElementById('timerOverlay').classList.add('hidden'); resetTimer(); }
 
         function saveAndRender() { 
             localStorage.setItem('gym_sessions', JSON.stringify(sessions)); 
@@ -370,11 +355,11 @@
                 if (isMonthOpen) groups[key].sessions.forEach(session => {
                     const isOpen = activeSessionIds.has(session.id);
                     const isEditing = editingSessionId === session.id;
-                    cont.innerHTML += `<div data-testid="session-card-${session.id}" class="glass p-6 mb-4 ${isOpen ? 'border-indigo-500/40' : ''}">
+                    cont.innerHTML += `<div class="glass p-6 mb-4 ${isOpen ? 'border-indigo-500/40' : ''}">
                         <div class="flex justify-between items-start mb-2">
                             <div class="flex-1">
                                 ${isEditing ? 
-                                    `<input data-testid="input-edit-session-name-${session.id}" id="edit-input-${session.id}" class="edit-session-input" value="${session.name}" onblur="saveSessionName(${session.id}, this.value)" onkeydown="if(event.key==='Enter') saveSessionName(${session.id}, this.value)">` : 
+                                    `<input id="edit-input-${session.id}" class="edit-session-input" value="${session.name}" onblur="saveSessionName(${session.id}, this.value)" onkeydown="if(event.key==='Enter') saveSessionName(${session.id}, this.value)">` : 
                                     `<div class="flex items-center gap-2">
                                         <h3 class="text-xl font-black italic uppercase">${session.name}</h3>
                                         <button onclick="editSessionName(${session.id})" class="text-[14px] opacity-40 hover:opacity-100">✎</button>
@@ -399,8 +384,8 @@
                                     <div class="flex items-center gap-1">
                                         <button onclick="toggleExSets(${ex.id})" class="text-[10px] font-black text-indigo-300 uppercase flex items-center gap-2"><span class="text-xs">${isExOpen ? '▾' : '▸'}</span> ${ex.name}</button>
                                         <div class="flex ml-2">
-                                            <button onclick="moveExercise(${session.id}, ${exIdx}, -1)" class="order-btn" data-testid="btn-move-up-${ex.id}">↑</button>
-                                            <button onclick="moveExercise(${session.id}, ${exIdx}, 1)" class="order-btn" data-testid="btn-move-down-${ex.id}">↓</button>
+                                            <button onclick="moveExercise(${session.id}, ${exIdx}, -1)" class="order-btn">↑</button>
+                                            <button onclick="moveExercise(${session.id}, ${exIdx}, 1)" class="order-btn">↓</button>
                                         </div>
                                     </div>
                                     <div class="flex gap-4">
@@ -510,29 +495,25 @@
         }
 
         async function shareStatsImage() {
-            const btn = document.querySelector('[data-testid="btn-share-stats"]'); const originalText = btn.innerText; btn.innerText = "GENERATING...";
             try {
                 const canvas = await html2canvas(document.getElementById('statsCaptureArea'), { backgroundColor: '#020617', scale: 2, logging: false });
                 canvas.toBlob(async (blob) => {
                     const file = new File([blob], 'gymlog_stats.png', { type: 'image/png' });
                     if (navigator.share && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], title: 'My GymLog Stats' });
                     else { const link = document.createElement('a'); link.download = 'gymlog_stats.png'; link.href = canvas.toDataURL(); link.click(); }
-                    btn.innerText = originalText;
                 });
-            } catch (err) { btn.innerText = originalText; }
+            } catch (err) { console.log(err); }
         }
 
         async function shareWeightTrendsImage() {
-            const btn = document.querySelector('[data-testid="btn-share-weight-trends"]'); const originalText = btn.innerText; btn.innerText = "GENERATING...";
             try {
                 const canvas = await html2canvas(document.getElementById('weightCaptureArea'), { backgroundColor: '#020617', scale: 2, logging: false });
                 canvas.toBlob(async (blob) => {
                     const file = new File([blob], 'gymlog_trends.png', { type: 'image/png' });
                     if (navigator.share && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], title: 'My Weight Trends' });
                     else { const link = document.createElement('a'); link.download = 'gymlog_trends.png'; link.href = canvas.toDataURL(); link.click(); }
-                    btn.innerText = originalText;
                 });
-            } catch (err) { btn.innerText = originalText; }
+            } catch (err) { console.log(err); }
         }
 
         async function shareWorkout(id) {
@@ -549,7 +530,7 @@
         function renderWeightLogs() { const logs = (userData.weightLogs || []).slice(0,10); document.getElementById('weightLogList').innerHTML = logs.map((l, i) => `<div class="flex justify-between items-center text-[10px] font-bold p-3 bg-white/5 rounded-xl mb-1 border border-white/5"><div><span class="text-indigo-400 font-black">${l.w} KG</span>${l.fat ? `<span class="text-emerald-400 ml-2 italic">${l.fat}% FAT</span>` : ''}</div><div class="flex gap-3 items-center"><span class="opacity-40 uppercase text-[8px]">${new Date(l.date).toLocaleDateString('en-US', {day:'2-digit', month:'2-digit'})}</span><button onclick="userData.weightLogs.splice(${i},1); saveAndRender();" class="text-rose-500">✕</button></div></div>`).join(''); }
         function logWeight() { const w = document.getElementById('profWeightInput').value; const fat = document.getElementById('profFatInput').value; if(w){ userData.weightLogs.unshift({ w: parseFloat(w), fat: fat ? parseFloat(fat) : null, date: new Date().toISOString() }); saveAndRender(); document.getElementById('profWeightInput').value = ""; document.getElementById('profFatInput').value = ""; renderWeightChart(30); } }
         function exportData() { const blob = new Blob([JSON.stringify({ sessions, exLibrary, user: userData })], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `gymlog_backup.json`; a.click(); }
-        function importData(e) { const reader = new FileReader(); reader.onload = (ev) => { try { const imp = JSON.parse(ev.target.result); if (imp.sessions) sessions = imp.sessions; if (imp.exLibrary) exLibrary = imp.exLibrary; if (imp.user) userData = imp.user; localStorage.setItem('gym_sessions', JSON.stringify(sessions)); localStorage.setItem('gym_user', JSON.stringify(userData)); localStorage.setItem('gym_ex_library', JSON.stringify(exLibrary)); setTimeout(() => { location.reload(true); }, 150); } catch (err) { alert("Invalid file."); } }; reader.readAsText(e.target.files[0]); }
+        function importData(e) { const reader = new FileReader(); reader.onload = (ev) => { try { const imp = JSON.parse(ev.target.result); sessions = imp.sessions; exLibrary = imp.exLibrary; userData = imp.user; saveAndRender(); location.reload(); } catch (err) { alert("Invalid file."); } }; reader.readAsText(e.target.files[0]); }
         function cloneSession(id) { const old = sessions.find(s => s.id === id); const today = new Date(); const news = { id: Date.now(), name: old.name, date: today.toLocaleDateString('en-US', { weekday:'long', day:'numeric', month:'short' }), rawDate: today.toISOString().split('T')[0], exercises: old.exercises.map(ex => ({ id: Date.now() + Math.random(), name: ex.name, sets: ex.sets.map(s => ({ w: s.w, r: s.r, bpm: '' })) })) }; sessions.unshift(news); activeSessionIds.add(news.id); saveAndRender(); }
         function updSet(sId, eId, i, f, v) { const s = sessions.find(x => x.id === sId); if(s) { const e = s.exercises.find(ex => ex.id === eId); if(e) { e.sets[i][f] = v; localStorage.setItem('gym_sessions', JSON.stringify(sessions)); } } }
         function addSet(sId, exId) { const s = sessions.find(x => x.id === sId); const e = s.exercises.find(ex => ex.id === exId); e.sets.push({w:'', r:REP_DEFAULTS[e.sets.length] || 6, bpm:''}); saveAndRender(); }
@@ -570,11 +551,10 @@
                 sess.exercises.push({ id: newExId, name: name.toUpperCase(), sets: [{w:'', r:12, bpm:''}, {w:'', r:10, bpm:''}, {w:'', r:8, bpm:''}, {w:'', r:6, bpm:''}]});
                 openExIds.add(newExId);
             }
-            saveAndRender(); 
-            closeExModal(); 
+            saveAndRender(); closeExModal(); 
         }
 
-        function startCustomEx() { const n = prompt("Exercise Name:"); if(!n) return; const pendingExName = n.toUpperCase(); const btnCont = document.getElementById('catBtnContainer'); btnCont.innerHTML = ""; Object.keys(exLibrary).forEach(cat => { const b = document.createElement('button'); b.className = "glass p-4 text-[10px] font-black uppercase"; b.innerText = cat; b.onclick = () => { if(!exLibrary[cat].includes(pendingExName)) exLibrary[cat].push(pendingExName); document.getElementById('catSelectorModal').classList.add('hidden'); saveAndRender(); filterExLibrary(cat); }; btnCont.appendChild(b); }); document.getElementById('catSelectorModal').classList.remove('hidden'); }
+        function startCustomEx() { const n = prompt("Exercise Name:"); if(!n) return; const pending = n.toUpperCase(); const btnCont = document.getElementById('catBtnContainer'); btnCont.innerHTML = ""; Object.keys(exLibrary).forEach(cat => { const b = document.createElement('button'); b.className = "glass p-4 text-[10px] font-black uppercase"; b.innerText = cat; b.onclick = () => { if(!exLibrary[cat].includes(pending)) exLibrary[cat].push(pending); document.getElementById('catSelectorModal').classList.add('hidden'); saveAndRender(); filterExLibrary(cat); }; btnCont.appendChild(b); }); document.getElementById('catSelectorModal').classList.remove('hidden'); }
 
         init();
     </script>
