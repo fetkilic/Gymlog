@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GymLog Pro v2.7.9</title>
+    <title>GymLog Pro v2.8.2</title>
     <meta name="theme-color" content="#020617">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -63,6 +63,17 @@
         .timer-content-wrapper { display: flex; align-items: center; justify-content: space-between; width: 100%; overflow: hidden; transition: all 0.4s ease; }
         .timer-collapsed .hide-on-collapse { width: 0; opacity: 0; margin: 0; padding: 0; pointer-events: none; transform: translateX(-20px); }
         .timer-collapsed { width: fit-content; max-width: 130px; margin-left: auto; margin-right: 0; border-radius: 1rem 0 0 1rem; border-right: none; }
+
+        /* EXPERIENCE LOGGING UI */
+        #actionSheet { position: fixed; bottom: 0; left: 0; right: 0; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 10000; padding-bottom: env(safe-area-inset-bottom); }
+        #actionSheet.open { transform: translateY(0); }
+        .feel-btn { flex: 1; padding: 20px 10px; border-radius: 16px; font-weight: 900; font-size: 11px; text-transform: uppercase; border: 3px solid transparent; transition: all 0.1s; color: white; }
+        .feel-btn.selected { border-color: white; transform: scale(1.05); }
+        .feel-badge { font-size: 7px; font-weight: 900; padding: 6px 4px; border-radius: 6px; text-transform: uppercase; text-align: center; border: 1px solid transparent; width: 100%; display: block; }
+        .feel-empty { color: rgba(255,255,255,0.15); border: 1px dashed rgba(255,255,255,0.1); }
+        .feel-easy { background: #2563eb; color: #fff; }
+        .feel-good { background: #10b981; color: #fff; }
+        .feel-hard { background: #ef4444; color: #fff; }
     </style>
 </head>
 <body class="p-4 max-w-md mx-auto">
@@ -70,7 +81,7 @@
         <div class="flex items-center">
             <div>
                 <h1 class="text-2xl font-black italic tracking-tighter inline-block">GYM<span class="text-indigo-500">LOG</span></h1>
-                <span class="text-[10px] font-black opacity-20 ml-1">v2.7.9</span>
+                <span class="text-[10px] font-black opacity-20 ml-1">v2.8.2</span>
             </div>
             <button onclick="location.reload(true)" class="reload-btn">↻</button>
         </div>
@@ -82,6 +93,18 @@
         <h2 class="text-4xl font-black italic text-indigo-400 mb-2 uppercase">Time's Up!</h2>
         <p class="text-white/60 font-bold mb-8 uppercase tracking-widest">Get back to work</p>
         <button onclick="stopTimerAlert()" class="btn-primary w-full py-6 text-xl italic">Dismiss</button>
+    </div>
+
+    <div id="actionSheetBg" class="hidden fixed inset-0 bg-black/80 z-[9999]" onclick="closeActionSheet()"></div>
+    <div id="actionSheet" class="glass rounded-t-3xl p-6 pb-12">
+        <h3 class="text-center font-black mb-6 text-indigo-400 uppercase text-sm italic">Experience</h3>
+        <div class="flex gap-3 mb-6">
+            <button onclick="selectFeel('EASY')" id="btn-EASY" class="feel-btn bg-blue-600">EASY</button>
+            <button onclick="selectFeel('GOOD')" id="btn-GOOD" class="feel-btn bg-emerald-600">GOOD</button>
+            <button onclick="selectFeel('HARD')" id="btn-HARD" class="feel-btn bg-rose-600">HARD</button>
+        </div>
+        <textarea id="feelComment" class="w-full bg-slate-900/60 border border-white/10 rounded-xl p-4 h-20 mb-4 text-xs font-bold uppercase text-white outline-none" placeholder="ADD NOTE..."></textarea>
+        <button onclick="saveExperience()" class="btn-primary w-full py-4 italic text-white">SAVE PROGRESS</button>
     </div>
 
     <section id="view-training" class="view-section">
@@ -224,8 +247,8 @@
         let activeSessionIds = new Set(), openExIds = new Set(), editingSessionId = null, activeMonths = new Set();
         let chartInstance = null, weightChartInstance = null, radarChartInstance = null, drillDownChartInstance = null;
         let currentRadarDays = 7, currentTargetSessionId = null, swapExId = null, currentSelectedCat = "Chest";
-
         let timerInterval = null, timerTotalSeconds = 0, timerRemaining = 0;
+        let currentSessId = null, currentExId = null, currentSetIdx = null, selectedStatus = "";
 
         function init() { 
             const savedSessions = JSON.parse(localStorage.getItem('gym_sessions')) || [];
@@ -240,18 +263,13 @@
                 activeSessionIds.add(sessions[0].id);
             }
             saveAndRender(); 
-
-            // PWA Service Worker Registration
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log("SW failed", err));
-            }
         }
 
         function toggleTimerCollapse() {
             const bar = document.getElementById('stickyTimerBar');
             const btn = document.getElementById('timerCollapseBtn');
-            if(bar.classList.contains('timer-collapsed')) { bar.classList.remove('timer-collapsed'); btn.innerText = "◀"; } 
-            else { bar.classList.add('timer-collapsed'); btn.innerText = "▶"; }
+            bar.classList.toggle('timer-collapsed');
+            btn.innerText = bar.classList.contains('timer-collapsed') ? "▶" : "◀";
         }
 
         function toggleTimer() {
@@ -265,8 +283,7 @@
             if (timerRemaining <= 0) return;
             document.getElementById('timerToggleBtn').innerText = "Pause";
             timerInterval = setInterval(() => {
-                timerRemaining--;
-                updateTimerUI();
+                timerRemaining--; updateTimerUI();
                 if (timerRemaining <= 0) { clearInterval(timerInterval); timerInterval = null; showTimerAlert(); }
             }, 1000);
         }
@@ -276,23 +293,42 @@
             document.getElementById('timerDisplay').innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
             const circle = document.getElementById('timerProgress');
             const circumference = 113.1;
-            const offset = circumference - (timerRemaining / (timerTotalSeconds || 1)) * circumference;
-            circle.style.strokeDashoffset = offset;
+            circle.style.strokeDashoffset = circumference - (timerRemaining / (timerTotalSeconds || 1)) * circumference;
         }
 
-        function resetTimer() {
-            clearInterval(timerInterval); timerInterval = null; timerRemaining = 0;
-            document.getElementById('timerDisplay').innerText = "00:00";
-            document.getElementById('timerToggleBtn').innerText = "Start";
-            document.getElementById('timerProgress').style.strokeDashoffset = 113.1;
-        }
-
-        function showTimerAlert() {
-            document.getElementById('timerOverlay').classList.remove('hidden');
-            if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
-        }
-
+        function resetTimer() { clearInterval(timerInterval); timerInterval = null; timerRemaining = 0; document.getElementById('timerDisplay').innerText = "00:00"; document.getElementById('timerToggleBtn').innerText = "Start"; document.getElementById('timerProgress').style.strokeDashoffset = 113.1; }
+        function showTimerAlert() { document.getElementById('timerOverlay').classList.remove('hidden'); if (navigator.vibrate) navigator.vibrate([500, 200, 500]); }
         function stopTimerAlert() { document.getElementById('timerOverlay').classList.add('hidden'); resetTimer(); }
+
+        // EXPERIENCE LOGIC
+        function openExperience(sId, eId, idx) {
+            currentSessId = sId; currentExId = eId; currentSetIdx = idx;
+            const set = sessions.find(s => s.id === sId).exercises.find(e => e.id === eId).sets[idx];
+            selectedStatus = "";
+            document.querySelectorAll('.feel-btn').forEach(b => b.classList.remove('selected'));
+            document.getElementById('feelComment').value = set.note || "";
+            document.getElementById('actionSheetBg').classList.remove('hidden');
+            document.getElementById('actionSheet').classList.add('open');
+        }
+
+        function selectFeel(f) {
+            selectedStatus = f;
+            if(navigator.vibrate) navigator.vibrate(25);
+            document.querySelectorAll('.feel-btn').forEach(b => b.classList.remove('selected'));
+            document.getElementById('btn-' + f).classList.add('selected');
+        }
+
+        function saveExperience() {
+            if(!selectedStatus) return;
+            const s = sessions.find(x => x.id === currentSessId);
+            const e = s.exercises.find(ex => ex.id === currentExId);
+            e.sets[currentSetIdx].feel = selectedStatus;
+            e.sets[currentSetIdx].note = document.getElementById('feelComment').value;
+            closeActionSheet();
+            saveAndRender();
+        }
+
+        function closeActionSheet() { document.getElementById('actionSheet').classList.remove('open'); setTimeout(() => document.getElementById('actionSheetBg').classList.add('hidden'), 300); }
 
         function saveAndRender() { 
             localStorage.setItem('gym_sessions', JSON.stringify(sessions)); 
@@ -403,7 +439,9 @@
                                             </div>
                                             <input type="text" inputmode="decimal" onclick="this.select()" oninput="this.value = this.value.replace(/,/g, '.')" onchange="updSet(${session.id},${ex.id},${i},'w',this.value)" value="${s.w||''}" class="table-input" placeholder="kg">
                                             <input type="text" inputmode="numeric" onclick="this.select()" onchange="updSet(${session.id},${ex.id},${i},'r',this.value)" value="${s.r||''}" class="table-input" placeholder="reps">
-                                            <input type="text" inputmode="numeric" onclick="this.select()" onchange="updSet(${session.id},${ex.id},${i},'bpm',this.value)" value="${s.bpm || ''}" class="table-input !text-rose-400" placeholder="bpm">
+                                            <div onclick="openExperience(${session.id},${ex.id},${i})">
+                                                <span class="feel-badge ${s.feel ? 'feel-'+s.feel.toLowerCase() : 'feel-empty'}">${s.feel || '+ FEEL'}</span>
+                                            </div>
                                             <button onclick="const e=sessions.find(s=>s.id===${session.id}).exercises.find(x=>x.id===${ex.id}); e.sets.splice(${i},1); saveAndRender();" class="text-rose-500 font-bold text-xl">×</button>
                                         </div>`;
                                     }).join('')}
@@ -531,9 +569,9 @@
         function logWeight() { const w = document.getElementById('profWeightInput').value; const fat = document.getElementById('profFatInput').value; if(w){ userData.weightLogs.unshift({ w: parseFloat(w), fat: fat ? parseFloat(fat) : null, date: new Date().toISOString() }); saveAndRender(); document.getElementById('profWeightInput').value = ""; document.getElementById('profFatInput').value = ""; renderWeightChart(30); } }
         function exportData() { const blob = new Blob([JSON.stringify({ sessions, exLibrary, user: userData })], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `gymlog_backup.json`; a.click(); }
         function importData(e) { const reader = new FileReader(); reader.onload = (ev) => { try { const imp = JSON.parse(ev.target.result); sessions = imp.sessions; exLibrary = imp.exLibrary; userData = imp.user; saveAndRender(); location.reload(); } catch (err) { alert("Invalid file."); } }; reader.readAsText(e.target.files[0]); }
-        function cloneSession(id) { const old = sessions.find(s => s.id === id); const today = new Date(); const news = { id: Date.now(), name: old.name, date: today.toLocaleDateString('en-US', { weekday:'long', day:'numeric', month:'short' }), rawDate: today.toISOString().split('T')[0], exercises: old.exercises.map(ex => ({ id: Date.now() + Math.random(), name: ex.name, sets: ex.sets.map(s => ({ w: s.w, r: s.r, bpm: '' })) })) }; sessions.unshift(news); activeSessionIds.add(news.id); saveAndRender(); }
+        function cloneSession(id) { const old = sessions.find(s => s.id === id); const today = new Date(); const news = { id: Date.now(), name: old.name, date: today.toLocaleDateString('en-US', { weekday:'long', day:'numeric', month:'short' }), rawDate: today.toISOString().split('T')[0], exercises: old.exercises.map(ex => ({ id: Date.now() + Math.random(), name: ex.name, sets: ex.sets.map(s => ({ w: s.w, r: s.r, feel: '', note: '' })) })) }; sessions.unshift(news); activeSessionIds.add(news.id); saveAndRender(); }
         function updSet(sId, eId, i, f, v) { const s = sessions.find(x => x.id === sId); if(s) { const e = s.exercises.find(ex => ex.id === eId); if(e) { e.sets[i][f] = v; localStorage.setItem('gym_sessions', JSON.stringify(sessions)); } } }
-        function addSet(sId, exId) { const s = sessions.find(x => x.id === sId); const e = s.exercises.find(ex => ex.id === exId); e.sets.push({w:'', r:REP_DEFAULTS[e.sets.length] || 6, bpm:''}); saveAndRender(); }
+        function addSet(sId, exId) { const s = sessions.find(x => x.id === sId); const e = s.exercises.find(ex => ex.id === exId); e.sets.push({w:'', r:REP_DEFAULTS[e.sets.length] || 6, feel: '', note: ''}); saveAndRender(); }
         function openExModal(sId) { currentTargetSessionId = sId; document.getElementById('exModal').classList.remove('hidden'); renderExTabs(); filterExLibrary(currentSelectedCat); }
         function closeExModal() { document.getElementById('exModal').classList.add('hidden'); }
         function renderExTabs() { const cont = document.getElementById('exCategoryScroll'); cont.innerHTML = Object.keys(exLibrary).map(cat => `<button onclick="filterExLibrary('${cat}')" class="cat-tab ${cat === currentSelectedCat ? 'active' : ''}" id="tab-${cat}">${cat}</button>`).join(''); }
@@ -548,7 +586,7 @@
                 swapExId = null;
             } else {
                 const newExId = Date.now();
-                sess.exercises.push({ id: newExId, name: name.toUpperCase(), sets: [{w:'', r:12, bpm:''}, {w:'', r:10, bpm:''}, {w:'', r:8, bpm:''}, {w:'', r:6, bpm:''}]});
+                sess.exercises.push({ id: newExId, name: name.toUpperCase(), sets: [{w:'', r:12, feel: '', note: ''}, {w:'', r:10, feel: '', note: ''}, {w:'', r:8, feel: '', note: ''}, {w:'', r:6, feel: '', note: ''}]});
                 openExIds.add(newExId);
             }
             saveAndRender(); closeExModal(); 
