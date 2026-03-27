@@ -998,40 +998,33 @@
 
         /* [JS: INITIALIZATION] */
 
-       function init() { 
-            const savedSessions = JSON.parse(localStorage.getItem('gym_sessions')) || [];
-            // We zorgen dat 'theme' ook een standaardwaarde heeft als de gebruiker nog niets heeft gedaan
-            const savedUser = JSON.parse(localStorage.getItem('gym_user')) || { name: "USER", weightLogs: [], theme: "dark" };
-            const savedLib = JSON.parse(localStorage.getItem('gym_ex_library')) || INITIAL_LIB;
-            
-            sessions = savedSessions; 
-            userData = savedUser; 
-            exLibrary = savedLib;
+        function init() {
 
-            // --- THEMA FIX: Pas thema direct toe bij het laden van de app ---
-            if (userData.theme === "light") {
-                document.body.classList.add('light-mode');
-                updateThemeUI(true);
-                document.querySelector('meta[name="theme-color"]').setAttribute('content', "#f1f5f9");
-            } else {
-                document.body.classList.remove('light-mode');
-                updateThemeUI(false);
-                document.querySelector('meta[name="theme-color"]').setAttribute('content', "#020617");
-            }
-            // ----------------------------------------------------------------
+            const savedSessions = JSON.parse(localStorage.getItem('gym_sessions')) || [];
+
+            const savedUser = JSON.parse(localStorage.getItem('gym_user')) || { name: "USER", weightLogs: [] };
+
+            const savedLib = JSON.parse(localStorage.getItem('gym_ex_library')) || INITIAL_LIB;
+
+            sessions = savedSessions; userData = savedUser; exLibrary = savedLib;
 
             document.getElementById('newWorkoutDate').valueAsDate = new Date();
-            document.getElementById('profName').value = userData.name || "";
-            
-            if (sessions.length > 0) {
-                const latest = new Date(sessions[0].rawDate);
-                activeMonths.add(`${latest.getFullYear()}-${latest.getMonth()}`);
-                activeSessionIds.add(sessions[0].id);
-            }
-            saveAndRender(); 
-        }
 
-    
+            document.getElementById('profName').value = userData.name || "";
+
+            if (sessions.length > 0) {
+
+                const latest = new Date(sessions[0].rawDate);
+
+                activeMonths.add(`${latest.getFullYear()}-${latest.getMonth()}`);
+
+                activeSessionIds.add(sessions[0].id);
+
+            }
+
+            saveAndRender();
+
+        }
 
 
 
@@ -1107,19 +1100,15 @@
 
 
 
-        /* [JS: THEME PERSISTENCE] */
-// Zoek in je init() functie de regel: userData = savedUser;
-// Plak dit er direct onder:
-if (userData.theme === "light") {
-    document.body.classList.add('light-mode');
-    updateThemeUI(true);
-    document.querySelector('meta[name="theme-color"]').setAttribute('content', "#f1f5f9");
-} else {
-    document.body.classList.remove('light-mode');
-    updateThemeUI(false);
-    document.querySelector('meta[name="meta[name="theme-color"]').setAttribute('content', "#020617");
-}
+        // Check of de gebruiker eerder 'light' heeft gekozen
 
+        if (userData.theme === "light") {
+
+            document.body.classList.add('light-mode');
+
+            updateThemeUI(true);
+
+        }
 
         /* [JS: TIMER LOGIC - BACKGROUND PROOF SYSTEM] */
 
