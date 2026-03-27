@@ -15,21 +15,35 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+
     <style>
+        /* [STYLE: ROOT VARIABLES] */
         :root { --accent: #6366f1; --bg: #020617; }
+
+        /* [STYLE: GLOBAL UI RESET] */
         body { background-color: var(--bg); color: #ffffff; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; min-height: 100vh; overflow-x: hidden; }
         .view-section { padding-bottom: 140px !important; }
+        
+        /* [STYLE: GLASSMORPHISM COMPONENTS] */
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.25rem; transition: all 0.2s ease; }
+        
+        /* [STYLE: INTERACTIVE ELEMENTS] */
         button, .ex-item, .ex-name-btn, nav button, .glass { transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.1s; cursor: pointer; }
         button:active, .ex-item:active, .ex-name-btn:active, nav button:active { transform: scale(0.96); opacity: 0.8; }
+        
+        /* [STYLE: FORM & INPUTS] */
         .input-field { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 0.75rem; padding: 14px; width: 100%; color: white; font-weight: 700; outline: none; transition: all 0.2s; display: block; box-sizing: border-box; appearance: none; -webkit-appearance: none; }
         input[type="date"].input-field { min-height: 52px; line-height: 1.2; }
         .btn-primary { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border-radius: 1rem; font-weight: 800; text-transform: uppercase; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3); }
         .table-input { background: #0f172a; width: 100%; font-weight: 800; font-size: 0.85rem; border-radius: 8px; padding: 8px; text-align: center; color: var(--accent); border: 1px solid rgba(255,255,255,0.1); }
+        
+        /* [STYLE: ACTION BUTTONS] */
         .action-btn { font-size: 9px; font-weight: 900; padding: 5px 10px; border-radius: 6px; text-transform: uppercase; border: 1px solid; }
         .btn-copy { color: #22c55e; border-color: #22c55e; background: rgba(34, 197, 94, 0.1); }
         .btn-share { color: #818cf8; border-color: #818cf8; background: rgba(129, 140, 248, 0.1); }
         .btn-delete { color: #ef4444; border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+        
+        /* [STYLE: EXERCISE LIBRARY MODAL] */
         #exCategoryScroll { background: #0f172a; border-bottom: 1px solid rgba(99, 102, 241, 0.3); position: sticky; top: 0; z-index: 50; display: flex; gap: 8px; overflow-x: auto; padding: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
         .cat-tab { padding: 12px 20px; border-radius: 14px; white-space: nowrap; font-size: 11px; font-weight: 900; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.6); background: #1e293b; }
         .cat-tab.active { background: var(--accent); color: white; border-color: #818cf8; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4); }
@@ -37,6 +51,8 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .ex-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .ex-item { background: #1e293b; padding: 16px; border-radius: 1rem; border: 1px solid rgba(255, 255, 255, 0.08); display: flex; flex-direction: column; justify-content: space-between; min-height: 70px; font-size: 12px; font-weight: 800; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        
+        /* [STYLE: STATS & CHARTS UI] */
         .record-tile { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 0.75rem; padding: 10px; display: flex; flex-direction: column; justify-content: center; }
         .filter-btn { font-size: 8px; font-weight: 900; padding: 4px 8px; border-radius: 4px; background: rgba(255,255,255,0.05); transition: all 0.2s; }
         .filter-btn.active { background: var(--accent); box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4); }
@@ -45,26 +61,30 @@
         .reload-btn { background: rgba(255,255,255,0.05); border-radius: 0.5rem; padding: 4px 8px; font-size: 12px; border: 1px solid rgba(255,255,255,0.1); margin-left: 8px; }
         .month-header { font-size: 11px; font-weight: 900; color: #6366f1; letter-spacing: 1px; margin: 24px 0 12px 4px; display: flex; align-items: center; gap: 8px; opacity: 0.8; cursor: pointer; }
         .month-header::after { content: ''; height: 1px; background: linear-gradient(90deg, rgba(99,102,241,0.3), transparent); flex: 1; }
+        
+        /* [STYLE: NAVIGATION] */
         nav { position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; width: 100vw !important; height: 85px !important; z-index: 9999 !important; background: rgba(15, 23, 42, 0.95) !important; backdrop-filter: blur(15px); border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); transform: translateZ(0); }
         .overlay-nav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); scrollbar-width: none; }
         .overlay-nav-btn { font-size: 7px; font-weight: 900; white-space: nowrap; padding: 6px 10px; border-radius: 6px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); text-transform: uppercase; }
         .overlay-nav-btn.active { background: var(--accent); color: white; }
+        
+        /* [STYLE: SESSION EDITING] */
         .edit-session-input { background: rgba(15, 23, 42, 0.9); border: 1px solid var(--accent); color: white; font-style: italic; font-weight: 900; text-transform: uppercase; outline: none; width: 100%; padding: 4px 8px; border-radius: 8px; }
         .order-btn { font-size: 14px; opacity: 0.3; padding: 0 4px; }
         .order-btn:hover { opacity: 1; color: var(--accent); }
         .record-cat-header { font-size: 8px; font-weight: 900; color: #10b981; text-transform: uppercase; letter-spacing: 1px; margin: 12px 0 6px 2px; opacity: 0.6; }
         
+        /* [STYLE: REST TIMER SYSTEM] */
         .sticky-timer-bar { position: sticky; top: 10px; left: 0; right: 0; width: 100%; z-index: 80; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(12px); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 1rem; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 20px; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .timer-mini-input { background: transparent; color: var(--accent); width: 35px; text-align: center; font-weight: 900; font-size: 14px; outline: none; }
         .timer-circle-progress { fill: none; stroke: var(--accent); stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
         .timer-ring { transform: rotate(-90deg); transform-origin: 50% 50%; width: 24px; height: 24px; }
         #timerOverlay { background: rgba(2, 6, 23, 0.98); }
-        
         .timer-content-wrapper { display: flex; align-items: center; justify-content: space-between; width: 100%; overflow: hidden; transition: all 0.4s ease; }
         .timer-collapsed .hide-on-collapse { width: 0; opacity: 0; margin: 0; padding: 0; pointer-events: none; transform: translateX(-20px); }
         .timer-collapsed { width: fit-content; max-width: 130px; margin-left: auto; margin-right: 0; border-radius: 1rem 0 0 1rem; border-right: none; }
 
-        /* EXPERIENCE LOGGING UI */
+        /* [STYLE: EXPERIENCE / FEELINGS SYSTEM] */
         #actionSheet { position: fixed; bottom: 0; left: 0; right: 0; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 10000; padding-bottom: env(safe-area-inset-bottom); }
         #actionSheet.open { transform: translateY(0); }
         .feel-btn { flex: 1; padding: 20px 10px; border-radius: 16px; font-weight: 900; font-size: 11px; text-transform: uppercase; border: 3px solid transparent; transition: all 0.1s; color: white; }
@@ -76,7 +96,9 @@
         .feel-hard { background: #ef4444; color: #fff; }
     </style>
 </head>
+
 <body class="p-4 max-w-md mx-auto">
+
     <header class="flex justify-between items-center mb-6 pt-4">
         <div class="flex items-center">
             <div>
@@ -200,6 +222,7 @@
     <section id="view-profile" class="view-section hidden">
         <div class="glass p-6 mb-6">
             <input id="profName" class="input-field mb-6 text-xl" placeholder="YOUR NAME" onchange="saveProfileName()">
+            
             <div id="weightCaptureArea" class="bg-[#020617] p-2 rounded-2xl mb-4">
                 <div class="flex justify-between items-center mb-2 px-1">
                     <span class="text-[8px] font-black opacity-40 uppercase">Trends</span>
@@ -211,17 +234,21 @@
                 </div>
                 <div class="h-40 w-full mb-2"><canvas id="weightChart"></canvas></div>
             </div>
+            
             <button onclick="shareWeightTrendsImage()" class="btn-primary w-full py-3 mb-6 italic text-[10px] tracking-widest flex items-center justify-center gap-2">SHARE TRENDS 📸</button>
+            
             <div class="flex gap-2 mb-6">
                 <input id="profWeightInput" type="number" step="0.1" class="input-field flex-1" placeholder="KG">
                 <input id="profFatInput" type="number" step="0.1" class="input-field flex-1" placeholder="FAT %">
                 <button onclick="logWeight()" class="btn-primary px-6 font-black italic">LOG</button>
             </div>
+            
             <div class="grid grid-cols-2 gap-3 mb-8">
                 <button onclick="exportData()" class="glass p-3 text-[9px] font-black uppercase">💾 Backup</button>
                 <button onclick="document.getElementById('importFile').click()" class="glass p-3 text-[9px] font-black uppercase">📂 Restore</button>
                 <input type="file" id="importFile" class="hidden" onchange="importData(event)" accept=".json">
             </div>
+            
             <div id="weightLogList" class="space-y-2 mb-8"></div>
         </div>
     </section>
@@ -233,6 +260,7 @@
     </nav>
 
     <script>
+        /* [JS: CORE DATA & STATE] */
         const INITIAL_LIB = { 
             "Chest": ["BENCH PRESS", "INCLINE DB PRESS", "PEC FLY", "DIPS", "PUSH UPS", "CABLE CROSSOVER"], 
             "Back": ["LAT PULLDOWN", "DEADLIFT", "BENT OVER ROW", "PULL UPS", "SEATED CABLE ROW", "FACE PULLS", "T-BAR ROW"], 
@@ -243,6 +271,7 @@
             "Abs / Core": ["PLANK", "CRUNCHES", "LEG RAISES", "RUSSIAN TWIST", "AB WHEEL"] 
         };
         const REP_DEFAULTS = [12, 10, 8, 6];
+        
         let exLibrary = INITIAL_LIB, sessions = [], userData = { name: "USER", weightLogs: [] };
         let activeSessionIds = new Set(), openExIds = new Set(), editingSessionId = null, activeMonths = new Set();
         let chartInstance = null, weightChartInstance = null, radarChartInstance = null, drillDownChartInstance = null;
@@ -250,6 +279,7 @@
         let timerInterval = null, timerTotalSeconds = 0, timerRemaining = 0;
         let currentSessId = null, currentExId = null, currentSetIdx = null, selectedStatus = "";
 
+        /* [JS: INITIALIZATION] */
         function init() { 
             const savedSessions = JSON.parse(localStorage.getItem('gym_sessions')) || [];
             const savedUser = JSON.parse(localStorage.getItem('gym_user')) || { name: "USER", weightLogs: [] };
@@ -265,28 +295,82 @@
             saveAndRender(); 
         }
 
+        /* [JS: TIMER LOGIC] */
         function toggleTimerCollapse() {
             const bar = document.getElementById('stickyTimerBar');
             const btn = document.getElementById('timerCollapseBtn');
             bar.classList.toggle('timer-collapsed');
             btn.innerText = bar.classList.contains('timer-collapsed') ? "▶" : "◀";
         }
+/* [JS: TIMER LOGIC - BACKGROUND PROOF SYSTEM] */
 
-        function toggleTimer() {
-            if (timerInterval) { clearInterval(timerInterval); timerInterval = null; document.getElementById('timerToggleBtn').innerText = "Resume"; return; }
-            if (timerRemaining <= 0) {
-                const mins = parseInt(document.getElementById('timerMin').value) || 0;
-                const secs = parseInt(document.getElementById('timerSec').value) || 0;
-                timerTotalSeconds = (mins * 60) + secs;
-                timerRemaining = timerTotalSeconds;
-            }
-            if (timerRemaining <= 0) return;
-            document.getElementById('timerToggleBtn').innerText = "Pause";
-            timerInterval = setInterval(() => {
-                timerRemaining--; updateTimerUI();
-                if (timerRemaining <= 0) { clearInterval(timerInterval); timerInterval = null; showTimerAlert(); }
-            }, 1000);
+// Extra variabele om de streeftijd in de toekomst vast te leggen
+let timerExpirationTime = null; 
+
+function toggleTimer() {
+    // 1. STOPPEN / PAUZEREN
+    if (timerInterval) { 
+        clearInterval(timerInterval); 
+        timerInterval = null; 
+        document.getElementById('timerToggleBtn').innerText = "Resume"; 
+        return; 
+    }
+
+    // 2. BEREKENEN VAN DE STARTTIJD
+    // Als er geen resterende tijd is (nieuwe start), pakken we de waarden uit de input-velden
+    if (timerRemaining <= 0) {
+        const mins = parseInt(document.getElementById('timerMin').value) || 0;
+        const secs = parseInt(document.getElementById('timerSec').value) || 0;
+        timerTotalSeconds = (mins * 60) + secs;
+        timerRemaining = timerTotalSeconds;
+    }
+
+    if (timerRemaining <= 0) return;
+
+    // 3. BEPAAL DE EXPIRE-TIJD (Systeemtijd nu + resterende seconden)
+    // Dit zorgt ervoor dat de timer "weet" hoe laat het moet zijn als je de app weer opent
+    timerExpirationTime = Date.now() + (timerRemaining * 1000);
+
+    document.getElementById('timerToggleBtn').innerText = "Pause";
+    
+    // 4. DE TICKER (Controleert elke seconde de telefoontijd)
+    timerInterval = setInterval(() => {
+        const now = Date.now();
+        // Bereken het verschil tussen de eindtijd en de huidige tijd van de telefoon
+        timerRemaining = Math.max(0, Math.round((timerExpirationTime - now) / 1000));
+
+        updateTimerUI();
+
+        if (timerRemaining <= 0) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            showTimerAlert(); // Trillen en popup
         }
+    }, 1000);
+}
+
+function updateTimerUI() {
+    const m = Math.floor(timerRemaining / 60); 
+    const s = timerRemaining % 60;
+    // Update de tekst (00:00)
+    document.getElementById('timerDisplay').innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    
+    // Update de visuele cirkel
+    const circle = document.getElementById('timerProgress');
+    const circumference = 113.1;
+    const offset = circumference - (timerRemaining / (timerTotalSeconds || 1)) * circumference;
+    circle.style.strokeDashoffset = offset;
+}
+
+function resetTimer() { 
+    clearInterval(timerInterval); 
+    timerInterval = null; 
+    timerRemaining = 0; 
+    timerExpirationTime = null;
+    document.getElementById('timerDisplay').innerText = "00:00"; 
+    document.getElementById('timerToggleBtn').innerText = "Start"; 
+    document.getElementById('timerProgress').style.strokeDashoffset = 113.1; 
+}
 
         function updateTimerUI() {
             const m = Math.floor(timerRemaining / 60); const s = timerRemaining % 60;
@@ -300,7 +384,7 @@
         function showTimerAlert() { document.getElementById('timerOverlay').classList.remove('hidden'); if (navigator.vibrate) navigator.vibrate([500, 200, 500]); }
         function stopTimerAlert() { document.getElementById('timerOverlay').classList.add('hidden'); resetTimer(); }
 
-        // EXPERIENCE LOGIC
+        /* [JS: EXPERIENCE LOGIC] */
         function openExperience(sId, eId, idx) {
             currentSessId = sId; currentExId = eId; currentSetIdx = idx;
             const set = sessions.find(s => s.id === sId).exercises.find(e => e.id === eId).sets[idx];
@@ -330,6 +414,7 @@
 
         function closeActionSheet() { document.getElementById('actionSheet').classList.remove('open'); setTimeout(() => document.getElementById('actionSheetBg').classList.add('hidden'), 300); }
 
+        /* [JS: DATA MANAGEMENT] */
         function saveAndRender() { 
             localStorage.setItem('gym_sessions', JSON.stringify(sessions)); 
             localStorage.setItem('gym_user', JSON.stringify(userData)); 
@@ -337,6 +422,7 @@
             updateHeader(); renderSessions(); renderWeightLogs(); populateExerciseSelect(); 
         }
 
+        /* [JS: SESSION & EXERCISE LOGIC] */
         function calc1RM(w, r) { const weight = parseFloat(w); const reps = parseInt(r); if (!weight || !reps || reps < 1) return 0; if (reps === 1) return weight; return weight * (36 / (37 - reps)); }
         function toggleSession(id) { if (activeSessionIds.has(id)) activeSessionIds.delete(id); else activeSessionIds.add(id); renderSessions(); }
         function toggleExSets(exId) { if (openExIds.has(exId)) openExIds.delete(exId); else openExIds.add(exId); renderSessions(); }
@@ -376,6 +462,7 @@
             return `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`;
         }
 
+        /* [JS: UI RENDERING] */
         function renderSessions() {
             const cont = document.getElementById('sessionContainer'); cont.innerHTML = "";
             const sorted = [...sessions].sort((a,b) => (new Date(b.rawDate) - new Date(a.rawDate)) || (b.id - a.id));
@@ -455,6 +542,7 @@
             });
         }
 
+        /* [JS: CHARTS & STATS ENGINE] */
         function renderCharts() { 
             updateChart(); renderRadarChart(currentRadarDays); 
             const volCont = document.getElementById('volumeTracker'); const recCont = document.getElementById('recordsTracker'); 
@@ -532,6 +620,7 @@
             weightChartInstance = new Chart(ctx, { type: 'line', data: { labels: logs.map(l => new Date(l.date).toLocaleDateString('en-US', {day:'numeric', month:'short'})), datasets: [ { label: 'KG', data: logs.map(l => l.w), borderColor: '#6366f1', tension: 0.4, yAxisID: 'y' }, { label: 'FAT %', data: logs.map(l => l.fat), borderColor: '#10b981', borderDash: [5,5], yAxisID: 'y1' } ] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: true, position: 'left', grid: { color: 'rgba(255,255,255,0.05)' } }, y1: { display: true, position: 'right', grid: { display: false } } } } });
         }
 
+        /* [JS: SHARING & EXPORT] */
         async function shareStatsImage() {
             try {
                 const canvas = await html2canvas(document.getElementById('statsCaptureArea'), { backgroundColor: '#020617', scale: 2, logging: false });
@@ -561,6 +650,7 @@
             else { navigator.clipboard.writeText(text); alert("Copied!"); }
         }
 
+        /* [JS: PROFILE & DATA HELPERS] */
         function populateExerciseSelect() { const u = [...new Set(sessions.flatMap(s => s.exercises.map(e => e.name.toUpperCase())))].sort(); document.getElementById('chartExerciseSelect').innerHTML = u.map(n => `<option value="${n}">${n}</option>`).join(''); }
         function saveProfileName() { userData.name = document.getElementById('profName').value.toUpperCase(); saveAndRender(); }
         function showView(v) { document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden')); document.getElementById('view-'+v).classList.remove('hidden'); if(v==='charts') renderCharts(); if(v==='profile') renderWeightChart(30); }
@@ -572,6 +662,8 @@
         function cloneSession(id) { const old = sessions.find(s => s.id === id); const today = new Date(); const news = { id: Date.now(), name: old.name, date: today.toLocaleDateString('en-US', { weekday:'long', day:'numeric', month:'short' }), rawDate: today.toISOString().split('T')[0], exercises: old.exercises.map(ex => ({ id: Date.now() + Math.random(), name: ex.name, sets: ex.sets.map(s => ({ w: s.w, r: s.r, feel: '', note: '' })) })) }; sessions.unshift(news); activeSessionIds.add(news.id); saveAndRender(); }
         function updSet(sId, eId, i, f, v) { const s = sessions.find(x => x.id === sId); if(s) { const e = s.exercises.find(ex => ex.id === eId); if(e) { e.sets[i][f] = v; localStorage.setItem('gym_sessions', JSON.stringify(sessions)); } } }
         function addSet(sId, exId) { const s = sessions.find(x => x.id === sId); const e = s.exercises.find(ex => ex.id === exId); e.sets.push({w:'', r:REP_DEFAULTS[e.sets.length] || 6, feel: '', note: ''}); saveAndRender(); }
+        
+        /* [JS: EXERCISE LIBRARY ACTIONS] */
         function openExModal(sId) { currentTargetSessionId = sId; document.getElementById('exModal').classList.remove('hidden'); renderExTabs(); filterExLibrary(currentSelectedCat); }
         function closeExModal() { document.getElementById('exModal').classList.add('hidden'); }
         function renderExTabs() { const cont = document.getElementById('exCategoryScroll'); cont.innerHTML = Object.keys(exLibrary).map(cat => `<button onclick="filterExLibrary('${cat}')" class="cat-tab ${cat === currentSelectedCat ? 'active' : ''}" id="tab-${cat}">${cat}</button>`).join(''); }
@@ -594,6 +686,7 @@
 
         function startCustomEx() { const n = prompt("Exercise Name:"); if(!n) return; const pending = n.toUpperCase(); const btnCont = document.getElementById('catBtnContainer'); btnCont.innerHTML = ""; Object.keys(exLibrary).forEach(cat => { const b = document.createElement('button'); b.className = "glass p-4 text-[10px] font-black uppercase"; b.innerText = cat; b.onclick = () => { if(!exLibrary[cat].includes(pending)) exLibrary[cat].push(pending); document.getElementById('catSelectorModal').classList.add('hidden'); saveAndRender(); filterExLibrary(cat); }; btnCont.appendChild(b); }); document.getElementById('catSelectorModal').classList.remove('hidden'); }
 
+        /* [JS: APP BOOT] */
         init();
     </script>
 </body>
