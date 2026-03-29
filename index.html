@@ -45,10 +45,8 @@
             --glass-border: rgba(255, 255, 255, 0.1);
             --input-bg: rgba(15, 23, 42, 0.6);
             --card-bg: #1e293b;
-            /* Donkergrijs voor darkmode */
         }
 
-        /* SOFT GREY LIGHT MODE DEFINITIE */
         body.light-mode {
             --bg: #f1f5f9;
             --text: #0f172a;
@@ -56,12 +54,8 @@
             --glass-border: rgba(99, 102, 241, 0.2);
             --input-bg: #e2e8f0;
             --card-bg: #e2e8f0;
-            /* Zachtgrijs voor lightmode */
         }
 
-
-
-        /* [STYLE: GLOBAL UI RESET] */
         body {
             background-color: var(--bg);
             color: var(--text);
@@ -72,7 +66,6 @@
             transition: background 0.3s, color 0.3s;
         }
 
-        /* [STYLE: GLASSMORPHISM COMPONENTS] */
         .glass {
             background: var(--glass-bg);
             backdrop-filter: blur(10px);
@@ -80,8 +73,6 @@
             border-radius: 1.25rem;
             transition: all 0.2s ease;
         }
-
-        /* [STYLE: INTERACTIVE ELEMENTS] */
 
         button,
         .ex-item,
@@ -99,10 +90,6 @@
             transform: scale(0.96);
             opacity: 0.8;
         }
-
-
-
-        /* [STYLE: FORM & INPUTS] */
 
         .input-field {
             background: rgba(15, 23, 42, 0.6);
@@ -131,6 +118,7 @@
             font-weight: 800;
             text-transform: uppercase;
             box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            color: white;
         }
 
         .table-input {
@@ -144,10 +132,6 @@
             color: var(--accent);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-
-
-
-        /* [STYLE: ACTION BUTTONS] */
 
         .action-btn {
             font-size: 9px;
@@ -175,10 +159,6 @@
             border-color: #ef4444;
             background: rgba(239, 68, 68, 0.1);
         }
-
-
-
-        /* [STYLE: EXERCISE LIBRARY MODAL] */
 
         #exCategoryScroll {
             background: #0f172a;
@@ -240,10 +220,6 @@
             font-weight: 800;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
-
-
-
-        /* [STYLE: STATS & CHARTS UI] */
 
         .record-tile {
             background: rgba(16, 185, 129, 0.1);
@@ -308,10 +284,6 @@
             flex: 1;
         }
 
-
-
-        /* [STYLE: NAVIGATION] */
-
         nav {
             position: fixed !important;
             bottom: 0 !important;
@@ -356,10 +328,6 @@
             color: white;
         }
 
-
-
-        /* [STYLE: SESSION EDITING] */
-
         .edit-session-input {
             background: rgba(15, 23, 42, 0.9);
             border: 1px solid var(--accent);
@@ -393,10 +361,6 @@
             margin: 12px 0 6px 2px;
             opacity: 0.6;
         }
-
-
-
-        /* [STYLE: REST TIMER SYSTEM] */
 
         .sticky-timer-bar {
             position: sticky;
@@ -473,10 +437,6 @@
             border-radius: 1rem 0 0 1rem;
             border-right: none;
         }
-
-
-
-        /* [STYLE: EXPERIENCE / FEELINGS SYSTEM] */
 
         #actionSheet {
             position: fixed;
@@ -562,7 +522,6 @@
             background: var(--bg) !important;
         }
 
-        /* Deze regel zorgt voor de zachtgrijze 'tegel' look */
         .light-mode .ex-item,
         .light-mode .table-input,
         .light-mode #feelComment {
@@ -575,7 +534,6 @@
             border: 1px dashed rgba(0, 0, 0, 0.2) !important;
             background: var(--card-bg) !important;
             opacity: 0.5;
-            /* Maakt het subtiel maar zichtbaar */
         }
 
         .light-mode .feel-badge {
@@ -588,12 +546,10 @@
 
         .light-mode #volumeTracker .bg-slate-900 {
             background: var(--input-bg) !important;
-            /* Maakt de lege achtergrond van de bar grijs */
         }
 
         .light-mode #volumeTracker span {
             color: var(--text) !important;
-            /* Zorgt dat de tekst boven de bars zichtbaar is */
         }
     </style>
 
@@ -810,6 +766,18 @@
 
     <section id="view-charts" class="view-section hidden">
 
+        <div class="glass p-6 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-[10px] font-black text-indigo-400 uppercase italic">Training Distribution (Sets)</h3>
+                <div class="flex gap-1" id="distFilters">
+                    <button onclick="renderDistributionChart(7)" class="filter-btn active">WEEK</button>
+                    <button onclick="renderDistributionChart(30)" class="filter-btn">MONTH</button>
+                    <button onclick="renderDistributionChart(9999)" class="filter-btn">YEAR</button>
+                </div>
+            </div>
+            <div class="h-64 w-full"><canvas id="distributionChart"></canvas></div>
+        </div>
+
         <div id="statsCaptureArea" class="bg-[#020617] p-2 rounded-3xl">
 
             <div class="glass p-6 mb-6">
@@ -984,21 +952,32 @@
 
         let activeSessionIds = new Set(), openExIds = new Set(), editingSessionId = null, activeMonths = new Set();
 
-        let chartInstance = null, weightChartInstance = null, radarChartInstance = null, drillDownChartInstance = null;
+        let chartInstance = null, weightChartInstance = null, radarChartInstance = null, drillDownChartInstance = null, distributionChartInstance = null;
 
-        let currentRadarDays = 7, currentTargetSessionId = null, swapExId = null, currentSelectedCat = "Chest";
+        let currentRadarDays = 7, currentDistDays = 7, currentTargetSessionId = null, swapExId = null, currentSelectedCat = "Chest";
 
         let timerInterval = null, timerTotalSeconds = 0, timerRemaining = 0;
 
         let currentSessId = null, currentExId = null, currentSetIdx = null, selectedStatus = "";
 
-        let theme = "dark"; // Standaardwaarde
+        let theme = "dark"; 
 
 
 
         /* [JS: INITIALIZATION] */
 
         function init() {
+
+            // FORCEER UPDATE LOGICA (Zonder dataverlies)
+            const CURRENT_VERSION = "2.8.2"; // Pas dit nummer aan bij elke grote update
+            const savedVersion = localStorage.getItem('gymlog_version');
+
+            if (savedVersion !== CURRENT_VERSION) {
+                localStorage.setItem('gymlog_version', CURRENT_VERSION);
+                // Forceer een reload van de server, niet uit cache
+                window.location.reload(true); 
+                return; // Stop de rest van de init tot de reload klaar is
+            }
 
             const savedSessions = JSON.parse(localStorage.getItem('gym_sessions')) || [];
 
@@ -1007,6 +986,11 @@
             const savedLib = JSON.parse(localStorage.getItem('gym_ex_library')) || INITIAL_LIB;
 
             sessions = savedSessions; userData = savedUser; exLibrary = savedLib;
+
+            if (userData.theme === "light") {
+                document.body.classList.add('light-mode');
+                updateThemeUI(true);
+            }
 
             document.getElementById('newWorkoutDate').valueAsDate = new Date();
 
@@ -1048,33 +1032,15 @@
 
         function toggleTheme() {
 
-            // 1. Wissel de class op de body
-
             document.body.classList.toggle('light-mode');
-
-
-
-            // 2. Bepaal de huidige modus
 
             const isLight = document.body.classList.contains('light-mode');
 
             userData.theme = isLight ? "light" : "dark";
 
-
-
-            // 3. Update de tekst en het icoontje op de knop
-
             updateThemeUI(isLight);
 
-
-
-            // 4. Sla de voorkeur op in je bestaande userData
-
             localStorage.setItem('gym_user', JSON.stringify(userData));
-
-
-
-            // Optioneel: verander de browser balk kleur (Android/Chrome)
 
             document.querySelector('meta[name="theme-color"]').setAttribute('content', isLight ? "#f1f5f9" : "#020617");
 
@@ -1100,29 +1066,13 @@
 
 
 
-        // Check of de gebruiker eerder 'light' heeft gekozen
-
-        if (userData.theme === "light") {
-
-            document.body.classList.add('light-mode');
-
-            updateThemeUI(true);
-
-        }
-
         /* [JS: TIMER LOGIC - BACKGROUND PROOF SYSTEM] */
-
-
-
-        // Extra variabele om de streeftijd in de toekomst vast te leggen
 
         let timerExpirationTime = null;
 
 
 
         function toggleTimer() {
-
-            // 1. STOPPEN / PAUZEREN
 
             if (timerInterval) {
 
@@ -1137,10 +1087,6 @@
             }
 
 
-
-            // 2. BEREKENEN VAN DE STARTTIJD
-
-            // Als er geen resterende tijd is (nieuwe start), pakken we de waarden uit de input-velden
 
             if (timerRemaining <= 0) {
 
@@ -1160,33 +1106,19 @@
 
 
 
-            // 3. BEPAAL DE EXPIRE-TIJD (Systeemtijd nu + resterende seconden)
-
-            // Dit zorgt ervoor dat de timer "weet" hoe laat het moet zijn als je de app weer opent
-
             timerExpirationTime = Date.now() + (timerRemaining * 1000);
-
-
 
             document.getElementById('timerToggleBtn').innerText = "Pause";
 
 
 
-            // 4. DE TICKER (Controleert elke seconde de telefoontijd)
-
             timerInterval = setInterval(() => {
 
                 const now = Date.now();
 
-                // Bereken het verschil tussen de eindtijd en de huidige tijd van de telefoon
-
                 timerRemaining = Math.max(0, Math.round((timerExpirationTime - now) / 1000));
 
-
-
                 updateTimerUI();
-
-
 
                 if (timerRemaining <= 0) {
 
@@ -1194,7 +1126,7 @@
 
                     timerInterval = null;
 
-                    showTimerAlert(); // Trillen en popup
+                    showTimerAlert();
 
                 }
 
@@ -1210,13 +1142,7 @@
 
             const s = timerRemaining % 60;
 
-            // Update de tekst (00:00)
-
             document.getElementById('timerDisplay').innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-
-
-
-            // Update de visuele cirkel
 
             const circle = document.getElementById('timerProgress');
 
@@ -1249,24 +1175,6 @@
         }
 
 
-
-        function updateTimerUI() {
-
-            const m = Math.floor(timerRemaining / 60); const s = timerRemaining % 60;
-
-            document.getElementById('timerDisplay').innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-
-            const circle = document.getElementById('timerProgress');
-
-            const circumference = 113.1;
-
-            circle.style.strokeDashoffset = circumference - (timerRemaining / (timerTotalSeconds || 1)) * circumference;
-
-        }
-
-
-
-        function resetTimer() { clearInterval(timerInterval); timerInterval = null; timerRemaining = 0; document.getElementById('timerDisplay').innerText = "00:00"; document.getElementById('timerToggleBtn').innerText = "Start"; document.getElementById('timerProgress').style.strokeDashoffset = 113.1; }
 
         function showTimerAlert() { document.getElementById('timerOverlay').classList.remove('hidden'); if (navigator.vibrate) navigator.vibrate([500, 200, 500]); }
 
@@ -1430,8 +1338,6 @@
 
 
 
-        /* [JS: UI RENDERING] */
-
         function renderSessions() {
 
             const cont = document.getElementById('sessionContainer'); cont.innerHTML = "";
@@ -1470,9 +1376,9 @@
 
                                 ${isEditing ?
 
-                            `<input id="edit-input-${session.id}" class="edit-session-input" value="${session.name}" onblur="saveSessionName(${session.id}, this.value)" onkeydown="if(event.key==='Enter') saveSessionName(${session.id}, this.value)">` :
+                                `<input id="edit-input-${session.id}" class="edit-session-input" value="${session.name}" onblur="saveSessionName(${session.id}, this.value)" onkeydown="if(event.key==='Enter') saveSessionName(${session.id}, this.value)">` :
 
-                            `<div class="flex items-center gap-2">
+                                `<div class="flex items-center gap-2">
 
                                         <h3 class="text-xl font-black italic uppercase">${session.name}</h3>
 
@@ -1480,7 +1386,7 @@
 
                                     </div>`
 
-                        }
+                                }
 
                             </div>
 
@@ -1508,9 +1414,9 @@
 
                             ${session.exercises.map((ex, exIdx) => {
 
-                            const isExOpen = openExIds.has(ex.id);
+                                const isExOpen = openExIds.has(ex.id);
 
-                            return `<div class="mb-4 bg-white/5 p-4 rounded-xl border border-white/5">
+                                return `<div class="mb-4 bg-white/5 p-4 rounded-xl border border-white/5">
 
                                 <div class="flex justify-between items-center">
 
@@ -1542,9 +1448,9 @@
 
                                     ${ex.sets.map((s, i) => {
 
-                                const orm = Math.round(calc1RM(s.w, s.r));
+                                    const orm = Math.round(calc1RM(s.w, s.r));
 
-                                return `<div class="grid grid-cols-5 gap-2 items-center">
+                                    return `<div class="grid grid-cols-5 gap-2 items-center">
 
                                             <div class="flex flex-col">
 
@@ -1568,7 +1474,7 @@
 
                                         </div>`;
 
-                            }).join('')}
+                                    }).join('')}
 
                                     <button onclick="addSet(${session.id}, ${ex.id})" class="w-full mt-4 py-2 border border-dashed border-white/10 rounded-lg text-[8px] font-black opacity-30 uppercase">+ Set</button>
 
@@ -1594,7 +1500,9 @@
 
         function renderCharts() {
 
-            updateChart(); renderRadarChart(currentRadarDays);
+            updateChart(); 
+            renderRadarChart(currentRadarDays);
+            renderDistributionChart(currentDistDays);
 
             const volCont = document.getElementById('volumeTracker'); const recCont = document.getElementById('recordsTracker');
 
@@ -1666,7 +1574,60 @@
 
         }
 
+        function renderDistributionChart(days = 7) {
+            currentDistDays = days;
+            const ctx = document.getElementById('distributionChart'); if (!ctx) return;
+            document.querySelectorAll('#distFilters .filter-btn').forEach(b => {
+                b.classList.remove('active');
+                if (b.getAttribute('onclick').includes(days)) b.classList.add('active');
+            });
 
+            const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - days);
+            const categories = Object.keys(exLibrary);
+            let exToCat = {}; 
+            Object.entries(exLibrary).forEach(([cat, exs]) => exs.forEach(e => exToCat[e.toUpperCase()] = cat));
+            
+            let setData = {}; categories.forEach(cat => setData[cat] = 0);
+
+            sessions.forEach(s => {
+                if (new Date(s.rawDate) >= cutoff) {
+                    s.exercises.forEach(ex => {
+                        const cat = exToCat[ex.name.toUpperCase()];
+                        if (cat && setData.hasOwnProperty(cat)) {
+                            setData[cat] += ex.sets.length;
+                        }
+                    });
+                }
+            });
+
+            const isLight = document.body.classList.contains('light-mode');
+            if (distributionChartInstance) distributionChartInstance.destroy();
+            
+            distributionChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        data: categories.map(c => setData[c]),
+                        backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'],
+                        borderWidth: 0, hoverOffset: 20
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false, cutout: '70%',
+                    plugins: { 
+                        legend: { 
+                            position: 'bottom', 
+                            labels: { 
+                                color: isLight ? '#0f172a' : '#94a3b8', 
+                                font: { size: 10, weight: '900' }, 
+                                padding: 20, usePointStyle: true 
+                            } 
+                        } 
+                    }
+                }
+            });
+        }
 
         function renderRadarChart(days = 7) {
 
