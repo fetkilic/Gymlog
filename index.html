@@ -267,11 +267,21 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 /* DIFF BADGE */
 .diff{font-size:8px;font-weight:700;position:absolute;top:-7px;right:1px;pointer-events:none}
 .diff.p{color:#4ade80}.diff.n{color:#f87171}
+
+/* NOTE BUTTON & BANNER */
+.ex-note-btn{padding:4px 6px!important;border-radius:5px;display:flex;align-items:center;justify-content:center;color:var(–mu);transition:all .15s}
+.ex-note-btn:active{color:var(–ac)}
+.ex-note-btn.has-note{color:var(–ac2);background:rgba(99,102,241,.1)}
+.ex-note-banner{margin:0 12px 8px;padding:9px 11px;background:var(–s2);border:1px solid var(–b1);border-left:3px solid var(–ac);border-radius:7px;font-size:11px;color:var(–sub);display:flex;align-items:flex-start;gap:8px;line-height:1.4}
+.ex-note-edit{padding:0!important;color:var(–mu);transition:color .15s;flex-shrink:0;display:flex;align-items:center;justify-content:center;width:20px;height:20px}
+.ex-note-edit:active{color:var(–ac)}
+
 /* LIGHT MODE */
-body.lt{--bg:#f4f4f5;--s1:#fff;--s2:#e4e4e7;--s3:#d4d4d8;--b1:rgba(0,0,0,.09);--b2:#a1a1aa;--tx:#09090b;--sub:#52525b;--mu:#71717a}
+body.lt{–bg:#f4f4f5;–s1:#fff;–s2:#e4e4e7;–s3:#d4d4d8;–b1:rgba(0,0,0,.09);–b2:#a1a1aa;–tx:#09090b;–sub:#52525b;–mu:#71717a}
 body.lt #tmr{background:rgba(244,244,245,.94)}
 body.lt #alert{background:rgba(244,244,245,.97)}
 </style>
+
 </head>
 <body>
 
@@ -594,6 +604,10 @@ body.lt #alert{background:rgba(244,244,245,.97)}
           <span id="theme-ico">🌙</span>
           <span id="theme-lbl">Dark mode</span>
         </button>
+        <button class="theme-btn" onclick="toggleAutoTimer()" style="margin-top:8px">
+          <span id="autoTimer-ico">⏱️</span>
+          <span id="autoTimer-lbl">Auto rust-timer aan</span>
+        </button>
       </div>
       <div class="card">
         <div class="card-hdr"><div class="card-title">Gewicht</div></div>
@@ -736,6 +750,32 @@ var chartDist = null, chartRadar = null, chartProg = null, chartWt = null;
 // Timer
 var tmrIv = null, tmrTotal = 0, tmrLeft = 0, tmrExpiry = null;
 
+
+// Apply smart suggestion to a set
+function applySuggestion(sId, exId, idx, w, r){
+  var s = sessions.find(function(x){ return x.id === sId; });
+  var ex = s && s.exercises.find(function(e){ return e.id === exId; });
+  if(!ex || !ex.sets[idx]) return;
+  ex.sets[idx].w = String(w);
+  ex.sets[idx].r = String(r);
+  saveRender();
+  toast('Suggestie toegepast');
+}
+
+// Edit per-exercise note
+function editExNote(sId, exId){
+  var s = sessions.find(function(x){ return x.id === sId; });
+  var ex = s && s.exercises.find(function(e){ return e.id === exId; });
+  if(!ex) return;
+  doInput('Notitie voor ' + ex.name, ex.note || '', function(val){
+    if(val === null) return;
+    ex.note = val.trim();
+    saveRender();
+    if(ex.note) toast('Notitie opgeslagen');
+    else toast('Notitie verwijderd');
+  });
+}
+
 // ═══════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════
@@ -819,7 +859,7 @@ function showView(v) {
   var b=document.getElementById('nav-'+v); if(b)b.classList.add('on');
   if(v==='stats') renderStats();
   if(v==='plan')  renderPlan();
-  if(v==='profile'){renderWtChart(30,null);renderXP();}
+  if(v==='profile'){renderWtChart(30,null);renderXP();setAutoTimerUI();}
 }
 
 // ═══════════════════════════════════════════════════
@@ -1121,81 +1161,146 @@ function toggleMon2(gi){ toggleMon(_gkArr[gi]); }
 // RENDER EXERCISES
 // ═══════════════════════════════════════════════════
 function renderExercises(s) {
-  var prMap={};
-  sessions.forEach(function(sess){sess.exercises.forEach(function(ex){
-    var n=ex.name.toUpperCase();
-    ex.sets.forEach(function(st){var w=w2f(st.w);if(!prMap[n]||w>prMap[n])prMap[n]=w;});
-  });});
+  var prMap = {};
+  sessions.forEach(function(sess){
+    sess.exercises.forEach(function(ex){
+      var n = ex.name.toUpperCase();
+      ex.sets.forEach(function(st){
+        var w = w2f(st.w);
+        if(!prMap[n] || w > prMap[n]) prMap[n] = w;
+      });
+    });
+  });
 
-  var h='<div class="sc-body">';
-  s.exercises.forEach(function(ex,xi){
-    var open=openExSets.has(ex.id);
-    var mw=0; ex.sets.forEach(function(st){var w=w2f(st.w);if(w>mw)mw=w;});
-    var filled=ex.sets.filter(function(st){return st.w&&st.r;}).length;
-    var isPR=mw>0&&prMap[ex.name.toUpperCase()]<=mw;
-    var mp=[''+ex.sets.length+' sets'];
-    if(mw>0)mp.push('max '+mw+'kg');
-    if(filled<ex.sets.length)mp.push('('+filled+'/'+ex.sets.length+' gevuld)');
-    else if(filled>0)mp.push('✓');
+  var h = '<div class="sc-body">';
+  s.exercises.forEach(function(ex, xi){
+    var open = openExSets.has(ex.id);
+    var mw = 0;
+    ex.sets.forEach(function(st){ var w = w2f(st.w); if(w > mw) mw = w; });
+    var filled = ex.sets.filter(function(st){ return st.w && st.r; }).length;
+    var isPR = mw > 0 && prMap[ex.name.toUpperCase()] <= mw;
+    var mp = [ex.sets.length + ' sets'];
+    if(mw > 0) mp.push('max ' + mw + 'kg');
+    if(filled < ex.sets.length) mp.push('(' + filled + '/' + ex.sets.length + ' gevuld)');
+    else if(filled > 0) mp.push('✓');
 
-    h+='<div class="ex-bl">'
-      +'<div class="ex-hd" onclick="toggleEx('+ex.id+')">'
-      +'<div style="flex:1;min-width:0">'
-      +'<div class="ex-nm">'+esc(ex.name)+(isPR&&mw>0?' <span style="font-size:9px;color:#f59e0b">🏆 PR</span>':'')+'</div>'
-      +'<div class="ex-mt">'+mp.join(' · ')+'</div>'
-      +'</div>'
-      +'<div class="ex-ct">'
-      +'<button class="ob" onclick="event.stopPropagation();moveEx('+s.id+','+xi+',-1)">↑</button>'
-      +'<button class="ob" onclick="event.stopPropagation();moveEx('+s.id+','+xi+',1)">↓</button>'
-      +'<button class="eb eb-s" onclick="event.stopPropagation();swapExId='+ex.id+';openExModal('+s.id+')">Wissel</button>'
-      +'<button class="eb eb-d" onclick="event.stopPropagation();delEx('+s.id+','+xi+')">&#x2715;</button>'
-      +'</div></div>';
+    h += '<div class="ex-bl">'
+      + '<div class="ex-hd" onclick="toggleEx(' + ex.id + ')">'
+      + '<div style="flex:1;min-width:0">'
+      + '<div class="ex-nm">' + esc(ex.name) + (isPR && mw > 0 ? ' <span style="font-size:9px;color:#f59e0b">🏆 PR</span>' : '') + '</div>'
+      + '<div class="ex-mt">' + mp.join(' · ') + '</div>'
+      + '</div>'
+      + '<div class="ex-ct">'
+      + '<button class="ob ex-note-btn' + (ex.note ? ' has-note' : '') + '" onclick="event.stopPropagation();editExNote(' + s.id + ',' + ex.id + ')" title="Notitie">'
+      + '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:block">'
+      + '<path stroke-linecap="round" stroke-linejoin="round" d="M11 4H6a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-5"/>'
+      + '<path stroke-linecap="round" stroke-linejoin="round" d="M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z"/>'
+      + '</svg>'
+      + '</button>'
+      + '<button class="ob" onclick="event.stopPropagation();moveEx(' + s.id + ',' + xi + ',-1)">↑</button>'
+      + '<button class="ob" onclick="event.stopPropagation();moveEx(' + s.id + ',' + xi + ',1)">↓</button>'
+      + '<button class="eb eb-s" onclick="event.stopPropagation();swapExId=' + ex.id + ';openExModal(' + s.id + ')">Wissel</button>'
+      + '<button class="eb eb-d" onclick="event.stopPropagation();delEx(' + s.id + ',' + xi + ')">&#x2715;</button>'
+      + '</div></div>';
 
     if(open){
-      // find prev session
-      var prevSets=null;
-      for(var si=0;si<sessions.length;si++){
-        var ss=sessions[si];
-        if(ss.id===s.id||new Date(ss.rawDate)>=new Date(s.rawDate))continue;
-        for(var ei=0;ei<ss.exercises.length;ei++){
-          if(ss.exercises[ei].name.toUpperCase()===ex.name.toUpperCase()){prevSets=ss.exercises[ei].sets;break;}
+      // Find prev session for this exercise
+      var prevSets = null;
+      var prevDate = null;
+      for(var si = 0; si < sessions.length; si++){
+        var ss = sessions[si];
+        if(ss.id === s.id || new Date(ss.rawDate) >= new Date(s.rawDate)) continue;
+        for(var ei = 0; ei < ss.exercises.length; ei++){
+          if(ss.exercises[ei].name.toUpperCase() === ex.name.toUpperCase()){
+            prevSets = ss.exercises[ei].sets;
+            prevDate = ss.rawDate;
+            break;
+          }
         }
-        if(prevSets)break;
+        if(prevSets) break;
       }
-      h+='<div class="sets-tbl">'
-        +'<div class="sets-hdr"><span>Set</span><span>KG</span><span>Reps</span><span>Gevoel</span><span></span></div>';
-      ex.sets.forEach(function(set,si){
-        var o=orm(set.w,set.r);
-        var prevS=prevSets?prevSets[si]:null;
-        var prevW=prevS?w2f(prevS.w):0;
-        var curW=w2f(set.w);
-        var diff=curW&&prevW?+(curW-prevW).toFixed(1):0;
-        var feelCls='feel-cell'+(set.feel==='EASY'?' fe':set.feel==='GOOD'?' fg':set.feel==='HARD'?' fh':'');
-        var feelLbl=set.feel==='EASY'?'Makkelijk':set.feel==='GOOD'?'Goed':set.feel==='HARD'?'Zwaar':'＋';
-        h+='<div class="set-row">'
-          +'<div class="s-num"><div class="s-n">'+(si+1)+'</div><div class="s-o">'+(o>0?o+'kg':'')+'</div></div>'
-          +'<div style="position:relative">'
-          +'<input class="inp-sm" type="text" inputmode="decimal" value="'+esc(set.w||'')+'" placeholder="'+(prevW||'kg')+'"'
-          +' onclick="this.select()" onchange="updSet('+s.id+','+ex.id+','+si+',&quot;w&quot;,this.value.replace(/,/g,&quot;.&quot;))">'
-          +(diff!==0?'<span class="diff '+(diff>0?'p':'n')+'">'+(diff>0?'+':'')+diff+'</span>':'')
-          +'</div>'
-          +'<input class="inp-sm" type="text" inputmode="numeric" value="'+esc(set.r||'')+'" placeholder="'+(prevS&&prevS.r?prevS.r:'reps')+'"'
-          +' onclick="this.select()" onchange="updSet('+s.id+','+ex.id+','+si+',&quot;r&quot;,this.value)">'
-          +'<div class="'+feelCls+'" onclick="openFeel('+s.id+','+ex.id+','+si+')">'+feelLbl+'</div>'
-          +'<button class="s-del" onclick="delSet('+s.id+','+ex.id+','+si+')">&#x00D7;</button>'
-          +'</div>';
+
+      // Per-exercise note display
+      if(ex.note){
+        h += '<div class="ex-note-banner">'
+          + '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px">'
+          + '<path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>'
+          + '<path stroke-linecap="round" d="M9 12h6M9 16h4"/>'
+          + '</svg>'
+          + '<span style="flex:1;line-height:1.4">' + esc(ex.note) + '</span>'
+          + '<button class="ob ex-note-edit" onclick="editExNote(' + s.id + ',' + ex.id + ')">'
+          + '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 4H6a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'
+          + '</button>'
+          + '</div>';
+      }
+
+      h += '<div class="sets-tbl">'
+        + '<div class="sets-hdr"><span>Set</span><span>KG</span><span>Reps</span><span>Gevoel</span><span></span></div>';
+
+      ex.sets.forEach(function(set, si){
+        var o = orm(set.w, set.r);
+        var prevS = prevSets ? prevSets[si] : null;
+        var prevW = prevS ? w2f(prevS.w) : 0;
+        var prevR = prevS && prevS.r ? prevS.r : '';
+        var prevFeel = prevS ? prevS.feel : '';
+        var curW = w2f(set.w);
+        var diff = curW && prevW ? +(curW - prevW).toFixed(1) : 0;
+        var feelCls = 'feel-cell' + (set.feel === 'EASY' ? ' fe' : set.feel === 'GOOD' ? ' fg' : set.feel === 'HARD' ? ' fh' : '');
+        var feelLbl = set.feel === 'EASY' ? 'Makkelijk' : set.feel === 'GOOD' ? 'Goed' : set.feel === 'HARD' ? 'Zwaar' : '＋';
+
+        // Compute smart suggestion based on prev feel
+        var sugW = 0, sugR = 0;
+        if(prevW && prevR){
+          if(prevFeel === 'EASY'){ sugW = +(prevW + 2.5).toFixed(1); sugR = parseInt(prevR); }
+          else if(prevFeel === 'GOOD'){ sugW = prevW; sugR = parseInt(prevR) + 1; }
+          else if(prevFeel === 'HARD'){ sugW = prevW; sugR = parseInt(prevR); }
+          else { sugW = prevW; sugR = parseInt(prevR); }
+        }
+
+        h += '<div class="set-row">'
+          + '<div class="s-num"><div class="s-n">' + (si + 1) + '</div><div class="s-o">' + (o > 0 ? o + 'kg' : '') + '</div></div>'
+          + '<div style="position:relative">'
+          + '<input class="inp-sm" type="text" inputmode="decimal" value="' + esc(set.w || '') + '" placeholder="' + (sugW || prevW || 'kg') + '"'
+          + ' onclick="this.select()"'
+          + ' onchange="updSet(' + s.id + ',' + ex.id + ',' + si + ',&quot;w&quot;,this.value.replace(/,/g,&quot;.&quot;))">'
+          + (diff !== 0 ? '<span class="diff ' + (diff > 0 ? 'p' : 'n') + '">' + (diff > 0 ? '+' : '') + diff + '</span>' : '')
+          + '</div>'
+          + '<input class="inp-sm" type="text" inputmode="numeric" value="' + esc(set.r || '') + '" placeholder="' + (sugR || prevR || 'reps') + '"'
+          + ' onclick="this.select()" onchange="updSet(' + s.id + ',' + ex.id + ',' + si + ',&quot;r&quot;,this.value)">'
+          + '<div class="' + feelCls + '" onclick="openFeel(' + s.id + ',' + ex.id + ',' + si + ')">' + feelLbl + '</div>'
+          + '<button class="s-del" onclick="delSet(' + s.id + ',' + ex.id + ',' + si + ')">&#x00D7;</button>'
+          + '</div>';
+
+        // Smart suggestion line under empty sets
+        if(!set.w && !set.r && (sugW || sugR)){
+          var sugText = sugW + 'kg × ' + sugR;
+          var sugReason = prevFeel === 'EASY' ? '↑ Vorige was makkelijk, +2.5kg'
+                        : prevFeel === 'GOOD' ? '↑ Vorige was goed, +1 rep'
+                        : prevFeel === 'HARD' ? '→ Herhaal vorige (was zwaar)'
+                        : '→ Zelfde als vorige';
+          h += '<div style="display:grid;grid-template-columns:28px 1fr 22px;gap:4px;align-items:center;margin:-4px 0 7px 0;padding:0 0 4px;cursor:pointer" onclick="applySuggestion(' + s.id + ',' + ex.id + ',' + si + ',' + sugW + ',' + sugR + ')">'
+            + '<div></div>'
+            + '<div style="font-size:9px;color:rgba(99,102,241,.7);font-weight:600;background:rgba(99,102,241,.06);border:1px dashed rgba(99,102,241,.25);border-radius:6px;padding:3px 6px;display:flex;justify-content:space-between;align-items:center">'
+            + '<span>' + sugText + '</span><span style="font-size:8px;opacity:.7">' + sugReason + '</span>'
+            + '</div>'
+            + '<div></div>'
+            + '</div>';
+        }
       });
-      h+='<button class="add-set" onclick="addSet('+s.id+','+ex.id+')">'
-        +'<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>'
-        +' Set toevoegen</button></div>';
+
+      h += '<button class="add-set" onclick="addSet(' + s.id + ',' + ex.id + ')">'
+        + '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>'
+        + ' Set toevoegen</button></div>';
     }
-    h+='</div>';
+    h += '</div>';
   });
-  h+='<button class="add-ex" onclick="swapExId=null;openExModal('+s.id+')">'
-    +'<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>'
-    +' Oefening Toevoegen</button></div>';
+
+  h += '<button class="add-ex" onclick="swapExId=null;openExModal(' + s.id + ')">'
+    + '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>'
+    + ' Oefening Toevoegen</button></div>';
   return h;
 }
+
 
 // ═══════════════════════════════════════════════════
 // EXERCISE OPS
@@ -1259,7 +1364,22 @@ function saveFeel(){
   var s=sessions.find(function(x){return x.id===feelSess;});
   var ex=s&&s.exercises.find(function(e){return e.id===feelEx;});
   if(ex){ex.sets[feelSetIdx].feel=selFeel_;ex.sets[feelSetIdx].note=document.getElementById('feel-note').value;}
-  saveRender();closeSheet();toast('Opgeslagen ✓');
+  saveRender();closeSheet();
+  
+  // ── AUTO TIMER based on feel ──
+  if(user.autoTimer !== false){  // default ON, toggle in profile
+    var rest = selFeel_==='EASY'?60 : selFeel_==='GOOD'?90 : 150;
+    var m = Math.floor(rest/60);
+    var s2 = rest%60;
+    document.getElementById('tMin').value = m;
+    document.getElementById('tSec').value = s2;
+    // Reset and start timer automatically
+    resetTimer();
+    setTimeout(function(){ toggleTimer(); }, 100);
+    toast('Rust ' + (m>0?m+'m ':'') + s2 + 's gestart');
+  } else {
+    toast('Opgeslagen ✓');
+  }
 }
 
 // ═══════════════════════════════════════════════════
@@ -2005,6 +2125,20 @@ function toggleTheme(){
 function setThemeUI(lt){
   document.getElementById('theme-ico').textContent=lt?'☀️':'🌙';
   document.getElementById('theme-lbl').textContent=lt?'Light mode':'Dark mode';
+}
+
+function toggleAutoTimer(){
+  user.autoTimer = user.autoTimer === false ? true : false;
+  setAutoTimerUI();
+  save();
+  toast(user.autoTimer === false ? 'Auto-timer uit' : 'Auto-timer aan');
+}
+function setAutoTimerUI(){
+  var on = user.autoTimer !== false;
+  var ico = document.getElementById('autoTimer-ico');
+  var lbl = document.getElementById('autoTimer-lbl');
+  if(ico) ico.textContent = on ? '⏱️' : '🔇';
+  if(lbl) lbl.textContent = on ? 'Auto rust-timer aan' : 'Auto rust-timer uit';
 }
 function logWeight(){
   var w=document.getElementById('w-kg').value,fat=document.getElementById('w-fat').value;
