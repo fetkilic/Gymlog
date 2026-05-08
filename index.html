@@ -276,6 +276,12 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 .ex-note-edit{padding:0!important;color:var(–mu);transition:color .15s;flex-shrink:0;display:flex;align-items:center;justify-content:center;width:20px;height:20px}
 .ex-note-edit:active{color:var(–ac)}
 
+/* DELOAD BANNER */
+.deload-card{border-radius:var(–r);padding:14px;margin-bottom:10px;background:linear-gradient(135deg,rgba(251,191,36,.12),rgba(245,158,11,.06));border:1px solid rgba(251,191,36,.3)}
+/* BODYWEIGHT SET ROW */
+.set-row.bw{grid-template-columns:28px 1fr 50px 22px}
+.sets-hdr.bw{grid-template-columns:28px 1fr 50px 22px}
+
 /* LIGHT MODE */
 body.lt{–bg:#f4f4f5;–s1:#fff;–s2:#e4e4e7;–s3:#d4d4d8;–b1:rgba(0,0,0,.09);–b2:#a1a1aa;–tx:#09090b;–sub:#52525b;–mu:#71717a}
 body.lt #tmr{background:rgba(244,244,245,.94)}
@@ -440,6 +446,13 @@ body.lt #alert{background:rgba(244,244,245,.97)}
     <div class="logo">GYM<em>LOG</em></div>
     <div id="greeting" style="font-size:11px;color:var(--mu);text-align:right;line-height:1.4"></div>
   </div>
+  <!-- Session in progress timer -->
+  <div id="sess-timer" style="display:none;align-items:center;gap:8px;padding:8px 12px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);border-radius:10px;margin-bottom:10px">
+    <div style="width:8px;height:8px;border-radius:50%;background:#4ade80;animation:pdot 2s infinite"></div>
+    <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:#86efac;letter-spacing:.06em;flex:1">Bezig</span>
+    <span class="D" id="sess-timer-val" style="font-size:18px;color:#4ade80">0m 0s</span>
+    <button class="btn btn-g" onclick="endTodaySess()" style="padding:5px 9px;font-size:10px;color:#fca5a5;border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.1)">Stop</button>
+  </div>
   <div id="dash-strip"></div>
 </div>
 
@@ -478,6 +491,7 @@ body.lt #alert{background:rgba(244,244,245,.97)}
   <!-- STATS -->
   <section id="view-stats" class="hidden">
     <div style="margin-top:12px">
+      <div id="deload-banner"></div>
       <div class="stats-hero" id="st-hero"></div>
       <div class="kpi-grid" id="st-kpi"></div>
       <div class="card">
@@ -776,6 +790,201 @@ function editExNote(sId, exId){
   });
 }
 
+
+// ═══════════════════════════════════════════════════
+// BODYWEIGHT EXERCISE DETECTION
+// ═══════════════════════════════════════════════════
+var BW_KEYWORDS = ['PUSH UP','PUSHUP','PUSH-UP','PULL UP','PULLUP','PULL-UP','CHIN UP','CHINUP','CHIN-UP','DIP','DIPS','PLANK','CRUNCH','SIT UP','SITUP','LEG RAISE','BURPEE','MOUNTAIN CLIMB','HANGING','HANDSTAND','MUSCLE UP','MUSCLE-UP','PIKE PUSH','HOLLOW HOLD','L-SIT','BODYWEIGHT'];
+
+function isBodyweight(name){
+  var n = String(name||'').toUpperCase();
+  for(var i=0;i<BW_KEYWORDS.length;i++){
+    if(n.indexOf(BW_KEYWORDS[i]) !== -1) return true;
+  }
+  return false;
+}
+
+// ═══════════════════════════════════════════════════
+// SESSION TIMER (total workout duration)
+// ═══════════════════════════════════════════════════
+var sessTimerIv = null;
+
+function getActiveTodaySession(){
+  var todayKey = new Date().toISOString().split('T')[0];
+  // Find any session from today
+  return sessions.find(function(s){ return s.rawDate === todayKey; });
+}
+
+function startSessTimer(sId){
+  var s = sessions.find(function(x){ return x.id===sId; });
+  if(!s) return;
+  if(!s.startedAt){
+    s.startedAt = Date.now();
+    save();
+  }
+}
+
+function tickSessTimer(){
+  var s = getActiveTodaySession();
+  var bar = document.getElementById('sess-timer');
+  if(!bar) return;
+  if(!s){
+    bar.style.display = 'none';
+    return;
+  }
+  // Auto-set startedAt if missing (existing today session without start time)
+  if(!s.startedAt){
+    s.startedAt = Date.now();
+    save();
+  }
+  // Don't show if session was already ended
+  if(s.duration){
+    bar.style.display = 'none';
+    return;
+  }
+  bar.style.display = 'flex';
+  var elapsed = Math.floor((Date.now() - s.startedAt) / 1000);
+  var h = Math.floor(elapsed/3600);
+  var m = Math.floor((elapsed%3600)/60);
+  var sec = elapsed%60;
+  var txt = (h>0 ? h+'u ' : '') + m + 'm ' + (h===0 ? sec+'s' : '');
+  var el = document.getElementById('sess-timer-val');
+  if(el) el.textContent = txt;
+}
+
+function startSessTimerLoop(){
+  if(sessTimerIv) clearInterval(sessTimerIv);
+  tickSessTimer();
+  sessTimerIv = setInterval(tickSessTimer, 1000);
+}
+
+function endSessTimer(sId){
+  var s = sessions.find(function(x){ return x.id===sId; });
+  if(s && s.startedAt){
+    s.duration = Date.now() - s.startedAt;
+    save();
+    var mins = Math.floor(s.duration/60000);
+    toast('Sessie beëindigd: ' + mins + ' min');
+    renderHeader();
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// DELOAD DETECTION
+// ═══════════════════════════════════════════════════
+function detectDeload(){
+  // Look at last 4 weeks
+  var cutoff4 = cutoff(28);
+  var cutoff7 = cutoff(7);
+  var recent = sessions.filter(function(s){ return new Date(s.rawDate) >= cutoff4; });
+  if(recent.length < 6) return null; // need enough data
+
+  // Count HARD feels in last 7 days vs prior 3 weeks
+  var hardLast7 = 0, totalLast7 = 0;
+  var hardPrior = 0, totalPrior = 0;
+
+  recent.forEach(function(s){
+    var d = new Date(s.rawDate);
+    var inLast7 = d >= cutoff7;
+    s.exercises.forEach(function(ex){
+      ex.sets.forEach(function(st){
+        if(!st.feel) return;
+        if(inLast7){ totalLast7++; if(st.feel==='HARD') hardLast7++; }
+        else { totalPrior++; if(st.feel==='HARD') hardPrior++; }
+      });
+    });
+  });
+
+  if(totalLast7 < 5) return null;
+  var hardPct = hardLast7 / totalLast7;
+  var hardPctPrior = totalPrior > 0 ? hardPrior / totalPrior : 0;
+
+  // Also check declining max weights for top exercises
+  var topEx = {};
+  recent.forEach(function(s){
+    s.exercises.forEach(function(ex){
+      var n = ex.name.toUpperCase();
+      var mw = 0;
+      ex.sets.forEach(function(st){ var w = w2f(st.w); if(w>mw) mw=w; });
+      if(mw>0){
+        if(!topEx[n]) topEx[n] = [];
+        topEx[n].push({date: new Date(s.rawDate), w: mw});
+      }
+    });
+  });
+
+  var declining = 0, trackedEx = 0;
+  Object.keys(topEx).forEach(function(n){
+    if(topEx[n].length < 3) return;
+    topEx[n].sort(function(a,b){ return a.date - b.date; });
+    var first = topEx[n][0].w;
+    var last  = topEx[n][topEx[n].length-1].w;
+    if(last < first) declining++;
+    trackedEx++;
+  });
+
+  var declinePct = trackedEx>0 ? declining/trackedEx : 0;
+
+  // Trigger if:
+  // - >40% sets in last 7 days felt HARD AND that's > prior weeks
+  // - OR >50% of tracked exercises are declining
+  var trigger = (hardPct > 0.4 && hardPct > hardPctPrior + 0.1) || declinePct > 0.5;
+
+  if(!trigger) return null;
+
+  return {
+    hardPct: Math.round(hardPct*100),
+    declining: declining,
+    tracked: trackedEx
+  };
+}
+
+function renderDeloadBanner(){
+  var el = document.getElementById('deload-banner');
+  if(!el) return;
+  var d = detectDeload();
+  // Allow user to dismiss for 3 days
+  var dismissed = parseInt(localStorage.getItem('gl_deload_dismiss')||'0');
+  var now = Date.now();
+  if(dismissed && (now - dismissed) < 3*24*3600*1000){
+    el.innerHTML = '';
+    return;
+  }
+  if(!d){
+    el.innerHTML = '';
+    return;
+  }
+  el.innerHTML = '<div class="deload-card">'
+    + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+    + '<svg width="20" height="20" fill="none" stroke="#fbbf24" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/></svg>'
+    + '<div class="D" style="font-size:15px;color:#fbbf24">DELOAD AANBEVOLEN</div>'
+    + '</div>'
+    + '<div style="font-size:12px;color:var(--sub);line-height:1.5;margin-bottom:10px">'
+    + 'Je lichaam vraagt om rust. ' + d.hardPct + '% van je sets voelde zwaar de afgelopen week'
+    + (d.declining>0 ? ' en ' + d.declining + ' van ' + d.tracked + ' oefeningen lopen terug' : '')
+    + '. Overweeg deze week 60-70% van je normale gewichten te gebruiken.'
+    + '</div>'
+    + '<button class="btn btn-g" style="width:100%;padding:9px;font-size:11px" onclick="dismissDeload()">Begrepen, verberg deze week</button>'
+    + '</div>';
+}
+
+function dismissDeload(){
+  localStorage.setItem('gl_deload_dismiss', String(Date.now()));
+  renderDeloadBanner();
+  toast('Verborgen voor 3 dagen');
+}
+
+
+function endTodaySess(){
+  var s = getActiveTodaySession();
+  if(!s) return;
+  doConfirm('Sessie beëindigen?', function(ok){
+    if(!ok) return;
+    endSessTimer(s.id);
+    tickSessTimer();
+  });
+}
+
 // ═══════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════
@@ -800,7 +1009,10 @@ function init() {
 
   save();
   renderAll();
+  setAutoTimerUI();
   checkAch();
+  startSessTimerLoop();
+  renderDeloadBanner();
 }
 
 // ═══════════════════════════════════════════════════
@@ -813,7 +1025,7 @@ function save() {
   localStorage.setItem('gl_wp', JSON.stringify(weekPlan));
   localStorage.setItem('gl_t',  JSON.stringify(templates));
 }
-function saveRender() { save(); renderAll(); }
+function saveRender() { save(); renderAll(); renderDeloadBanner(); }
 
 // ═══════════════════════════════════════════════════
 // HELPERS
@@ -942,12 +1154,20 @@ function createSession() {
   var raw=document.getElementById('sess-date').value;
   if(!raw){toast('Kies een datum.');return;}
   var d=new Date(raw);
-  var s={id:Date.now(),name:name,rawDate:raw,
+  var todayKey = new Date().toISOString().split('T')[0];
+  var s={
+    id:Date.now(),
+    name:name,
+    rawDate:raw,
     date:d.toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'short'}),
-    exercises:[]};
+    exercises:[],
+    startedAt: (raw === todayKey) ? Date.now() : null
+  };
   sessions.unshift(s);
   openSess.add(s.id); openMonths.add(mk(d));
-  saveRender(); checkAch(); toast('Sessie aangemaakt ✓');
+  saveRender(); checkAch();
+  tickSessTimer();
+  toast('Sessie aangemaakt ✓');
 }
 
 function deleteSession(id){
@@ -1234,47 +1454,74 @@ function renderExercises(s) {
           + '</div>';
       }
 
+      var bwHdr = isBodyweight(ex.name);
       h += '<div class="sets-tbl">'
-        + '<div class="sets-hdr"><span>Set</span><span>KG</span><span>Reps</span><span>Gevoel</span><span></span></div>';
+        + (bwHdr 
+           ? '<div class="sets-hdr bw"><span>Set</span><span>Reps</span><span>Gevoel</span><span></span></div>'
+           : '<div class="sets-hdr"><span>Set</span><span>KG</span><span>Reps</span><span>Gevoel</span><span></span></div>');
+
+      var bw = isBodyweight(ex.name);
+
+      // Different table header for bodyweight
+      h = h.replace(/<div class="sets-hdr"><span>Set<\/span><span>KG<\/span><span>Reps<\/span><span>Gevoel<\/span><span><\/span><\/div>$/m, '');
 
       ex.sets.forEach(function(set, si){
-        var o = orm(set.w, set.r);
+        var o = bw ? 0 : orm(set.w, set.r);
         var prevS = prevSets ? prevSets[si] : null;
         var prevW = prevS ? w2f(prevS.w) : 0;
         var prevR = prevS && prevS.r ? prevS.r : '';
         var prevFeel = prevS ? prevS.feel : '';
         var curW = w2f(set.w);
-        var diff = curW && prevW ? +(curW - prevW).toFixed(1) : 0;
+        var diff = (!bw && curW && prevW) ? +(curW - prevW).toFixed(1) : 0;
         var feelCls = 'feel-cell' + (set.feel === 'EASY' ? ' fe' : set.feel === 'GOOD' ? ' fg' : set.feel === 'HARD' ? ' fh' : '');
         var feelLbl = set.feel === 'EASY' ? 'Makkelijk' : set.feel === 'GOOD' ? 'Goed' : set.feel === 'HARD' ? 'Zwaar' : '＋';
 
         // Compute smart suggestion based on prev feel
         var sugW = 0, sugR = 0;
-        if(prevW && prevR){
+        if(bw){
+          if(prevR){
+            if(prevFeel === 'EASY'){ sugR = parseInt(prevR) + 2; }
+            else if(prevFeel === 'GOOD'){ sugR = parseInt(prevR) + 1; }
+            else if(prevFeel === 'HARD'){ sugR = parseInt(prevR); }
+            else { sugR = parseInt(prevR); }
+          }
+        } else if(prevW && prevR){
           if(prevFeel === 'EASY'){ sugW = +(prevW + 2.5).toFixed(1); sugR = parseInt(prevR); }
           else if(prevFeel === 'GOOD'){ sugW = prevW; sugR = parseInt(prevR) + 1; }
           else if(prevFeel === 'HARD'){ sugW = prevW; sugR = parseInt(prevR); }
           else { sugW = prevW; sugR = parseInt(prevR); }
         }
 
-        h += '<div class="set-row">'
-          + '<div class="s-num"><div class="s-n">' + (si + 1) + '</div><div class="s-o">' + (o > 0 ? o + 'kg' : '') + '</div></div>'
-          + '<div style="position:relative">'
-          + '<input class="inp-sm" type="text" inputmode="decimal" value="' + esc(set.w || '') + '" placeholder="' + (sugW || prevW || 'kg') + '"'
-          + ' onclick="this.select()"'
-          + ' onchange="updSet(' + s.id + ',' + ex.id + ',' + si + ',&quot;w&quot;,this.value.replace(/,/g,&quot;.&quot;))">'
-          + (diff !== 0 ? '<span class="diff ' + (diff > 0 ? 'p' : 'n') + '">' + (diff > 0 ? '+' : '') + diff + '</span>' : '')
-          + '</div>'
-          + '<input class="inp-sm" type="text" inputmode="numeric" value="' + esc(set.r || '') + '" placeholder="' + (sugR || prevR || 'reps') + '"'
-          + ' onclick="this.select()" onchange="updSet(' + s.id + ',' + ex.id + ',' + si + ',&quot;r&quot;,this.value)">'
-          + '<div class="' + feelCls + '" onclick="openFeel(' + s.id + ',' + ex.id + ',' + si + ')">' + feelLbl + '</div>'
-          + '<button class="s-del" onclick="delSet(' + s.id + ',' + ex.id + ',' + si + ')">&#x00D7;</button>'
-          + '</div>';
+        if(bw){
+          // Bodyweight row: skip KG column entirely
+          h += '<div class="set-row bw">'
+            + '<div class="s-num"><div class="s-n">' + (si + 1) + '</div><div class="s-o" style="color:rgba(99,102,241,.7);font-size:8px">BW</div></div>'
+            + '<input class="inp-sm" type="text" inputmode="numeric" value="' + esc(set.r || '') + '" placeholder="' + (sugR || prevR || 'reps') + '"'
+            + ' onclick="this.select()" onchange="updSet(' + s.id + ',' + ex.id + ',' + si + ',&quot;r&quot;,this.value)">'
+            + '<div class="' + feelCls + '" onclick="openFeel(' + s.id + ',' + ex.id + ',' + si + ')">' + feelLbl + '</div>'
+            + '<button class="s-del" onclick="delSet(' + s.id + ',' + ex.id + ',' + si + ')">&#x00D7;</button>'
+            + '</div>';
+        } else {
+          h += '<div class="set-row">'
+            + '<div class="s-num"><div class="s-n">' + (si + 1) + '</div><div class="s-o">' + (o > 0 ? o + 'kg' : '') + '</div></div>'
+            + '<div style="position:relative">'
+            + '<input class="inp-sm" type="text" inputmode="decimal" value="' + esc(set.w || '') + '" placeholder="' + (sugW || prevW || 'kg') + '"'
+            + ' onclick="this.select()"'
+            + ' onchange="updSet(' + s.id + ',' + ex.id + ',' + si + ',&quot;w&quot;,this.value.replace(/,/g,&quot;.&quot;))">'
+            + (diff !== 0 ? '<span class="diff ' + (diff > 0 ? 'p' : 'n') + '">' + (diff > 0 ? '+' : '') + diff + '</span>' : '')
+            + '</div>'
+            + '<input class="inp-sm" type="text" inputmode="numeric" value="' + esc(set.r || '') + '" placeholder="' + (sugR || prevR || 'reps') + '"'
+            + ' onclick="this.select()" onchange="updSet(' + s.id + ',' + ex.id + ',' + si + ',&quot;r&quot;,this.value)">'
+            + '<div class="' + feelCls + '" onclick="openFeel(' + s.id + ',' + ex.id + ',' + si + ')">' + feelLbl + '</div>'
+            + '<button class="s-del" onclick="delSet(' + s.id + ',' + ex.id + ',' + si + ')">&#x00D7;</button>'
+            + '</div>';
+        }
 
         // Smart suggestion line under empty sets
-        if(!set.w && !set.r && (sugW || sugR)){
-          var sugText = sugW + 'kg × ' + sugR;
-          var sugReason = prevFeel === 'EASY' ? '↑ Vorige was makkelijk, +2.5kg'
+        var hasSugg = bw ? (!set.r && sugR) : (!set.w && !set.r && (sugW || sugR));
+        if(hasSugg){
+          var sugText = bw ? (sugR + ' reps') : (sugW + 'kg × ' + sugR);
+          var sugReason = prevFeel === 'EASY' ? (bw?'↑ Vorige was makkelijk, +2 reps':'↑ Vorige was makkelijk, +2.5kg')
                         : prevFeel === 'GOOD' ? '↑ Vorige was goed, +1 rep'
                         : prevFeel === 'HARD' ? '→ Herhaal vorige (was zwaar)'
                         : '→ Zelfde als vorige';
@@ -1308,7 +1555,16 @@ function renderExercises(s) {
 function updSet(sId,exId,idx,field,val){
   var s=sessions.find(function(x){return x.id===sId;});
   var ex=s&&s.exercises.find(function(e){return e.id===exId;});
-  if(ex){ex.sets[idx][field]=val;save();}
+  if(ex){
+    ex.sets[idx][field]=val;
+    // Start session timer when user fills in first value today
+    var todayKey = new Date().toISOString().split('T')[0];
+    if(s.rawDate === todayKey && val && !s.startedAt){
+      s.startedAt = Date.now();
+      tickSessTimer();
+    }
+    save();
+  }
 }
 function addSet(sId,exId){
   var s=sessions.find(function(x){return x.id===sId;});
