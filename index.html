@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,900;1,900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root{--bg:#09090b;--s1:#18181b;--s2:#27272a;--s3:#3f3f46;--b1:rgba(255,255,255,.08);--b2:#52525b;--ac:#6366f1;--ac2:#818cf8;--tx:#fafafa;--sub:#a1a1aa;--mu:#71717a;--r:14px}
 *,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
@@ -282,6 +283,23 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 .set-row.bw{grid-template-columns:28px 1fr 50px 22px}
 .sets-hdr.bw{grid-template-columns:28px 1fr 50px 22px}
 
+/* INFO MODAL */
+.info-section{margin-bottom:16px}
+.info-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(–mu);margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.info-desc{font-size:13px;line-height:1.5;color:var(–sub)}
+.info-muscle{font-size:12px;color:var(–ac2);font-weight:600;line-height:1.4;background:rgba(99,102,241,.08);padding:9px 12px;border-radius:8px;border-left:3px solid var(–ac)}
+.info-list{list-style:none;padding:0;margin:0}
+.info-list li{font-size:12px;line-height:1.5;color:var(–sub);padding:6px 0 6px 22px;position:relative}
+.info-list.tips li::before{content:‘✓’;position:absolute;left:0;color:#4ade80;font-weight:800}
+.info-list.mistakes li::before{content:‘✕’;position:absolute;left:0;color:#f87171;font-weight:800}
+.info-yt-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:#ff0000;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;margin-top:6px}
+.info-yt-btn:active{opacity:.85}
+.info-empty{text-align:center;padding:30px 16px;color:var(–mu)}
+.info-empty-icon{font-size:36px;margin-bottom:10px;opacity:.4}
+.info-btn{padding:4px 6px!important;border-radius:5px;display:flex;align-items:center;justify-content:center;color:var(–mu);transition:all .15s}
+.info-btn:active{color:var(–ac2)}
+.info-btn.has-info{color:var(–ac2)}
+
 /* LIGHT MODE */
 body.lt{–bg:#f4f4f5;–s1:#fff;–s2:#e4e4e7;–s3:#d4d4d8;–b1:rgba(0,0,0,.09);–b2:#a1a1aa;–tx:#09090b;–sub:#52525b;–mu:#71717a}
 body.lt #tmr{background:rgba(244,244,245,.94)}
@@ -362,20 +380,102 @@ body.lt #alert{background:rgba(244,244,245,.97)}
   </div>
 </div>
 
+<!-- EXERCISE INFO MODAL -->
+
+<div id="info-bg" style="display:none;position:fixed;inset:0;z-index:8500;background:rgba(0,0,0,.85);backdrop-filter:blur(8px)" onclick="closeExInfo()"></div>
+<div id="info-box" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:8501;width:94%;max-width:430px;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--s1);border:1px solid var(--b1);border-radius:18px">
+  <!-- Header -->
+  <div style="position:sticky;top:0;background:var(--s1);border-bottom:1px solid var(--b1);padding:16px 18px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;border-radius:18px 18px 0 0;z-index:1">
+    <div style="flex:1;min-width:0">
+      <div id="info-cat" style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--ac2);margin-bottom:3px"></div>
+      <div id="info-name" class="D" style="font-size:22px;color:var(--tx);line-height:1.1"></div>
+    </div>
+    <button class="btn btn-icon" onclick="closeExInfo()">✕</button>
+  </div>
+  <div id="info-body" style="padding:16px 18px 22px"></div>
+</div>
+
 <!-- SHARE MODAL -->
 
-<div id="share-bg" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.75)" onclick="closeShare()"></div>
-<div id="share-box" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9001;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:20px;width:92%;max-width:380px;max-height:80vh;overflow-y:auto">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-    <div class="D" style="font-size:18px">SESSIE DELEN</div>
-    <button class="btn btn-icon" onclick="closeShare()" style="width:30px;height:30px;font-size:13px">✕</button>
+<div id="share-bg" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.85);backdrop-filter:blur(8px)" onclick="closeShare()"></div>
+<div id="share-box" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9001;width:94%;max-width:400px;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch">
+
+  <!-- Close -->
+
+  <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+    <button class="btn btn-icon" onclick="closeShare()" style="width:34px;height:34px;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);color:#fff">✕</button>
   </div>
-  <textarea id="share-text" readonly style="width:100%;height:240px;padding:12px;background:var(--s2);border:1px solid var(--b1);border-radius:10px;color:var(--tx);font-family:monospace;font-size:12px;line-height:1.5;resize:none;outline:none"></textarea>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
-    <button class="btn btn-g" onclick="shareNative()" style="padding:12px;font-size:13px">📤 Delen</button>
-    <button class="btn btn-p" onclick="shareCopy()" style="padding:12px;font-size:13px">📋 Kopiëren</button>
+
+  <!-- Visual share card (this is what gets shown) -->
+
+  <div id="share-card" style="background:linear-gradient(135deg,#0f0f1f 0%,#1a1a2e 50%,#0f0f1f 100%);border-radius:18px;padding:24px;color:#fff;position:relative;overflow:hidden;border:1px solid rgba(99,102,241,.3);box-shadow:0 20px 60px rgba(0,0,0,.5)">
+    <!-- Glow effect -->
+    <div style="position:absolute;top:-50px;right:-50px;width:200px;height:200px;background:radial-gradient(circle,rgba(99,102,241,.3),transparent 70%);pointer-events:none"></div>
+    <div style="position:absolute;bottom:-50px;left:-50px;width:200px;height:200px;background:radial-gradient(circle,rgba(139,92,246,.2),transparent 70%);pointer-events:none"></div>
+
+```
+<!-- Header -->
+<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;position:relative">
+  <div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;font-style:italic;color:#818cf8;letter-spacing:.1em">GYMLOG</div>
+    <div id="sc-name" class="D" style="font-size:26px;color:#fff;line-height:1.05;margin-top:2px"></div>
+    <div id="sc-date" style="font-size:11px;color:rgba(165,180,252,.7);margin-top:3px;font-weight:600"></div>
   </div>
-  <div id="share-hint" style="font-size:11px;color:var(--mu);text-align:center;margin-top:10px"></div>
+  <div style="text-align:right">
+    <div id="sc-emoji" style="font-size:36px;line-height:1">💪</div>
+  </div>
+</div>
+
+<!-- KPI bar -->
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;position:relative">
+  <div style="background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:9px 6px;text-align:center">
+    <div id="sc-kpi-ex" class="D" style="font-size:22px;color:#fff;line-height:1"></div>
+    <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(165,180,252,.7);margin-top:3px">Oefeningen</div>
+  </div>
+  <div style="background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:9px 6px;text-align:center">
+    <div id="sc-kpi-sets" class="D" style="font-size:22px;color:#fff;line-height:1"></div>
+    <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(165,180,252,.7);margin-top:3px">Sets</div>
+  </div>
+  <div style="background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:9px 6px;text-align:center">
+    <div id="sc-kpi-vol" class="D" style="font-size:22px;color:#fff;line-height:1"></div>
+    <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(165,180,252,.7);margin-top:3px">Volume</div>
+  </div>
+</div>
+
+<!-- Exercises list -->
+<div id="sc-exes" style="position:relative"></div>
+
+<!-- Footer -->
+<div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(99,102,241,.15);display:flex;justify-content:space-between;align-items:center;position:relative">
+  <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:900;font-style:italic;color:#818cf8;letter-spacing:.08em">GYMLOG</div>
+  <div id="sc-by" style="font-size:9px;color:rgba(165,180,252,.5);font-weight:600"></div>
+</div>
+```
+
+  </div>
+
+  <!-- Action buttons -->
+
+  <button class="btn btn-p" onclick="shareImage()" style="padding:14px;font-size:14px;width:100%;margin-top:14px">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" style="margin-right:7px"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path stroke-linecap="round" d="M21 15l-5-5L5 21"/></svg>
+    Deel als afbeelding
+  </button>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+    <button class="btn btn-g" onclick="shareNative()" style="padding:11px;font-size:12px">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" style="margin-right:5px"><path stroke-linecap="round" stroke-linejoin="round" d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+      Tekst delen
+    </button>
+    <button class="btn btn-g" onclick="shareCopy()" style="padding:11px;font-size:12px">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" style="margin-right:5px"><rect x="8" y="8" width="13" height="13" rx="2"/><path stroke-linecap="round" d="M3 16V5a2 2 0 012-2h11"/></svg>
+      Tekst kopiëren
+    </button>
+  </div>
+
+  <!-- Hidden text for clipboard -->
+
+  <textarea id="share-text" readonly style="position:absolute;left:-9999px;opacity:0"></textarea>
+
+  <div id="share-hint" style="font-size:11px;color:#a5b4fc;text-align:center;margin-top:10px;min-height:14px"></div>
 </div>
 
 <!-- TEMPLATE MODAL -->
@@ -727,6 +827,362 @@ function inputReject(){
 
 
 
+
+// ═══════════════════════════════════════════════════
+// EXERCISE INFO DATABASE
+// ═══════════════════════════════════════════════════
+var EX_INFO = {
+  // ═══ BORST ═══
+  'BENCH PRESS': {
+    cat:'Borst', muscle:'Pectoralis major (borst), triceps, voorste deltoid',
+    desc:'De koning van de borstoefeningen. Compound beweging die pure borststerkte opbouwt.',
+    tips:['Schouderbladen samenknijpen en naar beneden trekken','Voeten plat op de grond, lichte lendenboog','Stang raakt midden borst (rond tepellijn)','Pols recht houden, niet knikken','Adem in naar beneden, uit bij omhoog drukken'],
+    mistakes:['Stuiteren op de borst','Ellebogen 90° flaren (gevaarlijk voor schouders, houd ~70°)','Benen losmaken van de grond'],
+    youtube:'https://www.youtube.com/watch?v=rT7DgCr-3pg'
+  },
+  'INCLINE DB PRESS': {
+    cat:'Borst', muscle:'Bovenste borst, voorste deltoid',
+    desc:'Schuine bankdruk met dumbbells voor de bovenste borstvezels. Bredere bewegingsbaan dan de barbell.',
+    tips:['Bank op 30-45° (niet steiler, wordt schouder-oefening)','Dumbbells iets boven schouderhoogte starten','Beweging in halve cirkel, polsen boven elleboog','Knijp in de top, niet helemaal uitstrekken'],
+    mistakes:['Bank te steil instellen','Dumbbells tegen elkaar tikken in de top','Te zwaar gewicht waardoor vorm verloren gaat'],
+    youtube:'https://www.youtube.com/watch?v=8iPEnn-ltC8'
+  },
+  'PEC FLY': {
+    cat:'Borst', muscle:'Pectoralis major (vooral binnenkant)',
+    desc:'Isolatie-oefening voor de borst. Knijp-beweging zonder hulp van triceps.',
+    tips:['Lichte buiging in elleboog, vasthouden tijdens hele beweging','Rek voelen aan zijkant borst onderin','Knijp 1-2 sec in top','Langzaam tempo - dit is geen kracht-oefening'],
+    mistakes:['Ellebogen helemaal strekken (overbelast pees)','Te zwaar - dan wordt het een press','Te ver doortrekken naar achter'],
+    youtube:'https://www.youtube.com/watch?v=eozdVDA78K0'
+  },
+  'DIPS': {
+    cat:'Borst', muscle:'Onderste borst, triceps, voorste deltoid',
+    desc:'Bodyweight compound voor onderste borst. Voorovergeleund = meer borst, rechtop = meer triceps.',
+    tips:['Lichaam licht voorover hellen voor borst-focus','Schouders weg van oren','Zak tot bovenarm parallel met grond','Knijp triceps + borst in de top'],
+    mistakes:['Te diep zakken (schouder-blessure risico)','Schouders optrekken','Stoten of zwaaien'],
+    youtube:'https://www.youtube.com/watch?v=2z8JmcrW-As'
+  },
+  'PUSH UPS': {
+    cat:'Borst', muscle:'Borst, triceps, voorste deltoid, core',
+    desc:'Klassieke bodyweight compound. Versie aanpassen aan niveau (knieën, normaal, verzwaard).',
+    tips:['Lichaam recht als plank, geen zakkende heupen','Handen iets breder dan schouders','Borst tot vlak boven grond','Adem in naar beneden, uit bij omhoog'],
+    mistakes:['Heupen zakken door','Niet door volledige bewegingsbaan','Hoofd voorover laten hangen'],
+    youtube:'https://www.youtube.com/watch?v=IODxDxX7oi4'
+  },
+  'CABLE CROSSOVER': {
+    cat:'Borst', muscle:'Borst (hele bereik, vooral binnenkant)',
+    desc:'Constant spanning isolatie. Hoek bepaalt focus: hoog=onderste borst, laag=bovenste, midden=middelste.',
+    tips:['Lichte voorovergebogen houding','Lichte buiging in ellebogen','Knijp handen samen in front, hold 1 sec','Trekstand bepaalt borstdeel'],
+    mistakes:['Te zwaar - dan wordt het een press','Schouders optrekken','Niet terugbewegen tot rek voelbaar'],
+    youtube:'https://www.youtube.com/watch?v=taI4XduLpTk'
+  },
+
+  // ═══ RUG ═══
+  'LAT PULLDOWN': {
+    cat:'Rug', muscle:'Latissimus dorsi (brede rug), biceps, achterste deltoid',
+    desc:'Verticale trek-oefening, opbouw richting pull-ups. Brede grip = brede V-vorm.',
+    tips:['Lichte achterwaartse leuning (10-20°)','Stang naar bovenste borst trekken','Schouderbladen naar beneden + achteren','Ellebogen recht naar beneden, niet naar achter'],
+    mistakes:['Te ver achterover hellen','Stang achter het hoofd trekken (gevaarlijk)','Te zwaar waardoor je niet kunt knijpen in onderste positie'],
+    youtube:'https://www.youtube.com/watch?v=CAwf7n6Luuc'
+  },
+  'DEADLIFT': {
+    cat:'Rug', muscle:'Hele posterior chain: rug, billen, hamstrings',
+    desc:'De ultieme compound-oefening. Activeert meer spiermassa dan welke andere oefening dan ook.',
+    tips:['Stang over midden van voet','Heupen scharnieren, neutrale rug','Stang dicht bij benen optillen','Knijp billen samen in top, geen overstrekking','Adem vasthouden tijdens lift (Valsalva)'],
+    mistakes:['Ronding in onderrug (blessure-risico)','Stang te ver van lichaam','Met armen trekken (laat benen het werk doen)'],
+    youtube:'https://www.youtube.com/watch?v=op9kVnSso6Q'
+  },
+  'BENT OVER ROW': {
+    cat:'Rug', muscle:'Mid-back, lats, achterste deltoid, biceps',
+    desc:'Horizontale rij. Bouwt dikte op in mid-back en houdingsspieren.',
+    tips:['Heupen scharnieren tot torso ~45°','Neutrale rug, geen ronding','Stang naar onderste ribben/navel','Knijp schouderbladen samen in top'],
+    mistakes:['Te rechtop staan (wordt shrug)','Met momentum zwaaien','Stang naar borst trekken (verkeerde focus)'],
+    youtube:'https://www.youtube.com/watch?v=vT2GjY_Umpw'
+  },
+  'PULL UPS': {
+    cat:'Rug', muscle:'Lats, mid-back, biceps, achterste deltoid',
+    desc:'Bodyweight king voor de bovenrug. Niets bouwt brede lats zoals dit.',
+    tips:['Volledige hang in start (dead hang)','Borst naar stang in top','Schouders weg van oren','Lichaam licht achterover voor lat-focus'],
+    mistakes:['Half-rep (kin niet over stang)','Kipping/zwaaien (pas voor crossfit)','Schouders schrugen'],
+    youtube:'https://www.youtube.com/watch?v=eGo4IYlbE5g'
+  },
+  'SEATED ROW': {
+    cat:'Rug', muscle:'Mid-back, lats, biceps',
+    desc:'Geleide horizontale rij. Veiliger dan barbell row, ideaal voor beginners en hoge volume.',
+    tips:['Borst omhoog, schouders terug','Trek naar onderste borst/buik','Knijp schouderbladen 1 sec in top','Lichte achterwaartse leuning, niet te ver'],
+    mistakes:['Te ver achterover leunen','Met onderrug trekken','Schouderbladen niet samenknijpen'],
+    youtube:'https://www.youtube.com/watch?v=GZbfZ033f74'
+  },
+  'FACE PULLS': {
+    cat:'Rug', muscle:'Achterste deltoid, mid-traps, rotator cuff',
+    desc:'Beste oefening voor schoudergezondheid en houdingsverbetering. Iedereen zou deze moeten doen.',
+    tips:['Touw naar gezicht/oren trekken','Externe rotatie in eindpositie (duimen achter hoofd)','Hoge ellebogen','Lichter gewicht, hogere reps (12-20)'],
+    mistakes:['Te zwaar waardoor het een gewone row wordt','Niet roteren in eindpositie','Stoppen voor gezicht'],
+    youtube:'https://www.youtube.com/watch?v=eIq5CB9JfKE'
+  },
+  'T-BAR ROW': {
+    cat:'Rug', muscle:'Mid-back, lats, traps',
+    desc:'Compound rij met dikke handles. Bouwt dikte in de bovenrug op.',
+    tips:['Borst op pad, neutrale rug','Trek tot handles tegen borst','Knijp schouderbladen','Gebruik chest-supported variant indien beschikbaar'],
+    mistakes:['Met onderrug trekken','Te zwaar waardoor vorm verloren gaat','Te ver doortrekken'],
+    youtube:'https://www.youtube.com/watch?v=j3Igk5nyZE4'
+  },
+
+  // ═══ BENEN ═══
+  'SQUAT': {
+    cat:'Benen', muscle:'Quads, billen, hamstrings, core',
+    desc:'De koning van alle oefeningen. Bouwt totale onderlichaam-kracht en mass.',
+    tips:['Voeten schouderbreedte, tenen iets naar buiten','Heupen eerst naar achter, dan zakken','Knieën in lijn met tenen','Tot dijbenen parallel of dieper','Borst omhoog gedurende hele beweging'],
+    mistakes:['Knieën naar binnen vallen','Hielen los van grond','Voorover vallen (rug rond)','Niet diep genoeg (half-squat)'],
+    youtube:'https://www.youtube.com/watch?v=ultWZbUMPL8'
+  },
+  'LEG PRESS': {
+    cat:'Benen', muscle:'Quads, billen, hamstrings',
+    desc:'Geleide compound voor benen. Veiliger alternatief voor squat met hoge belasting.',
+    tips:['Voeten schouderbreedte op platform','Voeten hoger = meer billen/hams, lager = meer quads','Tot 90° in knie of dieper','Geen knieën helemaal strekken op top'],
+    mistakes:['Onderrug los van pad (knie-blessure)','Half-rep','Knieën naar binnen drukken'],
+    youtube:'https://www.youtube.com/watch?v=IZxyjW7MPJQ'
+  },
+  'LEG EXTENSION': {
+    cat:'Benen', muscle:'Quadriceps (isolatie)',
+    desc:'Pure quad isolatie. Goed als finisher of pre-exhaust voor squats.',
+    tips:['Pad net boven enkel','Volledige knie-extensie, knijp 1 sec','Langzaam laten zakken (3 sec)','Hoge reps werken het best (12-20)'],
+    mistakes:['Zwaaien met momentum','Te zwaar (knie-belasting)','Niet volledig strekken in top'],
+    youtube:'https://www.youtube.com/watch?v=YyvSfVjQeL0'
+  },
+  'LEG CURL': {
+    cat:'Benen', muscle:'Hamstrings (isolatie)',
+    desc:'Hamstring isolatie. Cruciaal voor balans tussen voor- en achterkant van bovenbeen.',
+    tips:['Pad net boven hiel','Volledige flexie tot billen','Tenen kunnen flex of point voor variatie','Langzaam laten zakken'],
+    mistakes:['Heupen optillen','Half-rep','Zwaaien met momentum'],
+    youtube:'https://www.youtube.com/watch?v=ELOCsoDSmrg'
+  },
+  'ROMANIAN DEADLIFT': {
+    cat:'Benen', muscle:'Hamstrings, billen, onderrug',
+    desc:'Hip-hinge oefening. Bouwt explosieve hamstring-kracht en billen.',
+    tips:['Lichte buiging in knieën, vasthouden','Heupen naar achter, niet zakken','Stang dicht langs benen','Tot rek in hams (meestal mid-scheen)','Heupen naar voren stuwen om omhoog te komen'],
+    mistakes:['Squatten ipv hingen','Stang te ver van benen','Onderrug ronden','Te ver doorzakken'],
+    youtube:'https://www.youtube.com/watch?v=7j3vEv8X3Wc'
+  },
+  'CALF RAISES': {
+    cat:'Benen', muscle:'Gastrocnemius, soleus (kuiten)',
+    desc:'Pure kuit isolatie. Hoge reps werken het best voor groei.',
+    tips:['Volledige bewegingsbaan: tot diepe rek én volledige strek','1 sec hold in top','Langzaam tempo (3-1-1)','15-25 reps werken vaak beter dan zwaar+laag'],
+    mistakes:['Stuiteren in onderkant','Half-rep in top','Te snel tempo'],
+    youtube:'https://www.youtube.com/watch?v=YMmgqO8Jo-k'
+  },
+  'LUNGES': {
+    cat:'Benen', muscle:'Quads, billen, hamstrings, core',
+    desc:'Unilateraal compound. Corrigeert links-rechts onbalans en bouwt functionele kracht.',
+    tips:['Stappen breed genoeg dat voorste knie 90° kan','Achterste knie tot vlak boven grond','Borst rechtop','Drukken via voorste hiel'],
+    mistakes:['Voorste knie voorbij tenen','Te kleine stap','Wegvallen in zijkant'],
+    youtube:'https://www.youtube.com/watch?v=QOVaHwm-Q6U'
+  },
+
+  // ═══ SCHOUDERS ═══
+  'OHP': {
+    cat:'Schouders', muscle:'Voorste deltoid, zijdelingse deltoid, triceps, core',
+    desc:'Overhead Press - de koning van schouder-oefeningen. Bouwt volle, ronde schouders.',
+    tips:['Stang op bovenborst start','Hoofd licht naar achter, dan onder stang door','Volledige extensie, oren bij armen','Billen + core gespannen, geen lendenboog'],
+    mistakes:['Te grote lendenboog','Niet volledig overhead persen','Stang te ver voor het lichaam'],
+    youtube:'https://www.youtube.com/watch?v=2yjwXTZQDDI'
+  },
+  'LATERAL RAISE': {
+    cat:'Schouders', muscle:'Zijdelingse deltoid (isolatie)',
+    desc:'De #1 oefening voor brede schouders. Pure isolatie van de side-delts.',
+    tips:['Lichte buiging in elleboog, vasthouden','Optillen tot armen parallel, niet hoger','Pinkkant iets omhoog (uitschenken-beweging)','Lichter gewicht, hogere reps (12-20)'],
+    mistakes:['Te zwaar - traps nemen het over','Zwaaien met momentum','Te hoog optillen (boven schouderhoogte)'],
+    youtube:'https://www.youtube.com/watch?v=3VcKaXpzqRo'
+  },
+  'FRONT RAISE': {
+    cat:'Schouders', muscle:'Voorste deltoid (isolatie)',
+    desc:'Voorste schouder isolatie. Vaak overbodig - bench press traint dit ook al.',
+    tips:['Lichte elleboog-buiging','Optillen tot schouderhoogte','Langzaam laten zakken','Afwisselend of beide tegelijk'],
+    mistakes:['Zwaaien met momentum','Te hoog optillen','Schouders schrugen'],
+    youtube:'https://www.youtube.com/watch?v=-t7fuZ0KhDA'
+  },
+  'DB SHOULDER PRESS': {
+    cat:'Schouders', muscle:'Hele deltoid, triceps',
+    desc:'Dumbbell schouder-press. Vrijere bewegingsbaan dan barbell, beter voor schouder-gezondheid.',
+    tips:['Dumbbells op schouderhoogte start','Polsen boven ellebogen','Volledige extensie zonder pijn','Lichte boog-beweging mogelijk'],
+    mistakes:['Te diep laten zakken (schouder-stress)','Dumbbells tegen elkaar tikken','Lendenboog'],
+    youtube:'https://www.youtube.com/watch?v=qEwKCR5JCog'
+  },
+  'REAR DELT FLY': {
+    cat:'Schouders', muscle:'Achterste deltoid (isolatie)',
+    desc:'Vaak vergeten maar cruciaal voor goede houding en complete schouders.',
+    tips:['Voorovergeleund of op bank liggend','Lichte elleboog-buiging','Knijp schouderbladen samen','Pinkkant iets omhoog'],
+    mistakes:['Te zwaar - dan wordt het een row','Niet ver genoeg doortrekken','Schouders schrugen'],
+    youtube:'https://www.youtube.com/watch?v=EA7u4Q_8HQ0'
+  },
+
+  // ═══ TRICEPS ═══
+  'CABLE PUSHDOWN': {
+    cat:'Triceps', muscle:'Triceps (alle 3 koppen)',
+    desc:'De #1 isolatie voor triceps. Constante spanning over hele bewegingsbaan.',
+    tips:['Ellebogen vast langs lichaam','Onderarmen bewegen, bovenarmen niet','Volledige strek, knijp 1 sec','Langzaam terugbewegen'],
+    mistakes:['Ellebogen wijken naar voren','Met lichaamsgewicht meeduwen','Te zwaar - vorm verloren'],
+    youtube:'https://www.youtube.com/watch?v=2-LAMcpzODU'
+  },
+  'SKULL CRUSHERS': {
+    cat:'Triceps', muscle:'Triceps (vooral lange kop)',
+    desc:'Lying triceps extension. Bouwt mass op in de triceps, vooral de lange kop.',
+    tips:['Ellebogen op vaste positie','Stang naar voorhoofd of net achter hoofd','Bovenarmen verticaal of licht naar achter','EZ-bar comfortabeler dan straight bar'],
+    mistakes:['Ellebogen flaren','Stang op gezicht laten landen (oeps)','Te zwaar voor strakke vorm'],
+    youtube:'https://www.youtube.com/watch?v=d_KZxkY_0cM'
+  },
+  'OVERHEAD EXTENSION': {
+    cat:'Triceps', muscle:'Triceps (vooral lange kop)',
+    desc:'Overhead positie strekt de lange kop maximaal voor optimale groei.',
+    tips:['Bovenarmen tegen oren','Volledige rek onderaan','Strekken zonder ellebogen te flaren','Kan met dumbbell, kabel of EZ-bar'],
+    mistakes:['Ellebogen wijken','Half-rep','Te zwaar gewicht'],
+    youtube:'https://www.youtube.com/watch?v=YbX7Wd8jQ-Q'
+  },
+  'CLOSE GRIP BENCH': {
+    cat:'Triceps', muscle:'Triceps, borst, voorste deltoid',
+    desc:'Compound triceps-oefening. Zwaarder dan isolaties - hier kun je écht laden.',
+    tips:['Handen schouderbreedte (niet smaller)','Ellebogen dicht bij lichaam','Stang naar onderborst','Volledige strek in top'],
+    mistakes:['Te smal grijpen (pols-stress)','Ellebogen flaren','Stang te hoog laten zakken'],
+    youtube:'https://www.youtube.com/watch?v=nEF0bv2FW94'
+  },
+
+  // ═══ BICEPS ═══
+  'BICEP CURL': {
+    cat:'Biceps', muscle:'Biceps brachii, brachialis',
+    desc:'De klassieke biceps oefening. Standing met dumbbells of barbell.',
+    tips:['Ellebogen vast langs lichaam','Volledige strek onderaan','Knijp 1 sec in top','Polsen recht houden'],
+    mistakes:['Met lichaam zwaaien','Ellebogen naar voren brengen','Half-rep'],
+    youtube:'https://www.youtube.com/watch?v=ykJmrZ5v0Oo'
+  },
+  'HAMMER CURL': {
+    cat:'Biceps', muscle:'Brachialis, brachioradialis, biceps',
+    desc:'Neutrale grip curl. Bouwt vooral de brachialis op (onder de biceps) - meer pieken.',
+    tips:['Polsen neutraal (duimen omhoog)','Ellebogen vast','Kan afwisselend of beide tegelijk','Langzaam negatief tempo'],
+    mistakes:['Polsen draaien','Met lichaam zwaaien','Ellebogen meebewegen'],
+    youtube:'https://www.youtube.com/watch?v=zC3nLlEvin4'
+  },
+  'PREACHER CURL': {
+    cat:'Biceps', muscle:'Biceps (vooral korte kop)',
+    desc:'Geleide curl op preacher bench. Elimineert momentum, pure isolatie.',
+    tips:['Bovenarmen plat op pad','Niet helemaal strekken onderaan (peesbelasting)','Volledige knijp in top','Langzaam tempo'],
+    mistakes:['Volledig strekken in onderkant','Met momentum stoten','Polsen knikken'],
+    youtube:'https://www.youtube.com/watch?v=fIWP-FRFNU0'
+  },
+  'CONCENTRATION CURL': {
+    cat:'Biceps', muscle:'Biceps (piek-vorming)',
+    desc:'Zittend, elleboog op binnenkant dij. Studies tonen dit als hoogste biceps-activatie.',
+    tips:['Zit voorover op bankje','Elleboog tegen binnen-dij gedrukt','Curl naar schouder, knijp top','Andere hand kan op andere knie steunen'],
+    mistakes:['Schouder mee bewegen','Te zwaar - vorm verloren','Te snel tempo'],
+    youtube:'https://www.youtube.com/watch?v=Jvj2wV0vOYU'
+  },
+  '21S': {
+    cat:'Biceps', muscle:'Biceps (volume techniek)',
+    desc:'7 reps onderste helft + 7 bovenste helft + 7 volledige. Brutale pomp.',
+    tips:['Lichter gewicht dan normale curl','7 reps van strek tot 90°','7 reps van 90° tot top','7 reps volledig (geen rust tussen)'],
+    mistakes:['Te zwaar gewicht kiezen','Vorm verliezen in laatste 7','Pauzeren tussen de sets van 7'],
+    youtube:'https://www.youtube.com/watch?v=8wbCS5TKNQ8'
+  },
+
+  // ═══ CORE ═══
+  'PLANK': {
+    cat:'Core', muscle:'Hele core, schouders, billen',
+    desc:'Isometrische core stabilisatie. Bouwt anti-extensie kracht op.',
+    tips:['Lichaam recht als plank','Billen + core actief gespannen','Schouders boven ellebogen','Adem rustig door'],
+    mistakes:['Heupen zakken door','Billen omhoog','Hoofd voorover/achterover'],
+    youtube:'https://www.youtube.com/watch?v=ASdvN_XEl_c'
+  },
+  'CRUNCHES': {
+    cat:'Core', muscle:'Rectus abdominis (six-pack)',
+    desc:'Klassieke ab-isolatie. Korte bewegingsbaan, focus op contractie.',
+    tips:['Schouderbladen los van grond, niet hoger','Knijp abs 1 sec in top','Langzaam laten zakken','Niet aan nek trekken'],
+    mistakes:['Hele rug optillen (heupbuiger neemt over)','Aan nek trekken','Te snel tempo'],
+    youtube:'https://www.youtube.com/watch?v=Xyd_fa5zoEU'
+  },
+  'LEG RAISES': {
+    cat:'Core', muscle:'Onderbuik, heupbuigers',
+    desc:'Onderste ab-focus. Hangend aan stang of liggend op rug.',
+    tips:['Onderrug tegen grond/pad gedrukt','Benen recht of gebogen optillen','Knijp onderbuik in top','Langzaam laten zakken'],
+    mistakes:['Benen laten vallen (geen controle)','Onderrug los van grond','Met momentum zwaaien'],
+    youtube:'https://www.youtube.com/watch?v=Pr1ieGZ5atk'
+  },
+  'RUSSIAN TWIST': {
+    cat:'Core', muscle:'Schuine buikspieren (obliques)',
+    desc:'Roterende core-oefening. Met of zonder gewicht.',
+    tips:['Voeten van grond voor extra moeilijkheid','Borst omhoog, lichte achterwaartse leuning','Roteer vanuit core, niet alleen armen','Tik gewicht naast heup, niet voor knie'],
+    mistakes:['Alleen armen bewegen','Onderrug ronden','Te snel tempo'],
+    youtube:'https://www.youtube.com/watch?v=wkD8rjkodUI'
+  },
+  'AB WHEEL': {
+    cat:'Core', muscle:'Hele core, lats, schouders',
+    desc:'Extreem zware core anti-extensie. Voor gevorderden.',
+    tips:['Begin op knieën','Rol uit tot bijna gestrekt','Geen doorzakkende rug','Trek terug met core, niet armen'],
+    mistakes:['Te ver uitrollen (lendenboog)','Te snel uitrollen','Niet genoeg core-spanning'],
+    youtube:'https://www.youtube.com/watch?v=rqiTPdK1c_I'
+  }
+};
+
+// Aliases - common name variations all point to same info
+var EX_ALIASES = {
+  'INCLINE BENCH PRESS':'INCLINE DB PRESS',
+  'INCLINE PRESS':'INCLINE DB PRESS',
+  'INCLINE DUMBBELL PRESS':'INCLINE DB PRESS',
+  'CHEST PRESS':'BENCH PRESS',
+  'BARBELL BENCH':'BENCH PRESS',
+  'DUMBBELL FLY':'PEC FLY',
+  'CHEST FLY':'PEC FLY',
+  'PUSHUP':'PUSH UPS',
+  'PUSH-UP':'PUSH UPS',
+  'PULLUP':'PULL UPS',
+  'PULL-UP':'PULL UPS',
+  'CHIN UP':'PULL UPS',
+  'CHINUP':'PULL UPS',
+  'BARBELL ROW':'BENT OVER ROW',
+  'BB ROW':'BENT OVER ROW',
+  'CABLE ROW':'SEATED ROW',
+  'SEATED CABLE ROW':'SEATED ROW',
+  'BACK SQUAT':'SQUAT',
+  'BARBELL SQUAT':'SQUAT',
+  'RDL':'ROMANIAN DEADLIFT',
+  'STIFF LEG DEADLIFT':'ROMANIAN DEADLIFT',
+  'CONVENTIONAL DEADLIFT':'DEADLIFT',
+  'OVERHEAD PRESS':'OHP',
+  'MILITARY PRESS':'OHP',
+  'SHOULDER PRESS':'DB SHOULDER PRESS',
+  'SIDE LATERAL RAISE':'LATERAL RAISE',
+  'DB LATERAL':'LATERAL RAISE',
+  'TRICEP PUSHDOWN':'CABLE PUSHDOWN',
+  'CABLE TRICEP':'CABLE PUSHDOWN',
+  'TRICEP EXTENSION':'OVERHEAD EXTENSION',
+  'OVERHEAD TRICEP':'OVERHEAD EXTENSION',
+  'CGBP':'CLOSE GRIP BENCH',
+  'CURL':'BICEP CURL',
+  'BARBELL CURL':'BICEP CURL',
+  'DB CURL':'BICEP CURL',
+  'EZ CURL':'BICEP CURL',
+  'STANDING CALF':'CALF RAISES',
+  'SEATED CALF':'CALF RAISES',
+  'AB CRUNCH':'CRUNCHES',
+  'ABDOMINAL CRUNCHES':'CRUNCHES',
+  'SIT UPS':'CRUNCHES',
+  'HANGING LEG RAISE':'LEG RAISES'
+};
+
+function getExInfo(name){
+  var n = String(name||'').trim().toUpperCase();
+  // Direct match
+  if(EX_INFO[n]) return EX_INFO[n];
+  // Alias match
+  if(EX_ALIASES[n] && EX_INFO[EX_ALIASES[n]]) return EX_INFO[EX_ALIASES[n]];
+  // Partial match (for things like "BENCH PRESS (SMITH)")
+  for(var key in EX_INFO){
+    if(n.indexOf(key) !== -1) return EX_INFO[key];
+  }
+  // Alias partial match
+  for(var alias in EX_ALIASES){
+    if(n.indexOf(alias) !== -1) return EX_INFO[EX_ALIASES[alias]];
+  }
+  return null;
+}
+
 // ═══════════════════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════════════════
@@ -794,13 +1250,51 @@ function editExNote(sId, exId){
 // ═══════════════════════════════════════════════════
 // BODYWEIGHT EXERCISE DETECTION
 // ═══════════════════════════════════════════════════
-var BW_KEYWORDS = ['PUSH UP','PUSHUP','PUSH-UP','PULL UP','PULLUP','PULL-UP','CHIN UP','CHINUP','CHIN-UP','DIP','DIPS','PLANK','CRUNCH','SIT UP','SITUP','LEG RAISE','BURPEE','MOUNTAIN CLIMB','HANGING','HANDSTAND','MUSCLE UP','MUSCLE-UP','PIKE PUSH','HOLLOW HOLD','L-SIT','BODYWEIGHT'];
+// Strict bodyweight - exercises that are ALWAYS bodyweight
+var BW_STRICT = ['PUSH UP','PUSHUP','PUSH-UP','PULL UP','PULLUP','PULL-UP','CHIN UP','CHINUP','CHIN-UP','BURPEE','MOUNTAIN CLIMB','MUSCLE UP','MUSCLE-UP','HANDSTAND','HOLLOW HOLD','L-SIT','PLANK'];
+// Ambiguous - bodyweight by default but respect history
+var BW_AMBIGUOUS = ['CRUNCH','SIT UP','SITUP','LEG RAISE','DIP','DIPS','PIKE PUSH','HANGING'];
+
+function nameMatchesAny(name, list){
+  var n = String(name||'').toUpperCase();
+  for(var i=0;i<list.length;i++){
+    if(n.indexOf(list[i]) !== -1) return true;
+  }
+  return false;
+}
+
+// Cache for performance
+var _bwCache = {};
+
+function clearBwCache(){ _bwCache = {}; }
 
 function isBodyweight(name){
   var n = String(name||'').toUpperCase();
-  for(var i=0;i<BW_KEYWORDS.length;i++){
-    if(n.indexOf(BW_KEYWORDS[i]) !== -1) return true;
+  if(_bwCache.hasOwnProperty(n)) return _bwCache[n];
+
+  // 1. Always bodyweight
+  if(nameMatchesAny(n, BW_STRICT)){ _bwCache[n] = true; return true; }
+
+  // 2. Ambiguous: check if user has ever logged weight for this exercise
+  if(nameMatchesAny(n, BW_AMBIGUOUS)){
+    var hasWeight = false;
+    for(var i = 0; i < sessions.length; i++){
+      var sess = sessions[i];
+      for(var j = 0; j < sess.exercises.length; j++){
+        if(sess.exercises[j].name.toUpperCase() === n){
+          for(var k = 0; k < sess.exercises[j].sets.length; k++){
+            if(w2f(sess.exercises[j].sets[k].w) > 0){ hasWeight = true; break; }
+          }
+        }
+        if(hasWeight) break;
+      }
+      if(hasWeight) break;
+    }
+    _bwCache[n] = !hasWeight;
+    return !hasWeight;
   }
+
+  _bwCache[n] = false;
   return false;
 }
 
@@ -985,6 +1479,87 @@ function endTodaySess(){
   });
 }
 
+
+// ═══════════════════════════════════════════════════
+// EXERCISE INFO MODAL
+// ═══════════════════════════════════════════════════
+function openExInfo(name){
+  var info = getExInfo(name);
+  document.getElementById('info-name').textContent = name;
+  var body = document.getElementById('info-body');
+  var catEl = document.getElementById('info-cat');
+
+  if(!info){
+    catEl.textContent = '';
+    body.innerHTML = '<div class="info-empty">'
+      + '<div class="info-empty-icon">📚</div>'
+      + '<div style="font-size:13px;font-weight:700;color:var(--sub);margin-bottom:6px">Geen info beschikbaar</div>'
+      + '<div style="font-size:11px;line-height:1.5">Voor deze oefening hebben we nog geen technische uitleg in onze bibliotheek.</div>'
+      + '<div style="font-size:11px;color:var(--mu);margin-top:14px">Tip: Gebruik de notitie-knop (potlood-icoon) bij de oefening om je eigen techniek-tips toe te voegen.</div>'
+      + '</div>';
+  } else {
+    catEl.textContent = info.cat;
+    var html = '';
+    
+    // Description
+    html += '<div class="info-section">'
+      + '<div class="info-desc">' + esc(info.desc) + '</div>'
+      + '</div>';
+    
+    // Muscle group
+    html += '<div class="info-section">'
+      + '<div class="info-label">'
+      + '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6.5C6 4 8 2 10.5 2c1.5 0 2.8.7 3.5 1.8C14.7 2.7 16 2 17.5 2 20 2 22 4 22 6.5c0 5-8 11.5-8 11.5s-8-6.5-8-11.5z"/></svg>'
+      + 'Spiergroep'
+      + '</div>'
+      + '<div class="info-muscle">' + esc(info.muscle) + '</div>'
+      + '</div>';
+    
+    // Tips
+    if(info.tips && info.tips.length){
+      html += '<div class="info-section">'
+        + '<div class="info-label" style="color:#4ade80">'
+        + '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+        + 'Belangrijkste tips'
+        + '</div>'
+        + '<ul class="info-list tips">'
+        + info.tips.map(function(t){ return '<li>' + esc(t) + '</li>'; }).join('')
+        + '</ul></div>';
+    }
+    
+    // Common mistakes
+    if(info.mistakes && info.mistakes.length){
+      html += '<div class="info-section">'
+        + '<div class="info-label" style="color:#f87171">'
+        + '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/></svg>'
+        + 'Veelgemaakte fouten'
+        + '</div>'
+        + '<ul class="info-list mistakes">'
+        + info.mistakes.map(function(m){ return '<li>' + esc(m) + '</li>'; }).join('')
+        + '</ul></div>';
+    }
+    
+    // YouTube link
+    if(info.youtube){
+      html += '<button class="info-yt-btn" onclick="window.open(\''+ info.youtube +'\',\'_blank\')">'
+        + '<svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M19.6 4H4.4C3.07 4 2 5.07 2 6.4v11.2C2 18.93 3.07 20 4.4 20h15.2c1.33 0 2.4-1.07 2.4-2.4V6.4C22 5.07 20.93 4 19.6 4zM10 16V8l6 4-6 4z"/></svg>'
+        + 'Bekijk video op YouTube'
+        + '</button>';
+    }
+    
+    body.innerHTML = html;
+  }
+
+  document.getElementById('info-bg').style.display = 'block';
+  document.getElementById('info-box').style.display = 'block';
+}
+
+function closeExInfo(){
+  document.getElementById('info-bg').style.display = 'none';
+  document.getElementById('info-box').style.display = 'none';
+}
+
+
 // ═══════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════
@@ -1025,7 +1600,7 @@ function save() {
   localStorage.setItem('gl_wp', JSON.stringify(weekPlan));
   localStorage.setItem('gl_t',  JSON.stringify(templates));
 }
-function saveRender() { save(); renderAll(); renderDeloadBanner(); }
+function saveRender() { save(); clearBwCache(); renderAll(); renderDeloadBanner(); }
 
 // ═══════════════════════════════════════════════════
 // HELPERS
@@ -1198,30 +1773,83 @@ function shareSession(id){
   if(!s){ toast('Sessie niet gevonden.'); return; }
   var vol = sesVol(s);
   var totalSets = s.exercises.reduce(function(a,ex){ return a + ex.sets.length; }, 0);
+
+  // Pick emoji based on dominant muscle group
+  var map = e2cat();
+  var catCount = {};
+  s.exercises.forEach(function(ex){
+    var c = map[ex.name.toUpperCase()];
+    if(c) catCount[c] = (catCount[c]||0) + 1;
+  });
+  var dominant = Object.keys(catCount).sort(function(a,b){return catCount[b]-catCount[a];})[0];
+  var emojiMap = {
+    'Borst':'💪', 'Rug':'🦾', 'Benen':'🦵', 'Schouders':'🏋️',
+    'Triceps':'💪', 'Biceps':'💪', 'Core':'🔥', 'Overig':'🏋️'
+  };
+  var emoji = emojiMap[dominant] || '💪';
+
+  // Populate visual card
+  document.getElementById('sc-name').textContent = s.name;
+  document.getElementById('sc-date').textContent = s.date.toUpperCase();
+  document.getElementById('sc-emoji').textContent = emoji;
+  document.getElementById('sc-kpi-ex').textContent = s.exercises.length;
+  document.getElementById('sc-kpi-sets').textContent = totalSets;
+  document.getElementById('sc-kpi-vol').textContent = vol > 0 ? (vol/1000).toFixed(1) + 'T' : '—';
+
+  // Exercise rows in card
+  var exHtml = '';
+  s.exercises.forEach(function(ex){
+    var mw = 0;
+    var bestReps = 0;
+    ex.sets.forEach(function(st){
+      var w = w2f(st.w);
+      if(w > mw){ mw = w; bestReps = parseInt(st.r) || 0; }
+    });
+    var bw = isBodyweight(ex.name);
+    // Count feels
+    var feels = {EASY:0, GOOD:0, HARD:0};
+    ex.sets.forEach(function(st){ if(feels[st.feel] !== undefined) feels[st.feel]++; });
+    var feelDots = '';
+    if(feels.EASY) feelDots += '<span style="color:#4ade80">●</span>'.repeat(feels.EASY);
+    if(feels.GOOD) feelDots += '<span style="color:#818cf8">●</span>'.repeat(feels.GOOD);
+    if(feels.HARD) feelDots += '<span style="color:#f87171">●</span>'.repeat(feels.HARD);
+    
+    exHtml += '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(99,102,241,.08)">'
+      + '<div style="flex:1;min-width:0">'
+      + '<div style="font-size:12px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(ex.name) + '</div>'
+      + (feelDots ? '<div style="font-size:8px;line-height:1;letter-spacing:1px;margin-top:3px">' + feelDots + '</div>' : '')
+      + '</div>'
+      + '<div style="text-align:right;flex-shrink:0">'
+      + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:900;font-style:italic;color:#a5b4fc;line-height:1">'
+      + (bw ? ex.sets.length + '×' + (bestReps || '—') : (mw > 0 ? mw + '<span style="font-size:9px;color:rgba(165,180,252,.6)">kg</span> × ' + bestReps : '—'))
+      + '</div>'
+      + '<div style="font-size:8px;color:rgba(165,180,252,.6);font-weight:600;margin-top:1px">' + ex.sets.length + ' sets</div>'
+      + '</div>'
+      + '</div>';
+  });
+  document.getElementById('sc-exes').innerHTML = exHtml;
+
+  // Footer with user name and date
+  var byText = (user.name ? user.name.toUpperCase() : 'ATLEET') + ' · ' + new Date().toLocaleDateString('nl-NL',{day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('sc-by').textContent = byText;
+
+  // Build text version for native share / clipboard
   var lines = [
-    '🏋️ GymLog — ' + s.name,
+    '🏋️ ' + s.name,
     '📅 ' + s.date,
-    '📊 ' + s.exercises.length + ' oef · ' + totalSets + ' sets · ' + (vol/1000).toFixed(1) + 'T',
+    '',
+    '📊 ' + s.exercises.length + ' oefeningen · ' + totalSets + ' sets · ' + (vol/1000).toFixed(1) + 'T volume',
     ''
   ];
   s.exercises.forEach(function(ex){
     var mw = 0;
     ex.sets.forEach(function(st){ var w = w2f(st.w); if(w > mw) mw = w; });
-    var line = '  ' + ex.name + ': ' + ex.sets.length + '×' + (mw > 0 ? mw + 'kg' : '?');
-    lines.push(line);
-    // Show each set detail
-    ex.sets.forEach(function(st, i){
-      if(st.w && st.r){
-        lines.push('    Set ' + (i+1) + ': ' + st.w + 'kg × ' + st.r + (st.feel ? ' [' + st.feel + ']' : ''));
-      }
-    });
+    lines.push('• ' + ex.name + ': ' + ex.sets.length + '×' + (mw > 0 ? mw + 'kg' : 'BW'));
   });
-  lines.push('', '— GymLog App');
-  var text = lines.join('\n');
-  
-  // Show share modal
-  var ta = document.getElementById('share-text');
-  ta.value = text;
+  lines.push('', '— GymLog');
+  document.getElementById('share-text').value = lines.join('\n');
+
+  // Show modal
   document.getElementById('share-bg').style.display = 'block';
   document.getElementById('share-box').style.display = 'block';
   document.getElementById('share-hint').textContent = '';
@@ -1230,6 +1858,71 @@ function shareSession(id){
 function closeShare(){
   document.getElementById('share-bg').style.display = 'none';
   document.getElementById('share-box').style.display = 'none';
+}
+
+
+function shareImage(){
+  var card = document.getElementById('share-card');
+  if(!card){ toast('Kaart niet gevonden.'); return; }
+  if(typeof html2canvas === 'undefined'){
+    toast('Afbeelding genereren niet beschikbaar.');
+    return;
+  }
+  var hint = document.getElementById('share-hint');
+  hint.textContent = '⏳ Afbeelding maken...';
+
+  html2canvas(card, {
+    backgroundColor: null,
+    scale: 2,           // retina quality
+    logging: false,
+    useCORS: true,
+    allowTaint: true
+  }).then(function(canvas){
+    canvas.toBlob(function(blob){
+      if(!blob){ hint.textContent = 'Afbeelding maken mislukt.'; return; }
+      var fileName = 'gymlog_' + new Date().toISOString().slice(0,10) + '.png';
+      var file = new File([blob], fileName, { type: 'image/png' });
+
+      // Try native share first (with file)
+      if(navigator.canShare && navigator.canShare({ files: [file] })){
+        navigator.share({
+          files: [file],
+          title: 'Mijn workout',
+          text: document.getElementById('share-text').value
+        }).then(function(){
+          hint.textContent = '';
+          closeShare();
+        }).catch(function(err){
+          if(err && err.name !== 'AbortError'){
+            // fallback to download
+            downloadBlob(blob, fileName);
+            hint.textContent = '✓ Afbeelding gedownload';
+          } else {
+            hint.textContent = '';
+          }
+        });
+      } else {
+        // No share API: download the image
+        downloadBlob(blob, fileName);
+        hint.textContent = '✓ Afbeelding gedownload';
+        setTimeout(function(){ hint.textContent = ''; }, 2500);
+      }
+    }, 'image/png');
+  }).catch(function(err){
+    console.error(err);
+    hint.textContent = 'Afbeelding maken mislukt.';
+  });
+}
+
+function downloadBlob(blob, fileName){
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
 }
 
 function shareNative(){
@@ -1411,6 +2104,11 @@ function renderExercises(s) {
       + '<div class="ex-mt">' + mp.join(' · ') + '</div>'
       + '</div>'
       + '<div class="ex-ct">'
+      + '<button class="ob info-btn' + (getExInfo(ex.name) ? ' has-info' : '') + '" onclick="event.stopPropagation();openExInfo(\'' + ex.name.replace(/'/g, "\\'") + '\')" title="Info">'
+      + '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:block">'
+      + '<circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 16v-4M12 8h.01"/>'
+      + '</svg>'
+      + '</button>'
       + '<button class="ob ex-note-btn' + (ex.note ? ' has-note' : '') + '" onclick="event.stopPropagation();editExNote(' + s.id + ',' + ex.id + ')" title="Notitie">'
       + '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:block">'
       + '<path stroke-linecap="round" stroke-linejoin="round" d="M11 4H6a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-5"/>'
@@ -2556,6 +3254,7 @@ function importData(ev){
       [chartDist,chartRadar,chartProg,chartWt].forEach(function(c){ if(c){c.destroy();} });
       chartDist=null; chartRadar=null; chartProg=null; chartWt=null;
 
+      clearBwCache();
       save();
       renderAll();
 
