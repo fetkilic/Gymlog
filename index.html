@@ -281,6 +281,64 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 .sc-kpi.five{grid-template-columns:repeat(5,1fr)}
 .sc-kpi.five .kc-v{font-size:15px}
 .sc-kpi.five .kc-l{font-size:7px}
+
+/* VOLUME TARGETS */
+.vt-grid{display:grid;grid-template-columns:1fr;gap:7px}
+.vt-card{background:var(–s2);border:1px solid var(–b1);border-radius:10px;padding:11px 13px}
+.vt-card.vt-low{border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.04)}
+.vt-card.vt-opt{border-color:rgba(74,222,128,.35);background:rgba(74,222,128,.05)}
+.vt-card.vt-high{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05)}
+.vt-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.vt-name{font-size:13px;font-weight:800}
+.vt-status{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:2px 7px;border-radius:4px}
+.vt-card.vt-low .vt-status{background:rgba(248,113,113,.18);color:#fca5a5}
+.vt-card.vt-opt .vt-status{background:rgba(74,222,128,.18);color:#86efac}
+.vt-card.vt-high .vt-status{background:rgba(251,191,36,.18);color:#fcd34d}
+.vt-val{display:flex;align-items:baseline;gap:5px;margin-bottom:7px}
+.vt-val .D{font-size:24px;color:var(–tx);line-height:1}
+.vt-target{font-size:10px;color:var(–mu);font-weight:600}
+.vt-bar{position:relative;height:6px;background:var(–s3);border-radius:3px;overflow:hidden}
+.vt-bar-fill{height:100%;border-radius:3px;transition:width .8s}
+.vt-card.vt-low .vt-bar-fill{background:#f87171}
+.vt-card.vt-opt .vt-bar-fill{background:#4ade80}
+.vt-card.vt-high .vt-bar-fill{background:#fbbf24}
+
+/* PR CELEBRATION */
+#pr-celebration{display:none;position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.92);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:20px;overflow:hidden}
+#pr-celebration.on{display:flex}
+.pr-confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.pr-confetti span{position:absolute;top:-15px;width:9px;height:14px;border-radius:1px;animation:fallConfetti linear forwards}
+@keyframes fallConfetti{
+0%{transform:translateY(0) rotate(0);opacity:1}
+100%{transform:translateY(110vh) rotate(720deg);opacity:0}
+}
+.pr-card{position:relative;background:linear-gradient(135deg,#1a1a2e 0%,#0f0f1f 100%);border:2px solid #fbbf24;border-radius:20px;padding:28px 24px;width:92%;max-width:360px;text-align:center;box-shadow:0 20px 80px rgba(251,191,36,.3),0 0 60px rgba(251,191,36,.15);animation:prPop .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes prPop{
+0%{transform:scale(.3);opacity:0}
+100%{transform:scale(1);opacity:1}
+}
+.pr-trophy{font-size:72px;line-height:1;margin-bottom:8px;animation:prSpin 1.5s ease-out;filter:drop-shadow(0 4px 20px rgba(251,191,36,.6))}
+@keyframes prSpin{
+0%{transform:rotate(-20deg) scale(0)}
+60%{transform:rotate(15deg) scale(1.2)}
+100%{transform:rotate(0) scale(1)}
+}
+.pr-list{display:flex;flex-direction:column;gap:9px}
+.pr-item{display:flex;align-items:center;gap:11px;padding:11px 13px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:10px;text-align:left}
+.pr-icon{font-size:22px;line-height:1;flex-shrink:0}
+.pr-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#fbbf24;margin-bottom:3px}
+.pr-vals{display:flex;align-items:baseline;gap:6px}
+.pr-val-new{font-size:18px;color:#fff;line-height:1}
+.pr-arrow{font-size:11px;color:var(–mu)}
+.pr-val-old{font-size:11px;color:var(–mu);text-decoration:line-through}
+
+/* WEIGHT STATS */
+.wt-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.wt-stat{background:var(–s2);border:1px solid var(–b1);border-radius:9px;padding:10px 8px;text-align:center}
+.wt-stat-l{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(–mu);margin-bottom:3px}
+.wt-stat-v{font-family:‘Barlow Condensed’,sans-serif;font-size:20px;font-weight:900;font-style:italic;line-height:1;color:var(–tx)}
+.wt-stat-s{font-size:8px;color:var(–mu);margin-top:2px;font-weight:600}
+.wt-u{font-size:10px;color:var(–mu);margin-left:1px;font-weight:600}
 /* DELOAD BANNER */
 .deload-card{border-radius:var(–r);padding:14px;margin-bottom:10px;background:linear-gradient(135deg,rgba(251,191,36,.12),rgba(245,158,11,.06));border:1px solid rgba(251,191,36,.3)}
 /* BODYWEIGHT SET ROW */
@@ -597,6 +655,15 @@ body.lt #alert{background:rgba(244,244,245,.97)}
     <div style="margin-top:12px">
       <div id="deload-banner"></div>
       <div class="stats-hero" id="st-hero"></div>
+      <div class="card">
+        <div class="card-hdr">
+          <div>
+            <div class="card-title">Weekvolume per Spiergroep</div>
+            <div style="font-size:10px;color:var(--mu);margin-top:2px">10-20 sets/spier/week is optimaal voor groei</div>
+          </div>
+        </div>
+        <div id="vol-targets"></div>
+      </div>
       <div class="kpi-grid" id="st-kpi"></div>
       <div class="card">
         <div class="card-hdr">
@@ -734,12 +801,14 @@ body.lt #alert{background:rgba(244,244,245,.97)}
           <input class="inp" id="w-fat" type="number" step="0.1" placeholder="Vet %" style="flex:1">
           <button class="btn btn-p" onclick="logWeight()" style="width:auto;padding:0 14px">LOG</button>
         </div>
-        <div style="height:140px;margin-bottom:10px"><canvas id="wt-chart"></canvas></div>
+        <div style="height:160px;margin-bottom:10px"><canvas id="wt-chart"></canvas></div>
         <div class="fp-row" style="margin-bottom:12px">
           <div class="fp wf on" onclick="renderWtChart(7,this)">Week</div>
           <div class="fp wf" onclick="renderWtChart(30,this)">Maand</div>
           <div class="fp wf" onclick="renderWtChart(365,this)">Jaar</div>
+          <div class="fp" onclick="setWeightGoal()" style="background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3);color:#fbbf24;margin-left:auto">🎯 Doel</div>
         </div>
+        <div id="wt-stats" style="margin-bottom:14px"></div>
         <div id="wt-logs"></div>
       </div>
       <div class="card">
@@ -1732,6 +1801,184 @@ function closeExInfo(){
 }
 
 
+
+// ═══════════════════════════════════════════════════
+// WEEKLY VOLUME PER MUSCLE GROUP
+// ═══════════════════════════════════════════════════
+// Scientific guidelines: 10-20 sets per muscle group per week for hypertrophy
+var VOLUME_TARGETS = {
+  'Borst':     { min: 10, max: 20 },
+  'Rug':       { min: 10, max: 20 },
+  'Benen':     { min: 12, max: 20 },
+  'Schouders': { min: 8,  max: 16 },
+  'Triceps':   { min: 6,  max: 14 },
+  'Biceps':    { min: 6,  max: 14 },
+  'Core':      { min: 6,  max: 16 }
+};
+
+function getWeeklyVolume(){
+  var map  = e2cat();
+  var wk7  = cutoff(7);
+  var volByCat = {};
+  Object.keys(VOLUME_TARGETS).forEach(function(c){ volByCat[c] = 0; });
+
+  sessions.forEach(function(s){
+    if(new Date(s.rawDate) < wk7) return;
+    s.exercises.forEach(function(ex){
+      var c = map[ex.name.toUpperCase()];
+      if(!c || !VOLUME_TARGETS[c]) return;
+      // Count only sets where weight OR reps logged (actual working sets)
+      var setCount = ex.sets.filter(function(st){ return st.w || st.r; }).length;
+      volByCat[c] += setCount;
+    });
+  });
+  return volByCat;
+}
+
+function renderVolumeTargets(){
+  var el = document.getElementById('vol-targets');
+  if(!el) return;
+  var vol = getWeeklyVolume();
+  var cats = Object.keys(VOLUME_TARGETS);
+
+  var html = '<div class="vt-grid">';
+  cats.forEach(function(c){
+    var sets = vol[c] || 0;
+    var t = VOLUME_TARGETS[c];
+    var status, statusCls, statusLbl, barFill;
+    if(sets < t.min){
+      status = 'low'; statusCls = 'vt-low';
+      statusLbl = 'Te weinig';
+      barFill = Math.max(8, (sets/t.min)*100);
+    } else if(sets > t.max){
+      status = 'high'; statusCls = 'vt-high';
+      statusLbl = 'Teveel';
+      barFill = 100;
+    } else {
+      status = 'optimal'; statusCls = 'vt-opt';
+      statusLbl = 'Optimaal';
+      barFill = ((sets - t.min) / (t.max - t.min)) * 60 + 30; // 30-90% in green zone
+    }
+
+    html += '<div class="vt-card ' + statusCls + '">'
+      + '<div class="vt-top">'
+      +   '<div class="vt-name">' + c + '</div>'
+      +   '<div class="vt-status">' + statusLbl + '</div>'
+      + '</div>'
+      + '<div class="vt-val">'
+      +   '<span class="D">' + sets + '</span>'
+      +   '<span class="vt-target">/ ' + t.min + '-' + t.max + ' sets</span>'
+      + '</div>'
+      + '<div class="vt-bar">'
+      +   '<div class="vt-bar-fill" style="width:' + Math.min(barFill,100) + '%"></div>'
+      +   '<div class="vt-bar-zone" style="left:' + (t.min/t.max*70) + '%;right:' + (100-70) + '%"></div>'
+      + '</div>'
+      + '</div>';
+  });
+  html += '</div>';
+  // Total summary
+  var totalLow = cats.filter(function(c){ return vol[c] < VOLUME_TARGETS[c].min; }).length;
+  var totalOk  = cats.filter(function(c){ var v=vol[c]; return v >= VOLUME_TARGETS[c].min && v <= VOLUME_TARGETS[c].max; }).length;
+  var totalHigh= cats.filter(function(c){ return vol[c] > VOLUME_TARGETS[c].max; }).length;
+  html += '<div style="margin-top:12px;padding:10px 12px;background:var(--s2);border-radius:8px;display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:700">'
+    + '<span style="color:#f87171">' + totalLow + ' te weinig</span>'
+    + '<span style="color:#4ade80">' + totalOk + ' optimaal</span>'
+    + '<span style="color:#fbbf24">' + totalHigh + ' teveel</span>'
+    + '</div>';
+
+  el.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════
+// PR DETECTION & CELEBRATION
+// ═══════════════════════════════════════════════════
+function checkPR(sId, exId, setIdx){
+  var s = sessions.find(function(x){ return x.id === sId; });
+  if(!s) return null;
+  var ex = s.exercises.find(function(e){ return e.id === exId; });
+  if(!ex) return null;
+  var newSet = ex.sets[setIdx];
+  if(!newSet || !newSet.w || !newSet.r) return null;
+  
+  var name = ex.name.toUpperCase();
+  var newW = w2f(newSet.w);
+  var newR = parseInt(newSet.r) || 0;
+  var newOrm = orm(newSet.w, newSet.r);
+  if(newW <= 0 || newR <= 0) return null;
+
+  // Find best previous (weight, reps, orm)
+  var bestW = 0, bestR = 0, bestOrm = 0;
+  sessions.forEach(function(sess){
+    sess.exercises.forEach(function(e){
+      if(e.name.toUpperCase() !== name) return;
+      e.sets.forEach(function(st, idx){
+        // Skip the current set itself
+        if(sess.id === sId && e.id === exId && idx === setIdx) return;
+        var w = w2f(st.w);
+        var r = parseInt(st.r) || 0;
+        var o = orm(st.w, st.r);
+        if(w > bestW) bestW = w;
+        if(r > bestR) bestR = r;
+        if(o > bestOrm) bestOrm = o;
+      });
+    });
+  });
+
+  var prs = [];
+  if(newW > bestW && newW > 0) prs.push({type:'weight', val:newW, prev:bestW, label:'Max gewicht'});
+  if(newR > bestR && newR > 0 && newW >= bestW * 0.85) prs.push({type:'reps', val:newR, prev:bestR, label:'Max reps'});
+  if(newOrm > bestOrm && newOrm > 0) prs.push({type:'orm', val:newOrm, prev:bestOrm, label:'Geschatte 1RM'});
+
+  return prs.length ? { exName: ex.name, prs: prs } : null;
+}
+
+function showPRCelebration(prData){
+  if(!prData || !prData.prs.length) return;
+  if(navigator.vibrate) navigator.vibrate([60, 40, 60, 40, 120]);
+
+  var prTypeIcons = { weight:'🏆', reps:'🔥', orm:'⭐' };
+  var prs = prData.prs.map(function(p){
+    return '<div class="pr-item">'
+      + '<div class="pr-icon">' + prTypeIcons[p.type] + '</div>'
+      + '<div style="flex:1">'
+      +   '<div class="pr-label">' + p.label + '</div>'
+      +   '<div class="pr-vals"><span class="D pr-val-new">' + p.val + (p.type==='reps'?'':'kg') + '</span>'
+      +   '<span class="pr-arrow">←</span>'
+      +   '<span class="pr-val-old">' + p.prev + (p.type==='reps'?'':'kg') + '</span></div>'
+      + '</div></div>';
+  }).join('');
+
+  var modal = document.getElementById('pr-celebration');
+  if(!modal){
+    modal = document.createElement('div');
+    modal.id = 'pr-celebration';
+    document.body.appendChild(modal);
+  }
+  modal.innerHTML = '<div class="pr-confetti">'
+    + Array.from({length:30}).map(function(_,i){
+        var colors = ['#fbbf24','#6366f1','#22c55e','#f87171','#a855f7'];
+        var c = colors[i%5];
+        var left = (Math.random()*100).toFixed(1);
+        var delay = (Math.random()*0.6).toFixed(2);
+        var dur = (1.2 + Math.random()*0.8).toFixed(2);
+        return '<span style="left:'+left+'%;background:'+c+';animation-delay:'+delay+'s;animation-duration:'+dur+'s"></span>';
+      }).join('')
+    + '</div>'
+    + '<div class="pr-card">'
+    + '<div class="pr-trophy">🏆</div>'
+    + '<div class="D" style="font-size:36px;color:#fbbf24;line-height:1;margin-bottom:4px">NEW PR!</div>'
+    + '<div style="font-size:13px;color:var(--sub);font-weight:700;margin-bottom:18px">' + esc(prData.exName) + '</div>'
+    + '<div class="pr-list">' + prs + '</div>'
+    + '<button class="btn btn-p" style="width:100%;margin-top:18px" onclick="closePR()">Doorgaan</button>'
+    + '</div>';
+  modal.classList.add('on');
+}
+
+function closePR(){
+  var m = document.getElementById('pr-celebration');
+  if(m) m.classList.remove('on');
+}
+
 // ═══════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════
@@ -2436,15 +2683,27 @@ function renderExercises(s) {
 function updSet(sId,exId,idx,field,val){
   var s=sessions.find(function(x){return x.id===sId;});
   var ex=s&&s.exercises.find(function(e){return e.id===exId;});
-  if(ex){
-    ex.sets[idx][field]=val;
-    // Start session timer when user fills in first value today
-    var todayKey = new Date().toISOString().split('T')[0];
-    if(s.rawDate === todayKey && val && !s.startedAt){
-      s.startedAt = Date.now();
-      tickSessTimer();
+  if(!ex) return;
+  ex.sets[idx][field]=val;
+  // Start session timer when user fills in first value today
+  var todayKey = new Date().toISOString().split('T')[0];
+  if(s.rawDate === todayKey && val && !s.startedAt){
+    s.startedAt = Date.now();
+    tickSessTimer();
+  }
+  save();
+  // PR check - only when both w and r are filled, and only for today's session
+  if(s.rawDate === todayKey && ex.sets[idx].w && ex.sets[idx].r && !isBodyweight(ex.name)){
+    var prData = checkPR(sId, exId, idx);
+    if(prData){
+      // Avoid duplicate PR notifications - track per session/ex/set
+      var prKey = 'pr_' + sId + '_' + exId + '_' + idx + '_' + ex.sets[idx].w + '_' + ex.sets[idx].r;
+      if(!window._prShown) window._prShown = {};
+      if(!window._prShown[prKey]){
+        window._prShown[prKey] = true;
+        showPRCelebration(prData);
+      }
     }
-    save();
   }
 }
 function addSet(sId,exId){
@@ -2644,7 +2903,7 @@ function stopAlert(){document.getElementById('alert').classList.remove('on');res
 // STATS
 // ═══════════════════════════════════════════════════
 function renderStats(){
-  renderHero();renderKPI();renderHeatmap();
+  renderHero();renderKPI();renderVolumeTargets();renderHeatmap();
   renderDist(7,document.querySelector('#dist-fp .fp.on'));
   renderRadar(7,document.querySelector('#radar-fp .fp.on'));
   renderFeel(30,document.querySelector('#feel-fp .fp.on'));
@@ -3307,18 +3566,221 @@ function renderWtLogs(){
   }).join('');
 }
 function delWeight(i){user.weightLogs.splice(i,1);save();renderWtLogs();renderWtChart(30,null);}
-function renderWtChart(days,el){
-  if(el){document.querySelectorAll('.wf').forEach(function(b){b.classList.remove('on');});if(el)el.classList.add('on');}
-  var logs=(user.weightLogs||[]).slice(0,days).reverse();
-  var ctx=document.getElementById('wt-chart');
-  if(chartWt)chartWt.destroy();
-  chartWt=new Chart(ctx,{type:'line',data:{labels:logs.map(function(l){return new Date(l.date).toLocaleDateString('nl-NL',{day:'numeric',month:'short'});}),
-    datasets:[{label:'KG',data:logs.map(function(l){return l.w;}),borderColor:'#6366f1',backgroundColor:'rgba(99,102,241,.08)',fill:true,tension:.4,yAxisID:'y'},
-      {label:'Vet %',data:logs.map(function(l){return l.fat;}),borderColor:'#22c55e',borderDash:[5,5],tension:.4,yAxisID:'y1'}]},
-    options:{maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{backgroundColor:'#18181b',borderColor:'#27272a',borderWidth:1,titleColor:'#fafafa',bodyColor:'#a1a1aa',padding:9}},
-      scales:{y:{position:'left',grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#71717a',font:{size:9}}},
-        y1:{position:'right',grid:{display:false},ticks:{color:'#71717a',font:{size:9}}}}}});
+function renderWtChart(days, el){
+  if(el){
+    document.querySelectorAll('.wf').forEach(function(b){ b.classList.remove('on'); });
+    el.classList.add('on');
+  }
+
+  var allLogs = (user.weightLogs || []).slice();
+  // Sort ascending (oldest first) for chart
+  allLogs.sort(function(a, b){ return new Date(a.date) - new Date(b.date); });
+
+  // Filter by date range
+  var cutoffMs = Date.now() - days * 86400000;
+  var logs = allLogs.filter(function(l){ return new Date(l.date).getTime() >= cutoffMs; });
+
+  // Render stats summary
+  renderWtStats(logs, allLogs);
+
+  // Chart
+  var ctx = document.getElementById('wt-chart');
+  if(chartWt) chartWt.destroy();
+
+  if(!logs.length){
+    ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
+    return;
+  }
+
+  var labels = logs.map(function(l){
+    var d = new Date(l.date);
+    return days <= 7  ? d.toLocaleDateString('nl-NL',{weekday:'short',day:'numeric'})
+         : days <= 30 ? d.toLocaleDateString('nl-NL',{day:'numeric',month:'short'})
+         :              d.toLocaleDateString('nl-NL',{day:'numeric',month:'short',year:'2-digit'});
+  });
+
+  var weights = logs.map(function(l){ return l.w; });
+  var fats    = logs.map(function(l){ return l.fat != null ? l.fat : null; });
+  var hasFat  = fats.some(function(v){ return v != null; });
+
+  // Goal line if set
+  var datasets = [{
+    label:'Gewicht (kg)',
+    data: weights,
+    borderColor:'#6366f1',
+    backgroundColor:'rgba(99,102,241,.12)',
+    fill:true,
+    tension:.35,
+    pointRadius:4,
+    pointBackgroundColor:'#6366f1',
+    pointBorderColor:'#fff',
+    pointBorderWidth:1.5,
+    yAxisID:'y',
+    spanGaps:true
+  }];
+
+  if(hasFat){
+    datasets.push({
+      label:'Vet %',
+      data: fats,
+      borderColor:'#22c55e',
+      backgroundColor:'transparent',
+      borderDash:[5,4],
+      tension:.35,
+      pointRadius:3,
+      pointBackgroundColor:'#22c55e',
+      pointBorderColor:'#fff',
+      pointBorderWidth:1,
+      yAxisID:'y1',
+      spanGaps:true
+    });
+  }
+
+  if(user.weightGoal){
+    datasets.push({
+      label:'Doel',
+      data: labels.map(function(){ return user.weightGoal; }),
+      borderColor:'#f59e0b',
+      borderDash:[2,4],
+      borderWidth:1.5,
+      pointRadius:0,
+      fill:false,
+      yAxisID:'y'
+    });
+  }
+
+  chartWt = new Chart(ctx, {
+    type:'line',
+    data:{ labels: labels, datasets: datasets },
+    options:{
+      maintainAspectRatio:false,
+      interaction:{ mode:'index', intersect:false },
+      plugins:{
+        legend:{
+          display:true, position:'top', align:'end',
+          labels:{ color:'#a1a1aa', font:{size:10,weight:'700'}, padding:8, boxWidth:14, boxHeight:2, usePointStyle:true, pointStyleWidth:8 }
+        },
+        tooltip:{
+          backgroundColor:'#18181b', borderColor:'#27272a', borderWidth:1,
+          titleColor:'#fafafa', bodyColor:'#a1a1aa', padding:9,
+          callbacks:{
+            label:function(c){
+              if(c.dataset.label==='Gewicht (kg)') return ' ' + c.raw + ' kg';
+              if(c.dataset.label==='Vet %')        return ' ' + c.raw + '%';
+              if(c.dataset.label==='Doel')         return ' Doel: ' + c.raw + ' kg';
+              return ' ' + c.raw;
+            }
+          }
+        }
+      },
+      scales: (function(){
+        var sc = {
+          x:{
+            ticks:{ color:'#71717a', font:{size:9}, maxRotation:30, autoSkip:true, maxTicksLimit:8 },
+            grid:{ color:'rgba(255,255,255,.03)' }
+          },
+          y:{
+            position:'left',
+            grid:{ color:'rgba(255,255,255,.04)' },
+            ticks:{ color:'#71717a', font:{size:9}, callback:function(v){ return v+' kg'; } }
+          }
+        };
+        if(hasFat){
+          sc.y1 = {
+            position:'right',
+            grid:{ display:false },
+            ticks:{ color:'#22c55e', font:{size:9}, callback:function(v){ return v+'%'; } }
+          };
+        }
+        return sc;
+      })()
+    }
+  });
+}
+
+// Render weight stats summary
+function renderWtStats(logs, allLogs){
+  var el = document.getElementById('wt-stats');
+  if(!el) return;
+
+  if(!logs.length){
+    el.innerHTML = '<div style="text-align:center;padding:14px;color:var(--mu);font-size:12px">'
+      + (allLogs.length ? 'Geen metingen in deze periode' : 'Log je eerste gewicht hierboven')
+      + '</div>';
+    return;
+  }
+
+  // Sort logs ascending
+  var sorted = logs.slice().sort(function(a,b){ return new Date(a.date) - new Date(b.date); });
+  var first = sorted[0];
+  var last  = sorted[sorted.length-1];
+
+  // Diff between first and last in period
+  var diff = +(last.w - first.w).toFixed(1);
+  var diffPct = first.w > 0 ? +((diff / first.w) * 100).toFixed(1) : 0;
+
+  // Min / max / avg
+  var weights = sorted.map(function(l){ return l.w; });
+  var minW = Math.min.apply(null, weights);
+  var maxW = Math.max.apply(null, weights);
+  var avgW = +(weights.reduce(function(a,b){ return a+b; }, 0) / weights.length).toFixed(1);
+
+  // Goal progress
+  var goalHtml = '';
+  if(user.weightGoal){
+    var goal = parseFloat(user.weightGoal);
+    var toGo = +(last.w - goal).toFixed(1);
+    var goalDir = toGo > 0 ? 'kg te verliezen' : toGo < 0 ? 'kg te winnen' : 'doel bereikt!';
+    goalHtml = '<div style="grid-column:1 / -1;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:9px 12px;margin-top:6px;display:flex;justify-content:space-between;align-items:center">'
+      + '<div><div style="font-size:9px;font-weight:800;text-transform:uppercase;color:#fbbf24;letter-spacing:.07em">Doel</div>'
+      + '<div style="font-size:11px;color:var(--sub);margin-top:2px">' + Math.abs(toGo) + ' ' + goalDir + '</div></div>'
+      + '<div class="D" style="font-size:22px;color:#fbbf24">' + goal + '<span style="font-size:11px;color:rgba(245,158,11,.6);margin-left:2px">kg</span></div>'
+      + '</div>';
+  }
+
+  // Trend color
+  var trendColor = diff > 0 ? '#fbbf24' : diff < 0 ? '#4ade80' : 'var(--mu)';
+  var trendArrow = diff > 0 ? '▲' : diff < 0 ? '▼' : '→';
+
+  el.innerHTML = '<div class="wt-stat-grid">'
+    + '<div class="wt-stat">'
+    +   '<div class="wt-stat-l">Huidig</div>'
+    +   '<div class="wt-stat-v">' + last.w + '<span class="wt-u">kg</span></div>'
+    + '</div>'
+    + '<div class="wt-stat">'
+    +   '<div class="wt-stat-l">Verschil</div>'
+    +   '<div class="wt-stat-v" style="color:' + trendColor + '">' + trendArrow + ' ' + Math.abs(diff) + '<span class="wt-u">kg</span></div>'
+    +   '<div class="wt-stat-s">' + (diffPct > 0 ? '+' : '') + diffPct + '%</div>'
+    + '</div>'
+    + '<div class="wt-stat">'
+    +   '<div class="wt-stat-l">Gemiddeld</div>'
+    +   '<div class="wt-stat-v">' + avgW + '<span class="wt-u">kg</span></div>'
+    + '</div>'
+    + '<div class="wt-stat">'
+    +   '<div class="wt-stat-l">Bereik</div>'
+    +   '<div class="wt-stat-v" style="font-size:14px">' + minW + ' - ' + maxW + '</div>'
+    +   '<div class="wt-stat-s">' + +(maxW - minW).toFixed(1) + ' kg spread</div>'
+    + '</div>'
+    + goalHtml
+    + '</div>';
+}
+
+function setWeightGoal(){
+  doInput('Doelgewicht (kg):', user.weightGoal || '', function(val){
+    if(val === null) return;
+    var n = parseFloat(String(val).replace(',','.'));
+    if(isNaN(n) || n <= 0){
+      user.weightGoal = null;
+      toast('Doel verwijderd');
+    } else {
+      user.weightGoal = n;
+      toast('Doel: ' + n + ' kg');
+    }
+    save();
+    var on = document.querySelector('.wf.on');
+    var days = on && on.textContent === 'Week' ? 7 : on && on.textContent === 'Maand' ? 30 : 365;
+    renderWtChart(days, null);
+  });
 }
 
 // ═══════════════════════════════════════════════════
