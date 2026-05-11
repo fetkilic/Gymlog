@@ -284,7 +284,8 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 
 /* VOLUME TARGETS */
 .vt-grid{display:grid;grid-template-columns:1fr;gap:7px}
-.vt-card{background:var(–s2);border:1px solid var(–b1);border-radius:10px;padding:11px 13px}
+.vt-card{background:var(–s2);border:1px solid var(–b1);border-radius:10px;padding:11px 13px;cursor:pointer;transition:transform .12s}
+.vt-card:active{transform:scale(.98)}
 .vt-card.vt-low{border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.04)}
 .vt-card.vt-opt{border-color:rgba(74,222,128,.35);background:rgba(74,222,128,.05)}
 .vt-card.vt-high{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05)}
@@ -659,7 +660,7 @@ body.lt #alert{background:rgba(244,244,245,.97)}
         <div class="card-hdr">
           <div>
             <div class="card-title">Weekvolume per Spiergroep</div>
-            <div style="font-size:10px;color:var(--mu);margin-top:2px">10-20 sets/spier/week is optimaal voor groei</div>
+            <div style="font-size:10px;color:var(--mu);margin-top:2px">Tik op een spiergroep om je doelen aan te passen</div>
           </div>
         </div>
         <div id="vol-targets"></div>
@@ -1806,7 +1807,8 @@ function closeExInfo(){
 // WEEKLY VOLUME PER MUSCLE GROUP
 // ═══════════════════════════════════════════════════
 // Scientific guidelines: 10-20 sets per muscle group per week for hypertrophy
-var VOLUME_TARGETS = {
+// Based on Mike Israetel (Renaissance Periodization) MEV/MRV concepts
+var VOLUME_TARGETS_DEFAULT = {
   'Borst':     { min: 10, max: 20 },
   'Rug':       { min: 10, max: 20 },
   'Benen':     { min: 12, max: 20 },
@@ -1815,6 +1817,17 @@ var VOLUME_TARGETS = {
   'Biceps':    { min: 6,  max: 14 },
   'Core':      { min: 6,  max: 16 }
 };
+
+// User can override these via settings
+function getVolumeTargets(){
+  var custom = user.volumeTargets || {};
+  var result = {};
+  Object.keys(VOLUME_TARGETS_DEFAULT).forEach(function(c){
+    result[c] = custom[c] || VOLUME_TARGETS_DEFAULT[c];
+  });
+  return result;
+}
+var VOLUME_TARGETS = VOLUME_TARGETS_DEFAULT; // alias for back-compat
 
 function getWeeklyVolume(){
   var map  = e2cat();
@@ -1839,30 +1852,29 @@ function renderVolumeTargets(){
   var el = document.getElementById('vol-targets');
   if(!el) return;
   var vol = getWeeklyVolume();
-  var cats = Object.keys(VOLUME_TARGETS);
+  var targets = getVolumeTargets();
+  var cats = Object.keys(targets);
 
   var html = '<div class="vt-grid">';
   cats.forEach(function(c){
     var sets = vol[c] || 0;
-    var t = VOLUME_TARGETS[c];
-    var status, statusCls, statusLbl, barFill;
+    var t = targets[c];
+    var statusCls, statusLbl, barFill;
     if(sets < t.min){
-      status = 'low'; statusCls = 'vt-low';
-      statusLbl = 'Te weinig';
+      statusCls = 'vt-low'; statusLbl = 'Te weinig';
       barFill = Math.max(8, (sets/t.min)*100);
     } else if(sets > t.max){
-      status = 'high'; statusCls = 'vt-high';
-      statusLbl = 'Teveel';
+      statusCls = 'vt-high'; statusLbl = 'Teveel';
       barFill = 100;
     } else {
-      status = 'optimal'; statusCls = 'vt-opt';
-      statusLbl = 'Optimaal';
-      barFill = ((sets - t.min) / (t.max - t.min)) * 60 + 30; // 30-90% in green zone
+      statusCls = 'vt-opt'; statusLbl = 'Optimaal';
+      barFill = ((sets - t.min) / (t.max - t.min)) * 60 + 30;
     }
+    var isCustom = user.volumeTargets && user.volumeTargets[c];
 
-    html += '<div class="vt-card ' + statusCls + '">'
+    html += '<div class="vt-card ' + statusCls + '" onclick="editVolumeTarget(\'' + c + '\')">'
       + '<div class="vt-top">'
-      +   '<div class="vt-name">' + c + '</div>'
+      +   '<div class="vt-name">' + c + (isCustom?' <span style="font-size:9px;color:var(--ac2);font-weight:600">aangepast</span>':'') + '</div>'
       +   '<div class="vt-status">' + statusLbl + '</div>'
       + '</div>'
       + '<div class="vt-val">'
@@ -1871,7 +1883,6 @@ function renderVolumeTargets(){
       + '</div>'
       + '<div class="vt-bar">'
       +   '<div class="vt-bar-fill" style="width:' + Math.min(barFill,100) + '%"></div>'
-      +   '<div class="vt-bar-zone" style="left:' + (t.min/t.max*70) + '%;right:' + (100-70) + '%"></div>'
       + '</div>'
       + '</div>';
   });
@@ -1977,6 +1988,77 @@ function showPRCelebration(prData){
 function closePR(){
   var m = document.getElementById('pr-celebration');
   if(m) m.classList.remove('on');
+}
+
+
+// ═══════════════════════════════════════════════════
+// EDIT VOLUME TARGETS
+// ═══════════════════════════════════════════════════
+function editVolumeTarget(cat){
+  if(!user.volumeTargets) user.volumeTargets = {};
+  var current = user.volumeTargets[cat] || VOLUME_TARGETS_DEFAULT[cat];
+  var def = VOLUME_TARGETS_DEFAULT[cat];
+  
+  // Build a small inline form modal
+  var bg = document.getElementById('vt-edit-bg');
+  if(!bg){
+    bg = document.createElement('div');
+    bg.id = 'vt-edit-bg';
+    bg.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);display:none';
+    bg.onclick = closeVolEdit;
+    document.body.appendChild(bg);
+  }
+  var box = document.getElementById('vt-edit-box');
+  if(!box){
+    box = document.createElement('div');
+    box.id = 'vt-edit-box';
+    box.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9001;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:22px;width:92%;max-width:340px;display:none';
+    document.body.appendChild(box);
+  }
+
+  box.innerHTML = '<div class="D" style="font-size:19px;margin-bottom:6px">VOLUME — ' + esc(cat).toUpperCase() + '</div>'
+    + '<div style="font-size:11px;color:var(--mu);margin-bottom:14px;line-height:1.5">Stel je eigen bereik in (sets per week). Standaard: ' + def.min + '-' + def.max + '</div>'
+    + '<div style="display:flex;gap:8px;margin-bottom:12px">'
+    +   '<div style="flex:1"><div style="font-size:9px;font-weight:800;text-transform:uppercase;color:var(--mu);margin-bottom:5px;letter-spacing:.07em">Minimum</div>'
+    +   '<input class="inp" id="vt-min" type="number" min="1" max="50" value="' + current.min + '" style="text-align:center;font-weight:800;font-size:18px"></div>'
+    +   '<div style="flex:1"><div style="font-size:9px;font-weight:800;text-transform:uppercase;color:var(--mu);margin-bottom:5px;letter-spacing:.07em">Maximum</div>'
+    +   '<input class="inp" id="vt-max" type="number" min="1" max="50" value="' + current.max + '" style="text-align:center;font-weight:800;font-size:18px"></div>'
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
+    +   '<button class="btn btn-g" onclick="resetVolTarget(\'' + cat + '\')" style="padding:11px;font-size:12px">Standaard</button>'
+    +   '<button class="btn btn-p" onclick="saveVolTarget(\'' + cat + '\')" style="padding:11px;font-size:13px">Opslaan</button>'
+    + '</div>'
+    + '<button class="btn" onclick="closeVolEdit()" style="width:100%;padding:9px;font-size:11px;color:var(--mu);background:none">Annuleren</button>';
+  
+  bg.style.display = 'block';
+  box.style.display = 'block';
+}
+
+function saveVolTarget(cat){
+  var mi = parseInt(document.getElementById('vt-min').value) || 1;
+  var ma = parseInt(document.getElementById('vt-max').value) || 30;
+  if(ma < mi){ toast('Max moet groter zijn dan min.'); return; }
+  if(!user.volumeTargets) user.volumeTargets = {};
+  user.volumeTargets[cat] = { min: mi, max: ma };
+  save();
+  closeVolEdit();
+  renderVolumeTargets();
+  toast(cat + ': ' + mi + '-' + ma + ' sets ✓');
+}
+
+function resetVolTarget(cat){
+  if(user.volumeTargets) delete user.volumeTargets[cat];
+  save();
+  closeVolEdit();
+  renderVolumeTargets();
+  toast(cat + ' teruggezet naar standaard');
+}
+
+function closeVolEdit(){
+  var bg = document.getElementById('vt-edit-bg');
+  var box = document.getElementById('vt-edit-box');
+  if(bg) bg.style.display = 'none';
+  if(box) box.style.display = 'none';
 }
 
 // ═══════════════════════════════════════════════════
