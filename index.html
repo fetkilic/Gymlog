@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
@@ -270,21 +269,24 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 .diff.p{color:#4ade80}.diff.n{color:#f87171}
 
 /* NOTE BUTTON & BANNER */
-.ex-note-btn{padding:4px 6px!important;border-radius:5px;display:flex;align-items:center;justify-content:center;color:var(–mu);transition:all .15s}
-.ex-note-btn:active{color:var(–ac)}
-.ex-note-btn.has-note{color:var(–ac2);background:rgba(99,102,241,.1)}
-.ex-note-banner{margin:0 12px 8px;padding:9px 11px;background:var(–s2);border:1px solid var(–b1);border-left:3px solid var(–ac);border-radius:7px;font-size:11px;color:var(–sub);display:flex;align-items:flex-start;gap:8px;line-height:1.4}
-.ex-note-edit{padding:0!important;color:var(–mu);transition:color .15s;flex-shrink:0;display:flex;align-items:center;justify-content:center;width:20px;height:20px}
-.ex-note-edit:active{color:var(–ac)}
+.ex-note-btn{padding:4px 6px!important;border-radius:5px;display:flex;align-items:center;justify-content:center;color:var(--mu);transition:all .15s}
+.ex-note-btn:active{color:var(--ac)}
+.ex-note-btn.has-note{color:var(--ac2);background:rgba(99,102,241,.1)}
+.ex-note-banner{margin:0 12px 8px;padding:9px 11px;background:var(--s2);border:1px solid var(--b1);border-left:3px solid var(--ac);border-radius:7px;font-size:11px;color:var(--sub);display:flex;align-items:flex-start;gap:8px;line-height:1.4}
+.ex-note-edit{padding:0!important;color:var(--mu);transition:color .15s;flex-shrink:0;display:flex;align-items:center;justify-content:center;width:20px;height:20px}
+.ex-note-edit:active{color:var(--ac)}
+
+
 
 /* 5-column KPI when duration exists */
 .sc-kpi.five{grid-template-columns:repeat(5,1fr)}
 .sc-kpi.five .kc-v{font-size:15px}
 .sc-kpi.five .kc-l{font-size:7px}
 
+
 /* VOLUME TARGETS */
 .vt-grid{display:grid;grid-template-columns:1fr;gap:7px}
-.vt-card{background:var(–s2);border:1px solid var(–b1);border-radius:10px;padding:11px 13px;cursor:pointer;transition:transform .12s}
+.vt-card{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:11px 13px;cursor:pointer;transition:transform .12s}
 .vt-card:active{transform:scale(.98)}
 .vt-card.vt-low{border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.04)}
 .vt-card.vt-opt{border-color:rgba(74,222,128,.35);background:rgba(74,222,128,.05)}
@@ -296,9 +298,9 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 .vt-card.vt-opt .vt-status{background:rgba(74,222,128,.18);color:#86efac}
 .vt-card.vt-high .vt-status{background:rgba(251,191,36,.18);color:#fcd34d}
 .vt-val{display:flex;align-items:baseline;gap:5px;margin-bottom:7px}
-.vt-val .D{font-size:24px;color:var(–tx);line-height:1}
-.vt-target{font-size:10px;color:var(–mu);font-weight:600}
-.vt-bar{position:relative;height:6px;background:var(–s3);border-radius:3px;overflow:hidden}
+.vt-val .D{font-size:24px;color:var(--tx);line-height:1}
+.vt-target{font-size:10px;color:var(--mu);font-weight:600}
+.vt-bar{position:relative;height:6px;background:var(--s3);border-radius:3px;overflow:hidden}
 .vt-bar-fill{height:100%;border-radius:3px;transition:width .8s}
 .vt-card.vt-low .vt-bar-fill{background:#f87171}
 .vt-card.vt-opt .vt-bar-fill{background:#4ade80}
@@ -310,19 +312,19 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 .pr-confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .pr-confetti span{position:absolute;top:-15px;width:9px;height:14px;border-radius:1px;animation:fallConfetti linear forwards}
 @keyframes fallConfetti{
-0%{transform:translateY(0) rotate(0);opacity:1}
-100%{transform:translateY(110vh) rotate(720deg);opacity:0}
+  0%{transform:translateY(0) rotate(0);opacity:1}
+  100%{transform:translateY(110vh) rotate(720deg);opacity:0}
 }
 .pr-card{position:relative;background:linear-gradient(135deg,#1a1a2e 0%,#0f0f1f 100%);border:2px solid #fbbf24;border-radius:20px;padding:28px 24px;width:92%;max-width:360px;text-align:center;box-shadow:0 20px 80px rgba(251,191,36,.3),0 0 60px rgba(251,191,36,.15);animation:prPop .4s cubic-bezier(.34,1.56,.64,1)}
 @keyframes prPop{
-0%{transform:scale(.3);opacity:0}
-100%{transform:scale(1);opacity:1}
+  0%{transform:scale(.3);opacity:0}
+  100%{transform:scale(1);opacity:1}
 }
 .pr-trophy{font-size:72px;line-height:1;margin-bottom:8px;animation:prSpin 1.5s ease-out;filter:drop-shadow(0 4px 20px rgba(251,191,36,.6))}
 @keyframes prSpin{
-0%{transform:rotate(-20deg) scale(0)}
-60%{transform:rotate(15deg) scale(1.2)}
-100%{transform:rotate(0) scale(1)}
+  0%{transform:rotate(-20deg) scale(0)}
+  60%{transform:rotate(15deg) scale(1.2)}
+  100%{transform:rotate(0) scale(1)}
 }
 .pr-list{display:flex;flex-direction:column;gap:9px}
 .pr-item{display:flex;align-items:center;gap:11px;padding:11px 13px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:10px;text-align:left}
@@ -330,50 +332,251 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 .pr-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#fbbf24;margin-bottom:3px}
 .pr-vals{display:flex;align-items:baseline;gap:6px}
 .pr-val-new{font-size:18px;color:#fff;line-height:1}
-.pr-arrow{font-size:11px;color:var(–mu)}
-.pr-val-old{font-size:11px;color:var(–mu);text-decoration:line-through}
+.pr-arrow{font-size:11px;color:var(--mu)}
+.pr-val-old{font-size:11px;color:var(--mu);text-decoration:line-through}
 
 /* WEIGHT STATS */
 .wt-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
-.wt-stat{background:var(–s2);border:1px solid var(–b1);border-radius:9px;padding:10px 8px;text-align:center}
-.wt-stat-l{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(–mu);margin-bottom:3px}
-.wt-stat-v{font-family:‘Barlow Condensed’,sans-serif;font-size:20px;font-weight:900;font-style:italic;line-height:1;color:var(–tx)}
-.wt-stat-s{font-size:8px;color:var(–mu);margin-top:2px;font-weight:600}
-.wt-u{font-size:10px;color:var(–mu);margin-left:1px;font-weight:600}
+.wt-stat{background:var(--s2);border:1px solid var(--b1);border-radius:9px;padding:10px 8px;text-align:center}
+.wt-stat-l{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);margin-bottom:3px}
+.wt-stat-v{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;font-style:italic;line-height:1;color:var(--tx)}
+.wt-stat-s{font-size:8px;color:var(--mu);margin-top:2px;font-weight:600}
+.wt-u{font-size:10px;color:var(--mu);margin-left:1px;font-weight:600}
+
+#sess-timer.warn{background:rgba(251,191,36,.15)!important;border-color:rgba(251,191,36,.4)!important}
+#sess-timer.warn .ab-g{background:rgba(251,191,36,.2);color:#fcd34d;border-color:rgba(251,191,36,.4)}
+
 /* DELOAD BANNER */
-.deload-card{border-radius:var(–r);padding:14px;margin-bottom:10px;background:linear-gradient(135deg,rgba(251,191,36,.12),rgba(245,158,11,.06));border:1px solid rgba(251,191,36,.3)}
+.deload-card{border-radius:var(--r);padding:14px;margin-bottom:10px;background:linear-gradient(135deg,rgba(251,191,36,.12),rgba(245,158,11,.06));border:1px solid rgba(251,191,36,.3)}
 /* BODYWEIGHT SET ROW */
 .set-row.bw{grid-template-columns:28px 1fr 50px 22px}
 .sets-hdr.bw{grid-template-columns:28px 1fr 50px 22px}
 
+
 /* INFO MODAL */
 .info-section{margin-bottom:16px}
-.info-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(–mu);margin-bottom:6px;display:flex;align-items:center;gap:5px}
-.info-desc{font-size:13px;line-height:1.5;color:var(–sub)}
-.info-muscle{font-size:12px;color:var(–ac2);font-weight:600;line-height:1.4;background:rgba(99,102,241,.08);padding:9px 12px;border-radius:8px;border-left:3px solid var(–ac)}
+.info-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.info-desc{font-size:13px;line-height:1.5;color:var(--sub)}
+.info-muscle{font-size:12px;color:var(--ac2);font-weight:600;line-height:1.4;background:rgba(99,102,241,.08);padding:9px 12px;border-radius:8px;border-left:3px solid var(--ac)}
 .info-list{list-style:none;padding:0;margin:0}
-.info-list li{font-size:12px;line-height:1.5;color:var(–sub);padding:6px 0 6px 22px;position:relative}
-.info-list.tips li::before{content:‘✓’;position:absolute;left:0;color:#4ade80;font-weight:800}
-.info-list.mistakes li::before{content:‘✕’;position:absolute;left:0;color:#f87171;font-weight:800}
+.info-list li{font-size:12px;line-height:1.5;color:var(--sub);padding:6px 0 6px 22px;position:relative}
+.info-list.tips li::before{content:'✓';position:absolute;left:0;color:#4ade80;font-weight:800}
+.info-list.mistakes li::before{content:'✕';position:absolute;left:0;color:#f87171;font-weight:800}
 .info-yt-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:#ff0000;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;margin-top:6px}
 .info-yt-btn:active{opacity:.85}
-.info-empty{text-align:center;padding:30px 16px;color:var(–mu)}
+.info-empty{text-align:center;padding:30px 16px;color:var(--mu)}
 .info-empty-icon{font-size:36px;margin-bottom:10px;opacity:.4}
-.info-btn{padding:4px 6px!important;border-radius:5px;display:flex;align-items:center;justify-content:center;color:var(–mu);transition:all .15s}
-.info-btn:active{color:var(–ac2)}
-.info-btn.has-info{color:var(–ac2)}
+.info-btn{padding:4px 6px!important;border-radius:5px;display:flex;align-items:center;justify-content:center;color:var(--mu);transition:all .15s}
+.info-btn:active{color:var(--ac2)}
+.info-btn.has-info{color:var(--ac2)}
+
+
+
+/* ═══════════════════════════════════════════════════
+   GLASS DESIGN MODE
+   Frosted glass aesthetic, follows current theme (dark/light)
+   ═══════════════════════════════════════════════════ */
+body.glass{
+  background:
+    radial-gradient(at 20% 10%, rgba(99,102,241,.30) 0%, transparent 45%),
+    radial-gradient(at 80% 30%, rgba(139,92,246,.25) 0%, transparent 50%),
+    radial-gradient(at 50% 90%, rgba(59,130,246,.18) 0%, transparent 55%),
+    linear-gradient(160deg, #050510 0%, #0f0a25 100%);
+  background-attachment:fixed;
+}
+body.glass.lt{
+  background:
+    radial-gradient(at 20% 10%, rgba(99,102,241,.22) 0%, transparent 45%),
+    radial-gradient(at 80% 30%, rgba(236,72,153,.18) 0%, transparent 50%),
+    radial-gradient(at 50% 90%, rgba(59,130,246,.16) 0%, transparent 55%),
+    linear-gradient(160deg, #f5f7ff 0%, #ffeaf5 100%);
+  background-attachment:fixed;
+}
+
+/* Cards become frosted glass */
+body.glass .card,
+body.glass .sc,
+body.glass .stats-hero,
+body.glass .ex-bl,
+body.glass .kpi-c,
+body.glass .ach-c,
+body.glass .ch-c,
+body.glass .tc-card,
+body.glass .vt-card,
+body.glass .rec-card,
+body.glass .wt-stat,
+body.glass .wl-item,
+body.glass .dc{
+  background:rgba(255,255,255,.06);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 8px 32px rgba(0,0,0,.18);
+}
+body.glass.lt .card,
+body.glass.lt .sc,
+body.glass.lt .stats-hero,
+body.glass.lt .ex-bl,
+body.glass.lt .kpi-c,
+body.glass.lt .ach-c,
+body.glass.lt .ch-c,
+body.glass.lt .tc-card,
+body.glass.lt .vt-card,
+body.glass.lt .rec-card,
+body.glass.lt .wt-stat,
+body.glass.lt .wl-item,
+body.glass.lt .dc{
+  background:rgba(255,255,255,.55);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.7),
+    0 6px 24px rgba(99,102,241,.08);
+}
+
+/* Inputs subtle glass */
+body.glass .inp,
+body.glass .inp-sm{
+  background:rgba(255,255,255,.05);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.1);
+}
+body.glass.lt .inp,
+body.glass.lt .inp-sm{
+  background:rgba(255,255,255,.45);
+  border:1px solid rgba(255,255,255,.6);
+}
+
+/* Today indicator on session card */
+body.glass .sc.today{
+  background:rgba(99,102,241,.14);
+  border-color:rgba(129,140,248,.45);
+}
+body.glass.lt .sc.today{
+  background:rgba(99,102,241,.12);
+  border-color:rgba(99,102,241,.5);
+}
+
+/* Highlight dash chip */
+body.glass .dc.hi{
+  background:rgba(99,102,241,.22);
+  border-color:rgba(129,140,248,.5);
+}
+
+/* Nav becomes glass too */
+body.glass #nav{
+  background:rgba(15,10,35,.55);
+  backdrop-filter:blur(24px) saturate(180%);
+  -webkit-backdrop-filter:blur(24px) saturate(180%);
+  border-top:1px solid rgba(255,255,255,.12);
+}
+body.glass.lt #nav{
+  background:rgba(255,255,255,.6);
+  border-top:1px solid rgba(255,255,255,.7);
+}
+
+/* Sticky timer bar — glass */
+body.glass #tmr{
+  background:rgba(15,10,35,.4);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+body.glass.lt #tmr{
+  background:rgba(255,255,255,.5);
+  border-bottom:1px solid rgba(255,255,255,.6);
+}
+
+/* Buttons keep accent color but softer */
+body.glass .btn-p{
+  box-shadow:0 4px 20px rgba(99,102,241,.45),inset 0 1px 0 rgba(255,255,255,.18);
+}
+
+/* Filter pills */
+body.glass .fp{
+  background:rgba(255,255,255,.06);
+  border-color:rgba(255,255,255,.12);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+body.glass.lt .fp{
+  background:rgba(255,255,255,.5);
+  border-color:rgba(0,0,0,.08);
+}
+
+/* Set rows subtle */
+body.glass .ex-bl{
+  background:rgba(0,0,0,.18);
+}
+body.glass.lt .ex-bl{
+  background:rgba(255,255,255,.4);
+}
+
+/* Soft modal blurs - even more frosted */
+body.glass #confirm-box,
+body.glass #input-box,
+body.glass #info-box,
+body.glass #share-box,
+body.glass #tmpl-modal,
+body.glass #ex-modal,
+body.glass .sh,
+body.glass .cm-inner{
+  background:rgba(15,15,30,.85);
+  backdrop-filter:blur(30px) saturate(180%);
+  -webkit-backdrop-filter:blur(30px) saturate(180%);
+  border:1px solid rgba(255,255,255,.14);
+}
+body.glass.lt #confirm-box,
+body.glass.lt #input-box,
+body.glass.lt #info-box,
+body.glass.lt #share-box,
+body.glass.lt #tmpl-modal,
+body.glass.lt #ex-modal,
+body.glass.lt .sh,
+body.glass.lt .cm-inner{
+  background:rgba(255,255,255,.85);
+  border:1px solid rgba(255,255,255,.7);
+}
+
+/* Sub-elements get a subtle glow */
+body.glass .vol-bar-fill,
+body.glass .sc-vf,
+body.glass .vb-fl,
+body.glass .xp-fill,
+body.glass .ch-pf,
+body.glass .ach-pf{
+  box-shadow:0 0 12px rgba(99,102,241,.55);
+}
+
+/* Note banner in glass */
+body.glass .ex-note-banner{
+  background:rgba(255,255,255,.05);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+body.glass.lt .ex-note-banner{
+  background:rgba(255,255,255,.55);
+}
+
+/* Reduce visual noise on small elements */
+body.glass .set-row .inp-sm{
+  background:rgba(255,255,255,.04);
+}
+body.glass.lt .set-row .inp-sm{
+  background:rgba(255,255,255,.55);
+}
 
 /* LIGHT MODE */
-body.lt{–bg:#f4f4f5;–s1:#fff;–s2:#e4e4e7;–s3:#d4d4d8;–b1:rgba(0,0,0,.09);–b2:#a1a1aa;–tx:#09090b;–sub:#52525b;–mu:#71717a}
+body.lt{--bg:#f4f4f5;--s1:#fff;--s2:#e4e4e7;--s3:#d4d4d8;--b1:rgba(0,0,0,.09);--b2:#a1a1aa;--tx:#09090b;--sub:#52525b;--mu:#71717a}
 body.lt #tmr{background:rgba(244,244,245,.94)}
 body.lt #alert{background:rgba(244,244,245,.97)}
 </style>
-
 </head>
 <body>
 
 <!-- ALERT -->
-
 <div id="alert">
   <div style="font-size:64px;margin-bottom:20px;animation:pdot 1s infinite">⏱️</div>
   <div class="D" style="font-size:38px;color:var(--ac);margin-bottom:8px">RUST VOORBIJ!</div>
@@ -382,7 +585,6 @@ body.lt #alert{background:rgba(244,244,245,.97)}
 </div>
 
 <!-- FEEL SHEET -->
-
 <div class="sh-bg" id="sh-bg" onclick="closeSheet()"></div>
 <div class="sh" id="sh">
   <div class="sh-handle"></div>
@@ -397,7 +599,6 @@ body.lt #alert{background:rgba(244,244,245,.97)}
 </div>
 
 <!-- EX MODAL -->
-
 <div id="ex-modal">
   <div class="em-hdr">
     <div class="D" style="font-size:21px">KIES <em style="color:var(--ac)">OEFENING</em></div>
@@ -411,7 +612,6 @@ body.lt #alert{background:rgba(244,244,245,.97)}
 </div>
 
 <!-- CAT MODAL -->
-
 <div id="cat-modal">
   <div class="cm-inner">
     <div class="D" style="font-size:18px;margin-bottom:14px">KOPPEL AAN SPIERGROEP</div>
@@ -420,8 +620,8 @@ body.lt #alert{background:rgba(244,244,245,.97)}
   </div>
 </div>
 
-<!-- CONFIRM DIALOG -->
 
+<!-- CONFIRM DIALOG -->
 <div id="confirm-bg" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.75);align-items:center;justify-content:center;padding:20px"></div>
 <div id="confirm-box" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9001;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:22px;width:90%;max-width:320px">
   <div id="confirm-msg" class="D" style="font-size:17px;margin-bottom:18px;color:var(--tx)"></div>
@@ -431,8 +631,8 @@ body.lt #alert{background:rgba(244,244,245,.97)}
   </div>
 </div>
 
-<!-- INPUT DIALOG -->
 
+<!-- INPUT DIALOG -->
 <div id="input-bg" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.75)"></div>
 <div id="input-box" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9001;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:22px;width:90%;max-width:340px">
   <div id="input-msg" class="D" style="font-size:17px;margin-bottom:14px;color:var(--tx)"></div>
@@ -443,8 +643,9 @@ body.lt #alert{background:rgba(244,244,245,.97)}
   </div>
 </div>
 
-<!-- EXERCISE INFO MODAL -->
 
+
+<!-- EXERCISE INFO MODAL -->
 <div id="info-bg" style="display:none;position:fixed;inset:0;z-index:8500;background:rgba(0,0,0,.85);backdrop-filter:blur(8px)" onclick="closeExInfo()"></div>
 <div id="info-box" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:8501;width:94%;max-width:430px;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--s1);border:1px solid var(--b1);border-radius:18px">
   <!-- Header -->
@@ -459,66 +660,59 @@ body.lt #alert{background:rgba(244,244,245,.97)}
 </div>
 
 <!-- SHARE MODAL -->
-
 <div id="share-bg" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.85);backdrop-filter:blur(8px)" onclick="closeShare()"></div>
 <div id="share-box" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9001;width:94%;max-width:400px;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch">
 
   <!-- Close -->
-
   <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
     <button class="btn btn-icon" onclick="closeShare()" style="width:34px;height:34px;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);color:#fff">✕</button>
   </div>
 
   <!-- Visual share card (this is what gets shown) -->
-
   <div id="share-card" style="background:linear-gradient(135deg,#0f0f1f 0%,#1a1a2e 50%,#0f0f1f 100%);border-radius:18px;padding:24px;color:#fff;position:relative;overflow:hidden;border:1px solid rgba(99,102,241,.3);box-shadow:0 20px 60px rgba(0,0,0,.5)">
     <!-- Glow effect -->
     <div style="position:absolute;top:-50px;right:-50px;width:200px;height:200px;background:radial-gradient(circle,rgba(99,102,241,.3),transparent 70%);pointer-events:none"></div>
     <div style="position:absolute;bottom:-50px;left:-50px;width:200px;height:200px;background:radial-gradient(circle,rgba(139,92,246,.2),transparent 70%);pointer-events:none"></div>
 
-```
-<!-- Header -->
-<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;position:relative">
-  <div>
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;font-style:italic;color:#818cf8;letter-spacing:.1em">GYMLOG</div>
-    <div id="sc-name" class="D" style="font-size:26px;color:#fff;line-height:1.05;margin-top:2px"></div>
-    <div id="sc-date" style="font-size:11px;color:rgba(165,180,252,.7);margin-top:3px;font-weight:600"></div>
-  </div>
-  <div style="text-align:right">
-    <div id="sc-emoji" style="font-size:36px;line-height:1">💪</div>
-  </div>
-</div>
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;position:relative">
+      <div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;font-style:italic;color:#818cf8;letter-spacing:.1em">GYMLOG</div>
+        <div id="sc-name" class="D" style="font-size:26px;color:#fff;line-height:1.05;margin-top:2px"></div>
+        <div id="sc-date" style="font-size:11px;color:rgba(165,180,252,.7);margin-top:3px;font-weight:600"></div>
+      </div>
+      <div style="text-align:right">
+        <div id="sc-emoji" style="font-size:36px;line-height:1">💪</div>
+      </div>
+    </div>
 
-<!-- KPI bar -->
-<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;position:relative">
-  <div style="background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:9px 6px;text-align:center">
-    <div id="sc-kpi-ex" class="D" style="font-size:22px;color:#fff;line-height:1"></div>
-    <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(165,180,252,.7);margin-top:3px">Oefeningen</div>
-  </div>
-  <div style="background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:9px 6px;text-align:center">
-    <div id="sc-kpi-sets" class="D" style="font-size:22px;color:#fff;line-height:1"></div>
-    <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(165,180,252,.7);margin-top:3px">Sets</div>
-  </div>
-  <div style="background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:9px 6px;text-align:center">
-    <div id="sc-kpi-vol" class="D" style="font-size:22px;color:#fff;line-height:1"></div>
-    <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(165,180,252,.7);margin-top:3px">Volume</div>
-  </div>
-</div>
+    <!-- KPI bar -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;position:relative">
+      <div style="background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:9px 6px;text-align:center">
+        <div id="sc-kpi-ex" class="D" style="font-size:22px;color:#fff;line-height:1"></div>
+        <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(165,180,252,.7);margin-top:3px">Oefeningen</div>
+      </div>
+      <div style="background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:9px 6px;text-align:center">
+        <div id="sc-kpi-sets" class="D" style="font-size:22px;color:#fff;line-height:1"></div>
+        <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(165,180,252,.7);margin-top:3px">Sets</div>
+      </div>
+      <div style="background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:9px 6px;text-align:center">
+        <div id="sc-kpi-vol" class="D" style="font-size:22px;color:#fff;line-height:1"></div>
+        <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(165,180,252,.7);margin-top:3px">Volume</div>
+      </div>
+    </div>
 
-<!-- Exercises list -->
-<div id="sc-exes" style="position:relative"></div>
+    <!-- Exercises list -->
+    <div id="sc-exes" style="position:relative"></div>
 
-<!-- Footer -->
-<div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(99,102,241,.15);display:flex;justify-content:space-between;align-items:center;position:relative">
-  <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:900;font-style:italic;color:#818cf8;letter-spacing:.08em">GYMLOG</div>
-  <div id="sc-by" style="font-size:9px;color:rgba(165,180,252,.5);font-weight:600"></div>
-</div>
-```
-
+    <!-- Footer -->
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(99,102,241,.15);display:flex;justify-content:space-between;align-items:center;position:relative">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:900;font-style:italic;color:#818cf8;letter-spacing:.08em">GYMLOG</div>
+      <div id="sc-by" style="font-size:9px;color:rgba(165,180,252,.5);font-weight:600"></div>
+    </div>
   </div>
 
   <!-- Action buttons -->
-
   <button class="btn btn-p" onclick="shareImage()" style="padding:14px;font-size:14px;width:100%;margin-top:14px">
     <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" style="margin-right:7px"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path stroke-linecap="round" d="M21 15l-5-5L5 21"/></svg>
     Deel als afbeelding
@@ -535,14 +729,11 @@ body.lt #alert{background:rgba(244,244,245,.97)}
   </div>
 
   <!-- Hidden text for clipboard -->
-
   <textarea id="share-text" readonly style="position:absolute;left:-9999px;opacity:0"></textarea>
-
   <div id="share-hint" style="font-size:11px;color:#a5b4fc;text-align:center;margin-top:10px;min-height:14px"></div>
 </div>
 
 <!-- TEMPLATE MODAL -->
-
 <div id="tmpl-modal">
   <div class="tm-hdr">
     <div class="D" style="font-size:21px">TEMPLATE <em style="color:var(--ac)">AANMAKEN</em></div>
@@ -550,286 +741,288 @@ body.lt #alert{background:rgba(244,244,245,.97)}
   </div>
   <div style="flex:1;overflow-y:auto;display:flex;flex-direction:column">
 
-```
-<!-- Step 1: naam + emoji -->
-<div style="padding:16px 18px 0">
-  <input class="inp D" id="tmpl-name" placeholder="NAAM (bijv. PUSH DAY)" style="margin-bottom:8px;font-size:17px;text-transform:uppercase">
-  <input class="inp" id="tmpl-emoji" placeholder="Emoji (bijv. 💪)" style="margin-bottom:14px;width:120px">
-</div>
-
-<!-- Oefeningen toegevoegd lijst -->
-<div style="padding:0 18px">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-    <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--mu)">Oefeningen</div>
-    <div id="tmpl-ex-count" style="font-size:10px;color:var(--ac);font-weight:700"></div>
-  </div>
-  <div id="tmpl-ex-list" style="margin-bottom:10px"></div>
-</div>
-
-<!-- Spiergroep tabs + oefening grid -->
-<div style="border-top:1px solid var(--b1);padding-top:10px">
-  <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--mu);padding:0 18px 8px">Oefening toevoegen</div>
-  <div id="tmpl-cat-row" style="display:flex;gap:7px;overflow-x:auto;padding:0 18px 10px;scrollbar-width:none"></div>
-  <!-- Sets selectie -->
-  <div style="display:flex;align-items:center;gap:8px;padding:0 18px 10px">
-    <span style="font-size:11px;color:var(--mu);font-weight:600">Sets:</span>
-    <div id="tmpl-sets-row" style="display:flex;gap:5px">
-      <button class="tmpl-set-btn on" onclick="selectTmplSets(this,2)">2</button>
-      <button class="tmpl-set-btn" onclick="selectTmplSets(this,3)">3</button>
-      <button class="tmpl-set-btn" onclick="selectTmplSets(this,4)">4</button>
-      <button class="tmpl-set-btn" onclick="selectTmplSets(this,5)">5</button>
+    <!-- Step 1: naam + emoji -->
+    <div style="padding:16px 18px 0">
+      <input class="inp D" id="tmpl-name" placeholder="NAAM (bijv. PUSH DAY)" style="margin-bottom:8px;font-size:17px;text-transform:uppercase">
+      <input class="inp" id="tmpl-emoji" placeholder="Emoji (bijv. 💪)" style="margin-bottom:14px;width:120px">
     </div>
-    <span style="font-size:11px;color:var(--mu);font-weight:600;margin-left:4px">sets per oefening</span>
-  </div>
-  <div id="tmpl-ex-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:0 18px 10px;max-height:280px;overflow-y:auto"></div>
-</div>
 
-<!-- Opslaan -->
-<div style="padding:12px 18px 24px;margin-top:auto">
-  <button class="btn btn-p" onclick="saveTemplate()">Template Opslaan</button>
-</div>
-```
+    <!-- Oefeningen toegevoegd lijst -->
+    <div style="padding:0 18px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--mu)">Oefeningen</div>
+        <div id="tmpl-ex-count" style="font-size:10px;color:var(--ac);font-weight:700"></div>
+      </div>
+      <div id="tmpl-ex-list" style="margin-bottom:10px"></div>
+    </div>
 
+    <!-- Spiergroep tabs + oefening grid -->
+    <div style="border-top:1px solid var(--b1);padding-top:10px">
+      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--mu);padding:0 18px 8px">Oefening toevoegen</div>
+      <div id="tmpl-cat-row" style="display:flex;gap:7px;overflow-x:auto;padding:0 18px 10px;scrollbar-width:none"></div>
+      <!-- Sets selectie -->
+      <div style="display:flex;align-items:center;gap:8px;padding:0 18px 10px">
+        <span style="font-size:11px;color:var(--mu);font-weight:600">Sets:</span>
+        <div id="tmpl-sets-row" style="display:flex;gap:5px">
+          <button class="tmpl-set-btn on" onclick="selectTmplSets(this,2)">2</button>
+          <button class="tmpl-set-btn" onclick="selectTmplSets(this,3)">3</button>
+          <button class="tmpl-set-btn" onclick="selectTmplSets(this,4)">4</button>
+          <button class="tmpl-set-btn" onclick="selectTmplSets(this,5)">5</button>
+        </div>
+        <span style="font-size:11px;color:var(--mu);font-weight:600;margin-left:4px">sets per oefening</span>
+      </div>
+      <div id="tmpl-ex-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:0 18px 10px;max-height:280px;overflow-y:auto"></div>
+    </div>
+
+    <!-- Opslaan -->
+    <div style="padding:12px 18px 24px;margin-top:auto">
+      <button class="btn btn-p" onclick="saveTemplate()">Template Opslaan</button>
+    </div>
   </div>
 </div>
 
 <!-- TOAST -->
-
 <div id="toast"></div>
 
 <!-- APP -->
-
 <div id="app">
   <div id="scroll">
 
-```
-<!-- HEADER -->
-<div id="hdr" style="padding:48px 16px 0">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-    <div class="logo">GYM<em>LOG</em></div>
-    <div id="greeting" style="font-size:11px;color:var(--mu);text-align:right;line-height:1.4"></div>
-  </div>
-  <!-- Session in progress timer -->
-  <div id="sess-timer" style="display:none;align-items:center;gap:8px;padding:8px 12px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);border-radius:10px;margin-bottom:10px">
-    <div style="width:8px;height:8px;border-radius:50%;background:#4ade80;animation:pdot 2s infinite"></div>
-    <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:#86efac;letter-spacing:.06em;flex:1">Bezig</span>
-    <span class="D" id="sess-timer-val" style="font-size:18px;color:#4ade80">0m 0s</span>
-    <button class="btn btn-g" onclick="endTodaySess()" style="padding:5px 9px;font-size:10px;color:#fca5a5;border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.1)">Stop</button>
-  </div>
-  <div id="dash-strip"></div>
-</div>
+    <!-- HEADER -->
+    <div id="hdr" style="padding:48px 16px 0">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="logo">GYM<em>LOG</em></div>
+        <div id="greeting" style="font-size:11px;color:var(--mu);text-align:right;line-height:1.4"></div>
+      </div>
+      <!-- Session in progress timer -->
+      <div id="sess-timer" style="display:none;align-items:center;gap:8px;padding:8px 12px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);border-radius:10px;margin-bottom:10px">
+        <div style="width:8px;height:8px;border-radius:50%;background:#4ade80;animation:pdot 2s infinite"></div>
+        <div style="flex:1;display:flex;flex-direction:column;line-height:1.1">
+          <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:#86efac;letter-spacing:.06em">Bezig</span>
+          <span id="sess-timer-idle" style="display:none;font-size:9px;color:#fbbf24;font-weight:600;margin-top:1px"></span>
+        </div>
+        <span class="D" id="sess-timer-val" style="font-size:18px;color:#4ade80">0m 0s</span>
+        <button class="btn btn-g" onclick="endTodaySess()" style="padding:5px 9px;font-size:10px;color:#fca5a5;border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.1)">Stop</button>
+      </div>
+      <div id="dash-strip"></div>
+    </div>
 
-<!-- TIMER -->
-<div id="tmr">
-  <div class="tmr-row">
-    <svg width="32" height="32" viewBox="0 0 36 36" style="transform:rotate(-90deg);flex-shrink:0">
-      <circle fill="none" stroke="var(--s2)" stroke-width="3" cx="18" cy="18" r="15"/>
-      <circle id="tmr-ring" fill="none" stroke="var(--ac)" stroke-width="3" stroke-linecap="round" cx="18" cy="18" r="15" stroke-dasharray="94.25" stroke-dashoffset="94.25"/>
-    </svg>
-    <div class="tmr-disp" id="tmr-disp">00:00</div>
-    <input class="tmr-in" id="tMin" type="number" value="1" min="0" max="59">
-    <span class="tmr-sep">:</span>
-    <input class="tmr-in" id="tSec" type="number" value="30" min="0" max="59">
-    <button class="btn btn-g" id="tmr-btn" onclick="toggleTimer()" style="padding:7px 12px;font-size:12px;margin-left:auto">Start</button>
-    <button class="btn btn-icon" onclick="resetTimer()" style="color:#f87171;font-size:13px">✕</button>
-  </div>
-</div>
-
-<div style="padding:0 16px">
-
-  <!-- TRAIN -->
-  <section id="view-train">
-    <div class="card" style="margin-top:12px">
-      <input class="inp D" id="sess-name" placeholder="WORKOUT NAAM" style="margin-bottom:8px;font-size:17px;text-transform:uppercase">
-      <div id="qnames" style="margin-bottom:8px"></div>
-      <div style="display:flex;gap:7px">
-        <input class="inp" id="sess-date" type="date" style="flex:1">
-        <button class="btn btn-p" style="flex:1;white-space:nowrap" onclick="createSession()">+ Nieuwe Sessie</button>
+    <!-- TIMER -->
+    <div id="tmr">
+      <div class="tmr-row">
+        <svg width="32" height="32" viewBox="0 0 36 36" style="transform:rotate(-90deg);flex-shrink:0">
+          <circle fill="none" stroke="var(--s2)" stroke-width="3" cx="18" cy="18" r="15"/>
+          <circle id="tmr-ring" fill="none" stroke="var(--ac)" stroke-width="3" stroke-linecap="round" cx="18" cy="18" r="15" stroke-dasharray="94.25" stroke-dashoffset="94.25"/>
+        </svg>
+        <div class="tmr-disp" id="tmr-disp">00:00</div>
+        <input class="tmr-in" id="tMin" type="number" value="1" min="0" max="59">
+        <span class="tmr-sep">:</span>
+        <input class="tmr-in" id="tSec" type="number" value="30" min="0" max="59">
+        <button class="btn btn-g" id="tmr-btn" onclick="toggleTimer()" style="padding:7px 12px;font-size:12px;margin-left:auto">Start</button>
+        <button class="btn btn-icon" onclick="resetTimer()" style="color:#f87171;font-size:13px">✕</button>
       </div>
     </div>
-    <div id="act-banner"></div>
-    <div id="sess-list"></div>
-  </section>
 
-  <!-- STATS -->
-  <section id="view-stats" class="hidden">
-    <div style="margin-top:12px">
-      <div id="deload-banner"></div>
-      <div class="stats-hero" id="st-hero"></div>
-      <div class="card">
-        <div class="card-hdr">
-          <div>
-            <div class="card-title">Weekvolume per Spiergroep</div>
-            <div style="font-size:10px;color:var(--mu);margin-top:2px">Tik op een spiergroep om je doelen aan te passen</div>
-          </div>
-        </div>
-        <div id="vol-targets"></div>
-      </div>
-      <div class="kpi-grid" id="st-kpi"></div>
-      <div class="card">
-        <div class="card-hdr">
-          <div class="card-title">Consistentie</div>
-          <div style="font-size:10px;color:var(--mu)" id="hm-sub"></div>
-        </div>
-        <div class="hm-grid" id="hm-grid"></div>
-        <div style="display:flex;align-items:center;gap:5px">
-          <span style="font-size:10px;color:var(--mu)">Minder</span>
-          <div style="width:11px;height:11px;border-radius:3px;background:#1a1a2e;border:1px solid #333"></div>
-          <div style="width:11px;height:11px;border-radius:3px;background:rgba(99,102,241,.28)"></div>
-          <div style="width:11px;height:11px;border-radius:3px;background:rgba(99,102,241,.58)"></div>
-          <div style="width:11px;height:11px;border-radius:3px;background:var(--ac)"></div>
-          <span style="font-size:10px;color:var(--mu)">Meer</span>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-hdr">
-          <div class="card-title">Verdeling Sets</div>
-          <div class="fp-row" id="dist-fp">
-            <div class="fp on" onclick="renderDist(7,this)">Week</div>
-            <div class="fp" onclick="renderDist(30,this)">Maand</div>
-            <div class="fp" onclick="renderDist(9999,this)">Altijd</div>
-          </div>
-        </div>
-        <div style="height:220px"><canvas id="dist-chart"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-hdr">
-          <div class="card-title">Spierbalans</div>
-          <div class="fp-row" id="radar-fp">
-            <div class="fp on" onclick="renderRadar(7,this)">Week</div>
-            <div class="fp" onclick="renderRadar(30,this)">Maand</div>
-            <div class="fp" onclick="renderRadar(9999,this)">Altijd</div>
-          </div>
-        </div>
-        <div style="height:220px"><canvas id="radar-chart"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-hdr">
-          <div class="card-title">Gevoel per Set</div>
-          <div class="fp-row" id="feel-fp">
-            <div class="fp on" onclick="renderFeel(30,this)">Maand</div>
-            <div class="fp" onclick="renderFeel(9999,this)">Altijd</div>
-          </div>
-        </div>
-        <div id="feel-bars"></div>
-      </div>
-      <div class="card">
-        <div class="card-hdr">
-          <div class="card-title">Volume</div>
-          <div class="fp-row" id="vol-fp">
-            <div class="fp on" onclick="renderVolBars(7,this)">Week</div>
-            <div class="fp" onclick="renderVolBars(30,this)">Maand</div>
-            <div class="fp" onclick="renderVolBars(9999,this)">Altijd</div>
-          </div>
-        </div>
-        <div id="vol-bars"></div>
-      </div>
-      <div class="card">
-        <div class="card-hdr">
-          <div class="card-title">Progressie</div>
-          <div class="fp-row" id="prog-fp">
-            <div class="fp on" onclick="setPM('weight',this)">Gewicht</div>
-            <div class="fp" onclick="setPM('volume',this)">Volume</div>
-            <div class="fp" onclick="setPM('orm',this)">1RM</div>
-          </div>
-        </div>
-        <select class="inp" id="prog-sel" onchange="renderProg()" style="margin-bottom:12px"></select>
-        <div style="height:160px"><canvas id="prog-chart"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-hdr">
-          <div class="card-title">PR's</div>
-          <div class="fp-row" id="rec-fp">
-            <div class="fp on" onclick="setRM('cat',this)">Categorie</div>
-            <div class="fp" onclick="setRM('recent',this)">Recent</div>
-          </div>
-        </div>
-        <div id="records"></div>
-      </div>
-    </div>
-  </section>
+    <div style="padding:0 16px">
 
-  <!-- PLAN -->
-  <section id="view-plan" class="hidden">
-    <div style="margin-top:12px">
-      <div class="card">
-        <div class="card-hdr">
-          <div class="card-title">Weekschema</div>
-          <button class="ab ab-g" onclick="applyPlanToday()">Vandaag trainen</button>
+      <!-- TRAIN -->
+      <section id="view-train">
+        <div class="card" style="margin-top:12px">
+          <input class="inp D" id="sess-name" placeholder="WORKOUT NAAM" style="margin-bottom:8px;font-size:17px;text-transform:uppercase">
+          <div id="qnames" style="margin-bottom:8px"></div>
+          <div style="display:flex;gap:7px">
+            <input class="inp" id="sess-date" type="date" style="flex:1">
+            <button class="btn btn-p" style="flex:1;white-space:nowrap" onclick="createSession()">+ Nieuwe Sessie</button>
+          </div>
         </div>
-        <div id="week-plan"></div>
-      </div>
-      <div class="card">
-        <div class="card-hdr">
-          <div class="card-title">Templates</div>
-          <button class="ab ab-b" onclick="openTmplModal()">+ Nieuw</button>
-        </div>
-        <div id="tmpl-list"></div>
-      </div>
-      <div class="card">
-        <div class="card-hdr">
-          <div class="card-title">🏆 Achievements</div>
-          <div style="font-size:10px;color:var(--mu)" id="ach-sub"></div>
-        </div>
-        <div id="ach-list"></div>
-      </div>
-      <div class="card">
-        <div class="card-hdr"><div class="card-title">⚡ Uitdagingen</div></div>
-        <div id="chal-list"></div>
-      </div>
-    </div>
-  </section>
+        <div id="act-banner"></div>
+        <div id="sess-list"></div>
+      </section>
 
-  <!-- PROFILE -->
-  <section id="view-profile" class="hidden">
-    <div style="margin-top:12px">
-      <div class="card" id="xp-card"></div>
-      <div class="card">
-        <input class="inp" id="prof-name" placeholder="JOUW NAAM" style="margin-bottom:10px" onchange="saveName()">
-        <button class="theme-btn" onclick="toggleTheme()">
-          <span id="theme-ico">🌙</span>
-          <span id="theme-lbl">Dark mode</span>
-        </button>
-        <button class="theme-btn" onclick="toggleAutoTimer()" style="margin-top:8px">
-          <span id="autoTimer-ico">⏱️</span>
-          <span id="autoTimer-lbl">Auto rust-timer aan</span>
-        </button>
-      </div>
-      <div class="card">
-        <div class="card-hdr"><div class="card-title">Gewicht</div></div>
-        <div style="display:flex;gap:7px;margin-bottom:10px">
-          <input class="inp" id="w-kg" type="number" step="0.1" placeholder="KG" style="flex:1">
-          <input class="inp" id="w-fat" type="number" step="0.1" placeholder="Vet %" style="flex:1">
-          <button class="btn btn-p" onclick="logWeight()" style="width:auto;padding:0 14px">LOG</button>
+      <!-- STATS -->
+      <section id="view-stats" class="hidden">
+        <div style="margin-top:12px">
+          <div id="deload-banner"></div>
+          <div class="stats-hero" id="st-hero"></div>
+          <div class="card">
+            <div class="card-hdr">
+              <div>
+                <div class="card-title">Weekvolume per Spiergroep</div>
+                <div style="font-size:10px;color:var(--mu);margin-top:2px">Tik op een spiergroep om je doelen aan te passen</div>
+              </div>
+            </div>
+            <div id="vol-targets"></div>
+          </div>
+          <div class="kpi-grid" id="st-kpi"></div>
+          <div class="card">
+            <div class="card-hdr">
+              <div class="card-title">Consistentie</div>
+              <div style="font-size:10px;color:var(--mu)" id="hm-sub"></div>
+            </div>
+            <div class="hm-grid" id="hm-grid"></div>
+            <div style="display:flex;align-items:center;gap:5px">
+              <span style="font-size:10px;color:var(--mu)">Minder</span>
+              <div style="width:11px;height:11px;border-radius:3px;background:#1a1a2e;border:1px solid #333"></div>
+              <div style="width:11px;height:11px;border-radius:3px;background:rgba(99,102,241,.28)"></div>
+              <div style="width:11px;height:11px;border-radius:3px;background:rgba(99,102,241,.58)"></div>
+              <div style="width:11px;height:11px;border-radius:3px;background:var(--ac)"></div>
+              <span style="font-size:10px;color:var(--mu)">Meer</span>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-hdr">
+              <div class="card-title">Verdeling Sets</div>
+              <div class="fp-row" id="dist-fp">
+                <div class="fp on" onclick="renderDist(7,this)">Week</div>
+                <div class="fp" onclick="renderDist(30,this)">Maand</div>
+                <div class="fp" onclick="renderDist(9999,this)">Altijd</div>
+              </div>
+            </div>
+            <div style="height:220px"><canvas id="dist-chart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-hdr">
+              <div class="card-title">Spierbalans</div>
+              <div class="fp-row" id="radar-fp">
+                <div class="fp on" onclick="renderRadar(7,this)">Week</div>
+                <div class="fp" onclick="renderRadar(30,this)">Maand</div>
+                <div class="fp" onclick="renderRadar(9999,this)">Altijd</div>
+              </div>
+            </div>
+            <div style="height:220px"><canvas id="radar-chart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-hdr">
+              <div class="card-title">Gevoel per Set</div>
+              <div class="fp-row" id="feel-fp">
+                <div class="fp on" onclick="renderFeel(30,this)">Maand</div>
+                <div class="fp" onclick="renderFeel(9999,this)">Altijd</div>
+              </div>
+            </div>
+            <div id="feel-bars"></div>
+          </div>
+          <div class="card">
+            <div class="card-hdr">
+              <div class="card-title">Volume</div>
+              <div class="fp-row" id="vol-fp">
+                <div class="fp on" onclick="renderVolBars(7,this)">Week</div>
+                <div class="fp" onclick="renderVolBars(30,this)">Maand</div>
+                <div class="fp" onclick="renderVolBars(9999,this)">Altijd</div>
+              </div>
+            </div>
+            <div id="vol-bars"></div>
+          </div>
+          <div class="card">
+            <div class="card-hdr">
+              <div class="card-title">Progressie</div>
+              <div class="fp-row" id="prog-fp">
+                <div class="fp on" onclick="setPM('weight',this)">Gewicht</div>
+                <div class="fp" onclick="setPM('volume',this)">Volume</div>
+                <div class="fp" onclick="setPM('orm',this)">1RM</div>
+              </div>
+            </div>
+            <select class="inp" id="prog-sel" onchange="renderProg()" style="margin-bottom:12px"></select>
+            <div style="height:160px"><canvas id="prog-chart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-hdr">
+              <div class="card-title">PR's</div>
+              <div class="fp-row" id="rec-fp">
+                <div class="fp on" onclick="setRM('cat',this)">Categorie</div>
+                <div class="fp" onclick="setRM('recent',this)">Recent</div>
+              </div>
+            </div>
+            <div id="records"></div>
+          </div>
         </div>
-        <div style="height:160px;margin-bottom:10px"><canvas id="wt-chart"></canvas></div>
-        <div class="fp-row" style="margin-bottom:12px">
-          <div class="fp wf on" onclick="renderWtChart(7,this)">Week</div>
-          <div class="fp wf" onclick="renderWtChart(30,this)">Maand</div>
-          <div class="fp wf" onclick="renderWtChart(365,this)">Jaar</div>
-          <div class="fp" onclick="setWeightGoal()" style="background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3);color:#fbbf24;margin-left:auto">🎯 Doel</div>
-        </div>
-        <div id="wt-stats" style="margin-bottom:14px"></div>
-        <div id="wt-logs"></div>
-      </div>
-      <div class="card">
-        <div class="card-hdr"><div class="card-title">Data</div></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
-          <button class="btn btn-g" onclick="exportData()" style="padding:13px 0;font-size:12px">💾 Backup</button>
-          <button class="btn btn-g" onclick="document.getElementById('imp-file').click()" style="padding:13px 0;font-size:12px">📂 Herstellen</button>
-        </div>
-        <input type="file" id="imp-file" class="hidden" accept=".json" onchange="importData(event)">
-      </div>
-    </div>
-  </section>
+      </section>
 
-</div><!-- /inner pad -->
-```
+      <!-- PLAN -->
+      <section id="view-plan" class="hidden">
+        <div style="margin-top:12px">
+          <div class="card">
+            <div class="card-hdr">
+              <div class="card-title">Weekschema</div>
+              <button class="ab ab-g" onclick="applyPlanToday()">Vandaag trainen</button>
+            </div>
+            <div id="week-plan"></div>
+          </div>
+          <div class="card">
+            <div class="card-hdr">
+              <div class="card-title">Templates</div>
+              <button class="ab ab-b" onclick="openTmplModal()">+ Nieuw</button>
+            </div>
+            <div id="tmpl-list"></div>
+          </div>
+          <div class="card">
+            <div class="card-hdr">
+              <div class="card-title">🏆 Achievements</div>
+              <div style="font-size:10px;color:var(--mu)" id="ach-sub"></div>
+            </div>
+            <div id="ach-list"></div>
+          </div>
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">⚡ Uitdagingen</div></div>
+            <div id="chal-list"></div>
+          </div>
+        </div>
+      </section>
 
+      <!-- PROFILE -->
+      <section id="view-profile" class="hidden">
+        <div style="margin-top:12px">
+          <div class="card" id="xp-card"></div>
+          <div class="card">
+            <input class="inp" id="prof-name" placeholder="JOUW NAAM" style="margin-bottom:10px" onchange="saveName()">
+            <button class="theme-btn" onclick="toggleTheme()">
+              <span id="theme-ico">🌙</span>
+              <span id="theme-lbl">Dark mode</span>
+            </button>
+            <button class="theme-btn" onclick="toggleAutoTimer()" style="margin-top:8px">
+              <span id="autoTimer-ico">⏱️</span>
+              <span id="autoTimer-lbl">Auto rust-timer aan</span>
+            </button>
+            <button class="theme-btn" onclick="editInactivityTimeout()" style="margin-top:8px">
+              <span>💤</span>
+              <span id="inactivity-lbl">Auto-stop sessie na 30 min</span>
+            </button>
+            <button class="theme-btn" onclick="toggleGlass()" style="margin-top:8px">
+              <span id="glass-ico">🪟</span>
+              <span id="glass-lbl">Glass design</span>
+            </button>
+          </div>
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">Gewicht</div></div>
+            <div style="display:flex;gap:7px;margin-bottom:10px">
+              <input class="inp" id="w-kg" type="number" step="0.1" placeholder="KG" style="flex:1">
+              <input class="inp" id="w-fat" type="number" step="0.1" placeholder="Vet %" style="flex:1">
+              <button class="btn btn-p" onclick="logWeight()" style="width:auto;padding:0 14px">LOG</button>
+            </div>
+            <div style="height:160px;margin-bottom:10px"><canvas id="wt-chart"></canvas></div>
+            <div class="fp-row" style="margin-bottom:12px">
+              <div class="fp wf on" onclick="renderWtChart(7,this)">Week</div>
+              <div class="fp wf" onclick="renderWtChart(30,this)">Maand</div>
+              <div class="fp wf" onclick="renderWtChart(365,this)">Jaar</div>
+              <div class="fp" onclick="setWeightGoal()" style="background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3);color:#fbbf24;margin-left:auto">🎯 Doel</div>
+            </div>
+            <div id="wt-stats" style="margin-bottom:14px"></div>
+            <div id="wt-logs"></div>
+          </div>
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">Data</div></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+              <button class="btn btn-g" onclick="exportData()" style="padding:13px 0;font-size:12px">💾 Backup</button>
+              <button class="btn btn-g" onclick="document.getElementById('imp-file').click()" style="padding:13px 0;font-size:12px">📂 Herstellen</button>
+            </div>
+            <input type="file" id="imp-file" class="hidden" accept=".json" onchange="importData(event)">
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /inner pad -->
   </div><!-- /scroll -->
 
   <!-- NAV -->
-
   <nav id="nav">
     <button class="nb on" id="nav-train" onclick="showView('train')">
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15M4.5 6l4 4-4 4M19.5 6l-4 4 4 4"/></svg>
@@ -1546,11 +1739,22 @@ function getActiveTodaySession(){
   return sessions.find(function(s){ return s.rawDate === todayKey; });
 }
 
+// Configurable inactivity timeout (minutes). User can override in profile.
+function getInactivityTimeout(){
+  return parseInt(user.sessInactivityMin) || 30; // default 30 min
+}
+
+function markActivity(s){
+  if(!s) return;
+  s.lastActivityAt = Date.now();
+}
+
 function startSessTimer(sId){
   var s = sessions.find(function(x){ return x.id===sId; });
   if(!s) return;
   if(!s.startedAt){
     s.startedAt = Date.now();
+    s.lastActivityAt = Date.now();
     save();
   }
 }
@@ -1566,13 +1770,34 @@ function tickSessTimer(){
   // Auto-set startedAt if missing (existing today session without start time)
   if(!s.startedAt){
     s.startedAt = Date.now();
+    s.lastActivityAt = Date.now();
     save();
   }
+  if(!s.lastActivityAt) s.lastActivityAt = s.startedAt;
+
   // Don't show if session was already ended
   if(s.duration){
     bar.style.display = 'none';
     return;
   }
+
+  // AUTO-STOP if user has been inactive too long
+  var idleMin = (Date.now() - s.lastActivityAt) / 60000;
+  var timeoutMin = getInactivityTimeout();
+  if(timeoutMin > 0 && idleMin >= timeoutMin){
+    // Auto-end: backdate duration to last activity time
+    s.duration = s.lastActivityAt - s.startedAt;
+    save();
+    bar.style.display = 'none';
+    var totMin = Math.floor(s.duration/60000);
+    var h = Math.floor(totMin/60);
+    var m = totMin % 60;
+    var msg = h>0 ? ('Sessie automatisch beëindigd na inactiviteit: ' + h + 'u ' + m + 'm') : ('Sessie automatisch beëindigd: ' + m + ' min');
+    toast(msg);
+    renderAll();
+    return;
+  }
+
   bar.style.display = 'flex';
   var elapsed = Math.floor((Date.now() - s.startedAt) / 1000);
   var h = Math.floor(elapsed/3600);
@@ -1581,11 +1806,24 @@ function tickSessTimer(){
   var txt = (h>0 ? h+'u ' : '') + m + 'm ' + (h===0 ? sec+'s' : '');
   var el = document.getElementById('sess-timer-val');
   if(el) el.textContent = txt;
+
+  // Show warning if approaching timeout
+  var warnEl = document.getElementById('sess-timer-idle');
+  if(timeoutMin > 0 && idleMin > timeoutMin * 0.7){
+    var remaining = Math.ceil(timeoutMin - idleMin);
+    if(warnEl){
+      warnEl.style.display = '';
+      warnEl.textContent = '⚠ Stopt automatisch in ' + remaining + 'm';
+    }
+  } else if(warnEl){
+    warnEl.style.display = 'none';
+  }
 }
 
 function startSessTimerLoop(){
   if(sessTimerIv) clearInterval(sessTimerIv);
   tickSessTimer();
+  // Check every 10 seconds instead of every 1s since we have a warning system
   sessTimerIv = setInterval(tickSessTimer, 1000);
 }
 
@@ -1601,6 +1839,40 @@ function endSessTimer(sId){
     toast(msg);
     renderAll();
   }
+}
+
+// Manual fix: let user adjust duration of a session that ended too late
+function editSessDuration(sId){
+  var s = sessions.find(function(x){ return x.id === sId; });
+  if(!s) return;
+  var curMin = s.duration ? Math.round(s.duration / 60000) : 0;
+  var prompt = curMin > 0
+    ? 'Sessieduur in minuten (0 = verwijderen):'
+    : 'Sessieduur in minuten (voeg toe):';
+  doInput(prompt, String(curMin), function(val){
+    if(val === null) return;
+    var n = parseInt(val);
+    if(isNaN(n) || n < 0){ toast('Ongeldige waarde'); return; }
+    if(n === 0){
+      delete s.duration;
+      delete s.startedAt;
+      delete s.lastActivityAt;
+      toast('Tijd verwijderd');
+    } else if(n > 240){
+      // Confirm if over 4 hours
+      doConfirm(n + ' minuten is meer dan 4 uur. Zeker weten?', function(ok){
+        if(!ok) return;
+        s.duration = n * 60000;
+        save(); renderAll();
+        toast('Tijd: ' + n + ' min ✓');
+      });
+      return;
+    } else {
+      s.duration = n * 60000;
+      toast('Tijd: ' + n + ' min ✓');
+    }
+    save(); renderAll();
+  });
 }
 
 // ═══════════════════════════════════════════════════
@@ -2555,18 +2827,19 @@ function renderSessions() {
         +'<div class="sc-acts">'
         +'<button class="ab ab-g" onclick="cloneSession('+s.id+')">Kopieer</button>'
         +'<button class="ab ab-b" onclick="shareSession('+s.id+')">Deel</button>'
+        
         +'<button class="ab ab-r" onclick="deleteSession('+s.id+')">&#x2715;</button>'
         +'</div></div>'
         +'<div class="sc-meta"><span class="sc-date">'+esc(s.date)+'</span>'
         +(isToday?'<span class="sc-tag td">Vandaag</span>':'')
         +cats.slice(0,3).map(function(c){return '<span class="sc-tag">'+esc(c)+'</span>';}).join('')
         +'</div></div>'
-        +'<div class="sc-kpi'+(s.duration?' five':'')+'">'
+        +'<div class="sc-kpi five">'
         +'<div class="kc"><div class="kc-v">'+s.exercises.length+'</div><div class="kc-l">Oef</div></div>'
         +'<div class="kc"><div class="kc-v">'+sets+'</div><div class="kc-l">Sets</div></div>'
         +'<div class="kc"><div class="kc-v" style="color:'+(pct===100?'#4ade80':'var(--tx)')+'">'+pct+'%</div><div class="kc-l">Gevuld</div></div>'
         +'<div class="kc"><div class="kc-v">'+(vol>0?(vol/1000).toFixed(1)+'<span style="font-size:10px;color:var(--mu)">T</span>':'—')+'</div><div class="kc-l">Vol</div></div>'
-        +(s.duration?'<div class="kc"><div class="kc-v" style="color:#4ade80">'+fmtDur(s.duration)+'</div><div class="kc-l">Tijd</div></div>':'')
+        +'<div class="kc kc-tijd" onclick="editSessDuration('+s.id+')" style="cursor:pointer"><div class="kc-v" style="color:'+(s.duration && s.duration>4*3600000?'#fbbf24':s.duration?'#4ade80':'var(--mu)')+'">'+(s.duration?fmtDur(s.duration):'—')+'</div><div class="kc-l">Tijd ✎</div></div>'
         +'</div>'
         +'<div class="sc-vb"><div class="sc-vf" style="width:'+vp+'%"></div></div>'
         +'<div class="sc-tog" onclick="toggleSess('+s.id+')">'
@@ -2769,9 +3042,15 @@ function updSet(sId,exId,idx,field,val){
   ex.sets[idx][field]=val;
   // Start session timer when user fills in first value today
   var todayKey = new Date().toISOString().split('T')[0];
-  if(s.rawDate === todayKey && val && !s.startedAt){
-    s.startedAt = Date.now();
-    tickSessTimer();
+  if(s.rawDate === todayKey && val){
+    if(!s.startedAt){
+      s.startedAt = Date.now();
+      s.lastActivityAt = Date.now();
+      tickSessTimer();
+    } else {
+      // Update last activity on every change (resets inactivity timer)
+      s.lastActivityAt = Date.now();
+    }
   }
   save();
   // PR check - only when both w and r are filled, and only for today's session
@@ -3614,6 +3893,35 @@ function setThemeUI(lt){
   document.getElementById('theme-lbl').textContent=lt?'Light mode':'Dark mode';
 }
 
+
+// ═══════════════════════════════════════════════════
+// GLASS DESIGN TOGGLE
+// ═══════════════════════════════════════════════════
+function toggleGlass(){
+  user.glass = user.glass === true ? false : true;
+  applyGlass();
+  save();
+  toast(user.glass ? 'Glass design aan' : 'Standaard design aan');
+}
+
+function applyGlass(){
+  if(user.glass){
+    document.body.classList.add('glass');
+  } else {
+    document.body.classList.remove('glass');
+  }
+  setGlassUI();
+}
+
+function setGlassUI(){
+  var on = user.glass === true;
+  var ico = document.getElementById('glass-ico');
+  var lbl = document.getElementById('glass-lbl');
+  if(ico) ico.textContent = on ? '✨' : '🪟';
+  if(lbl) lbl.textContent = on ? 'Glass design aan' : 'Glass design';
+}
+
+
 function toggleAutoTimer(){
   user.autoTimer = user.autoTimer === false ? true : false;
   setAutoTimerUI();
@@ -3626,6 +3934,31 @@ function setAutoTimerUI(){
   var lbl = document.getElementById('autoTimer-lbl');
   if(ico) ico.textContent = on ? '⏱️' : '🔇';
   if(lbl) lbl.textContent = on ? 'Auto rust-timer aan' : 'Auto rust-timer uit';
+  // Update inactivity label
+  var iLbl = document.getElementById('inactivity-lbl');
+  if(iLbl){
+    var min = getInactivityTimeout();
+    iLbl.textContent = min > 0
+      ? 'Auto-stop sessie na ' + min + ' min'
+      : 'Auto-stop uit (handmatig stoppen)';
+  }
+}
+
+function editInactivityTimeout(){
+  var current = getInactivityTimeout();
+  doInput(
+    'Stop sessie automatisch na hoeveel minuten inactiviteit?\n(0 = uit)',
+    String(current),
+    function(val){
+      if(val === null) return;
+      var n = parseInt(val);
+      if(isNaN(n) || n < 0){ toast('Ongeldige waarde'); return; }
+      user.sessInactivityMin = n;
+      save();
+      setAutoTimerUI();
+      toast(n > 0 ? 'Auto-stop na ' + n + ' min' : 'Auto-stop uitgeschakeld');
+    }
+  );
 }
 function logWeight(){
   var w=document.getElementById('w-kg').value,fat=document.getElementById('w-fat').value;
@@ -4010,7 +4343,7 @@ function importData(ev){
 // START
 // ═══════════════════════════════════════════════════
 init();
-</script>
 
+</script>
 </body>
 </html>
