@@ -4219,9 +4219,14 @@ function restoreTimerState(){
       // Timer already finished while app was closed
       clearTimerState();
       updateTmrUI();
-      // If the timer just finished (within last 60 sec), still alert
+      // If the timer just finished (within last 60 sec), show in-app alert
+      // (Notification was already sent via setTimeout while in background)
       var msSinceExpiry = Date.now() - tmrExpiry;
-      if(msSinceExpiry < 60000) showAlert();
+      if(msSinceExpiry < 60000){
+        // Mark as alerted to prevent visibilitychange from triggering it again
+        tmrAlertedFor = tmrExpiry;
+        showAlertNoNotif();
+      }
       return;
     }
     // Resume countdown
@@ -4244,12 +4249,17 @@ document.addEventListener('visibilitychange', function(){
   if(document.visibilityState === 'visible' && tmrExpiry){
     tmrLeft = Math.max(0, Math.round((tmrExpiry - Date.now())/1000));
     updateTmrUI();
-    // If finished while in background and we haven't alerted yet
-    if(tmrLeft <= 0 && tmrAlertedFor !== tmrExpiry){
-      tmrAlertedFor = tmrExpiry;
+    if(tmrLeft <= 0){
       if(tmrIv){ clearInterval(tmrIv); tmrIv = null; }
       clearTimerState();
-      showAlert();
+      // Was the alert already sent via the scheduled background notification?
+      if(tmrAlertedFor === tmrExpiry){
+        // Yes - just show in-app alert overlay, but skip the notification
+        showAlertNoNotif();
+      } else {
+        tmrAlertedFor = tmrExpiry;
+        showAlert();
+      }
     }
   }
 });
@@ -4269,9 +4279,13 @@ function updateTmrUI(){
   document.getElementById('tmr-ring').style.strokeDashoffset=94.25-pct*94.25;
 }
 function showAlert(){
+  showAlertNoNotif();
+  sendRestNotification();
+}
+
+function showAlertNoNotif(){
   document.getElementById('alert').classList.add('on');
   if(navigator.vibrate)navigator.vibrate([400,150,400,150,400]);
-  sendRestNotification();
 }
 
 // ═══════════════════════════════════════════════════
@@ -4322,6 +4336,8 @@ function scheduleRestNotif(expiryMs){
   var delay = expiryMs - Date.now();
   if(delay <= 0) return;
   _notifTimeout = setTimeout(function(){
+    // Mark this expiry as alerted so visibilitychange / tickTimer don't fire again
+    tmrAlertedFor = expiryMs;
     sendRestNotification();
     _notifTimeout = null;
   }, delay);
