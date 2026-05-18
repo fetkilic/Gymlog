@@ -1280,6 +1280,11 @@ body.lt #alert{background:rgba(244,244,245,.97)}
               <strong style="color:var(--sub)">Tip:</strong> maak regelmatig een backup via Profiel → 💾 Backup om je data niet te verliezen bij browser-resets.
             </div>
           </div>
+
+          <!-- Version footer (subtle) -->
+          <div style="text-align:center;padding:10px 0 6px;color:var(--mu);font-size:9px;font-weight:500;letter-spacing:.08em;opacity:.5">
+            <span id="app-version"></span>
+          </div>
         </div>
       </section>
 
@@ -1893,6 +1898,9 @@ var LIB_DEFAULT = {
   'Biceps':    ['BICEP CURL','HAMMER CURL','PREACHER CURL','CONCENTRATION CURL'],
   'Core':      ['PLANK','CRUNCHES','LEG RAISES','RUSSIAN TWIST','AB WHEEL']
 };
+
+var APP_VERSION = '1.0.0';
+var APP_BUILD = '2026.05.18';
 
 var sessions  = [];
 var library   = {};
@@ -3350,7 +3358,11 @@ function showView(v) {
   if(v==='stats') renderStats();
   if(v==='plan')  renderPlan();
   if(v==='profile'){renderWtChart(30,null);renderXP();renderMmStats();renderMmChart(30,null);renderMmLogs();}
-  if(v==='settings'){setAutoTimerUI();setGlassUI();setNotifUI();}
+  if(v==='settings'){
+    setAutoTimerUI(); setGlassUI(); setNotifUI();
+    var vEl = document.getElementById('app-version');
+    if(vEl) vEl.textContent = 'GymLog v' + APP_VERSION + ' • ' + APP_BUILD;
+  }
 }
 
 // ═══════════════════════════════════════════════════
@@ -4183,15 +4195,13 @@ function tickTimer(){
   tmrLeft = Math.max(0, Math.round((tmrExpiry - Date.now()) / 1000));
   updateTmrUI();
   if(tmrLeft <= 0){
-    // Only alert once per expiry (in case tick runs multiple times after expiry)
-    if(tmrAlertedFor !== tmrExpiry){
-      tmrAlertedFor = tmrExpiry;
-      clearInterval(tmrIv); tmrIv = null;
-      clearTimerState();
-      showAlert();
-    } else {
-      clearInterval(tmrIv); tmrIv = null;
-    }
+    clearInterval(tmrIv); tmrIv = null;
+    clearTimerState();
+    if(tmrAlertedFor === tmrExpiry) return;
+    tmrAlertedFor = tmrExpiry;
+    persistAlertedState(tmrExpiry);
+    cancelRestNotif();
+    showAlertInApp();
   }
 }
 
@@ -4219,13 +4229,18 @@ function restoreTimerState(){
       // Timer already finished while app was closed
       clearTimerState();
       updateTmrUI();
-      // If the timer just finished (within last 60 sec), show in-app alert
-      // (Notification was already sent via setTimeout while in background)
+      // Already alerted? Don't show anything.
+      var prevAlerted = loadAlertedState();
+      if(prevAlerted === tmrExpiry){
+        tmrAlertedFor = tmrExpiry;
+        return;
+      }
+      // Show in-app alert if recent (within 60 sec)
       var msSinceExpiry = Date.now() - tmrExpiry;
       if(msSinceExpiry < 60000){
-        // Mark as alerted to prevent visibilitychange from triggering it again
         tmrAlertedFor = tmrExpiry;
-        showAlertNoNotif();
+        persistAlertedState(tmrExpiry);
+        showAlertInApp();
       }
       return;
     }
@@ -4246,28 +4261,34 @@ function restoreTimerState(){
 
 // ── When app becomes visible again, recalculate from system time ──
 document.addEventListener('visibilitychange', function(){
-  if(document.visibilityState === 'visible' && tmrExpiry){
-    tmrLeft = Math.max(0, Math.round((tmrExpiry - Date.now())/1000));
-    updateTmrUI();
-    if(tmrLeft <= 0){
-      if(tmrIv){ clearInterval(tmrIv); tmrIv = null; }
-      clearTimerState();
-      // Was the alert already sent via the scheduled background notification?
-      if(tmrAlertedFor === tmrExpiry){
-        // Yes - just show in-app alert overlay, but skip the notification
-        showAlertNoNotif();
-      } else {
-        tmrAlertedFor = tmrExpiry;
-        showAlert();
-      }
-    }
-  }
+  if(document.visibilityState !== 'visible') return;
+  if(!tmrExpiry) return;
+
+  tmrLeft = Math.max(0, Math.round((tmrExpiry - Date.now())/1000));
+  updateTmrUI();
+
+  if(tmrLeft > 0) return; // still running, nothing to do
+
+  // Timer has expired
+  if(tmrIv){ clearInterval(tmrIv); tmrIv = null; }
+  cancelRestNotif();
+  clearTimerState();
+
+  // Already alerted for this expiry? Don't do anything more.
+  if(tmrAlertedFor === tmrExpiry) return;
+
+  tmrAlertedFor = tmrExpiry;
+  persistAlertedState(tmrExpiry);
+
+  // App is now visible, only show in-app alert (don't send notification)
+  showAlertInApp();
 });
 function resetTimer(){
   if(tmrIv){ clearInterval(tmrIv); tmrIv = null; }
   tmrLeft = 0; tmrExpiry = null; tmrAlertedFor = null;
   cancelRestNotif();
   clearTimerState();
+  clearAlertedState();
   document.getElementById('tmr-btn').textContent = 'Start';
   document.getElementById('tmr-disp').textContent = '00:00';
   document.getElementById('tmr-ring').style.strokeDashoffset = 94.25;
@@ -4278,15 +4299,14 @@ function updateTmrUI(){
   var pct=tmrTotal>0?tmrLeft/tmrTotal:0;
   document.getElementById('tmr-ring').style.strokeDashoffset=94.25-pct*94.25;
 }
-function showAlert(){
-  showAlertNoNotif();
-  sendRestNotification();
-}
-
-function showAlertNoNotif(){
+// Show in-app alert (full-screen + vibration) without sending notification
+function showAlertInApp(){
   document.getElementById('alert').classList.add('on');
-  if(navigator.vibrate)navigator.vibrate([400,150,400,150,400]);
+  if(navigator.vibrate) navigator.vibrate([400,150,400,150,400]);
 }
+// Legacy wrapper for any leftover calls
+function showAlert(){ showAlertInApp(); }
+function showAlertNoNotif(){ showAlertInApp(); }
 
 // ═══════════════════════════════════════════════════
 // BROWSER NOTIFICATIONS
@@ -4336,11 +4356,32 @@ function scheduleRestNotif(expiryMs){
   var delay = expiryMs - Date.now();
   if(delay <= 0) return;
   _notifTimeout = setTimeout(function(){
-    // Mark this expiry as alerted so visibilitychange / tickTimer don't fire again
-    tmrAlertedFor = expiryMs;
-    sendRestNotification();
     _notifTimeout = null;
+    // Check if alert was already handled (e.g. via visibilitychange or tickTimer)
+    if(tmrAlertedFor === expiryMs) return;
+    // Mark BEFORE sending so other paths can't double-fire
+    tmrAlertedFor = expiryMs;
+    persistAlertedState(expiryMs);
+    // Only send notification if the app is in background
+    if(document.visibilityState !== 'visible' || !document.hasFocus()){
+      sendRestNotification();
+    }
   }, delay);
+}
+
+// Persist tmrAlertedFor so it survives reloads
+function persistAlertedState(expiryMs){
+  try { localStorage.setItem('gl_tmr_alerted', String(expiryMs)); } catch(_){}
+}
+function clearAlertedState(){
+  try { localStorage.removeItem('gl_tmr_alerted'); } catch(_){}
+}
+function loadAlertedState(){
+  var raw;
+  try { raw = localStorage.getItem('gl_tmr_alerted'); } catch(_){ return null; }
+  if(!raw) return null;
+  var n = parseInt(raw, 10);
+  return isNaN(n) ? null : n;
 }
 function cancelRestNotif(){
   if(_notifTimeout){ clearTimeout(_notifTimeout); _notifTimeout = null; }
@@ -4360,8 +4401,11 @@ function sendRestNotification(){
       silent: false
     });
     notif.onclick = function(){
-      window.focus();
+      try { window.focus(); } catch(_){}
       this.close();
+    };
+    notif.onshow = function(){
+      // Close any existing notifications with same tag (defensive)
     };
     // Auto-close after 10 seconds
     setTimeout(function(){ try{ notif.close(); }catch(_){} }, 10000);
@@ -4433,6 +4477,7 @@ function setNotifUI(){
 function stopAlert(){
   document.getElementById('alert').classList.remove('on');
   resetTimer();
+  clearAlertedState();
 }
 
 // ═══════════════════════════════════════════════════
