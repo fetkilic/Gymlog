@@ -3279,6 +3279,7 @@ function init() {
   startSessTimerLoop();
   renderDeloadBanner();
   checkAutoMonthSummary();
+  restoreTimerState();
 }
 
 // ═══════════════════════════════════════════════════
@@ -4146,27 +4147,120 @@ function addCustomEx(cat,name){
 // ═══════════════════════════════════════════════════
 // TIMER
 // ═══════════════════════════════════════════════════
+// Background-safe timer using system time. Survives tab-pause and app backgrounding.
+var tmrAlertedFor = null; // expiry time we already alerted on (prevents double-alert)
+
 function toggleTimer(){
-  if(tmrIv){clearInterval(tmrIv);tmrIv=null;document.getElementById('tmr-btn').textContent='Hervat';return;}
-  if(tmrLeft<=0){
-    var m=parseInt(document.getElementById('tMin').value)||0;
-    var s=parseInt(document.getElementById('tSec').value)||0;
-    tmrTotal=m*60+s;tmrLeft=tmrTotal;
+  if(tmrIv){
+    // PAUSE
+    clearInterval(tmrIv); tmrIv = null;
+    cancelRestNotif();
+    document.getElementById('tmr-btn').textContent = 'Hervat';
+    // Persist remaining time so resume picks it up
+    persistTimerState({running:false, leftSec:tmrLeft, totalSec:tmrTotal});
+    return;
   }
-  if(tmrLeft<=0)return;
-  tmrExpiry=Date.now()+tmrLeft*1000;
-  document.getElementById('tmr-btn').textContent='Pauzeer';
-  tmrIv=setInterval(function(){
-    tmrLeft=Math.max(0,Math.round((tmrExpiry-Date.now())/1000));
-    updateTmrUI();
-    if(tmrLeft<=0){clearInterval(tmrIv);tmrIv=null;showAlert();}
-  },500);
+  if(tmrLeft <= 0){
+    var m = parseInt(document.getElementById('tMin').value) || 0;
+    var s = parseInt(document.getElementById('tSec').value) || 0;
+    tmrTotal = m*60 + s;
+    tmrLeft  = tmrTotal;
+  }
+  if(tmrLeft <= 0) return;
+  tmrExpiry = Date.now() + tmrLeft*1000;
+  tmrAlertedFor = null;
+  document.getElementById('tmr-btn').textContent = 'Pauzeer';
+  persistTimerState({running:true, expiry:tmrExpiry, totalSec:tmrTotal});
+
+  if(tmrIv) clearInterval(tmrIv);
+  tmrIv = setInterval(tickTimer, 500);
+  scheduleRestNotif(tmrExpiry);
+  tickTimer(); // immediate update
 }
+
+function tickTimer(){
+  if(!tmrExpiry) return;
+  tmrLeft = Math.max(0, Math.round((tmrExpiry - Date.now()) / 1000));
+  updateTmrUI();
+  if(tmrLeft <= 0){
+    // Only alert once per expiry (in case tick runs multiple times after expiry)
+    if(tmrAlertedFor !== tmrExpiry){
+      tmrAlertedFor = tmrExpiry;
+      clearInterval(tmrIv); tmrIv = null;
+      clearTimerState();
+      showAlert();
+    } else {
+      clearInterval(tmrIv); tmrIv = null;
+    }
+  }
+}
+
+// ── Persist timer state across page reloads / backgrounding ──
+function persistTimerState(state){
+  try { localStorage.setItem('gl_timer', JSON.stringify(state)); } catch(_){}
+}
+function clearTimerState(){
+  try { localStorage.removeItem('gl_timer'); } catch(_){}
+}
+function restoreTimerState(){
+  var raw;
+  try { raw = localStorage.getItem('gl_timer'); } catch(_){ return; }
+  if(!raw) return;
+  var state;
+  try { state = JSON.parse(raw); } catch(_){ return; }
+
+  if(state.running && state.expiry){
+    tmrExpiry = state.expiry;
+    tmrTotal  = state.totalSec || 0;
+    tmrLeft   = Math.max(0, Math.round((tmrExpiry - Date.now())/1000));
+    tmrAlertedFor = null;
+
+    if(tmrLeft <= 0){
+      // Timer already finished while app was closed
+      clearTimerState();
+      updateTmrUI();
+      // If the timer just finished (within last 60 sec), still alert
+      var msSinceExpiry = Date.now() - tmrExpiry;
+      if(msSinceExpiry < 60000) showAlert();
+      return;
+    }
+    // Resume countdown
+    document.getElementById('tmr-btn').textContent = 'Pauzeer';
+    if(tmrIv) clearInterval(tmrIv);
+    tmrIv = setInterval(tickTimer, 500);
+    scheduleRestNotif(tmrExpiry);
+    tickTimer();
+  } else if(state.leftSec && state.leftSec > 0){
+    // Was paused
+    tmrLeft  = state.leftSec;
+    tmrTotal = state.totalSec || state.leftSec;
+    document.getElementById('tmr-btn').textContent = 'Hervat';
+    updateTmrUI();
+  }
+}
+
+// ── When app becomes visible again, recalculate from system time ──
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState === 'visible' && tmrExpiry){
+    tmrLeft = Math.max(0, Math.round((tmrExpiry - Date.now())/1000));
+    updateTmrUI();
+    // If finished while in background and we haven't alerted yet
+    if(tmrLeft <= 0 && tmrAlertedFor !== tmrExpiry){
+      tmrAlertedFor = tmrExpiry;
+      if(tmrIv){ clearInterval(tmrIv); tmrIv = null; }
+      clearTimerState();
+      showAlert();
+    }
+  }
+});
 function resetTimer(){
-  clearInterval(tmrIv);tmrIv=null;tmrLeft=0;tmrExpiry=null;
-  document.getElementById('tmr-btn').textContent='Start';
-  document.getElementById('tmr-disp').textContent='00:00';
-  document.getElementById('tmr-ring').style.strokeDashoffset=94.25;
+  if(tmrIv){ clearInterval(tmrIv); tmrIv = null; }
+  tmrLeft = 0; tmrExpiry = null; tmrAlertedFor = null;
+  cancelRestNotif();
+  clearTimerState();
+  document.getElementById('tmr-btn').textContent = 'Start';
+  document.getElementById('tmr-disp').textContent = '00:00';
+  document.getElementById('tmr-ring').style.strokeDashoffset = 94.25;
 }
 function updateTmrUI(){
   var m=Math.floor(tmrLeft/60),s=tmrLeft%60;
@@ -4218,6 +4312,22 @@ function requestNotifPermission(cb){
     }
     if(cb) cb(result === 'granted');
   });
+}
+
+// Schedule a backup notification at exact expiry time (works even if setInterval is throttled)
+var _notifTimeout = null;
+function scheduleRestNotif(expiryMs){
+  cancelRestNotif();
+  if(!notifEnabled()) return;
+  var delay = expiryMs - Date.now();
+  if(delay <= 0) return;
+  _notifTimeout = setTimeout(function(){
+    sendRestNotification();
+    _notifTimeout = null;
+  }, delay);
+}
+function cancelRestNotif(){
+  if(_notifTimeout){ clearTimeout(_notifTimeout); _notifTimeout = null; }
 }
 
 function sendRestNotification(){
@@ -4304,7 +4414,10 @@ function setNotifUI(){
     ? 'Je krijgt een melding als de rust-timer afloopt.'
     : 'Tik om opnieuw in te schakelen.';
 }
-function stopAlert(){document.getElementById('alert').classList.remove('on');resetTimer();}
+function stopAlert(){
+  document.getElementById('alert').classList.remove('on');
+  resetTimer();
+}
 
 // ═══════════════════════════════════════════════════
 // STATS
