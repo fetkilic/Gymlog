@@ -22,7 +22,8 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 #scroll{height:100vh;height:100dvh;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px}
 /* NAV - fixed at bottom, always visible */
 #nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;display:flex;justify-content:space-around;align-items:flex-start;padding-top:8px;padding-bottom:env(safe-area-inset-bottom);background:rgba(9,9,11,.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--b1);min-height:64px;z-index:999}
-.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:none;background:none;color:var(--mu);cursor:pointer;padding:0;transition:color .15s}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:none;background:none;color:var(--mu);cursor:pointer;padding:0 2px;transition:color .15s}
+.nb span{white-space:nowrap}
 .nb svg{width:20px;height:20px}
 .nb span{font-size:8px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
 .nb.on{color:var(--ac)}
@@ -336,6 +337,19 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 .pr-val-old{font-size:11px;color:var(--mu);text-decoration:line-through}
 
 
+
+/* MEASUREMENTS */
+.mm-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--mu);margin-bottom:4px}
+.mm-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.mm-stat{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:8px 6px;text-align:center}
+.mm-stat-v{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;font-style:italic;line-height:1;color:var(--tx)}
+.mm-stat-l{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);margin-top:3px}
+.mm-stat-s{font-size:8px;color:var(--mu);margin-top:2px;font-weight:600}
+.mm-log-item{display:flex;justify-content:space-between;align-items:center;padding:8px 11px;background:var(--s2);border-radius:7px;margin-bottom:4px;font-size:11px;font-weight:600}
+.mm-log-info{display:flex;gap:7px;align-items:baseline;flex-wrap:wrap}
+.mm-log-v{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;font-style:italic;color:var(--ac)}
+.mm-log-d{color:var(--mu);font-size:10px}
+.mm-log-del{background:none;border:none;color:#f87171;cursor:pointer;font-size:16px;line-height:1}
 /* MONTHLY SUMMARY */
 .ms-tile{background:rgba(99,102,241,.14);border:1px solid rgba(99,102,241,.28);border-radius:11px;padding:13px 11px;text-align:center}
 .ms-tile-v{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:900;font-style:italic;line-height:1;color:#fff}
@@ -680,6 +694,53 @@ body.lt #alert{background:rgba(244,244,245,.97)}
 </div>
 
 
+
+<!-- BODY MEASUREMENTS MODAL -->
+<div id="mm-bg" style="display:none;position:fixed;inset:0;z-index:8700;background:rgba(0,0,0,.85);backdrop-filter:blur(8px)" onclick="closeMeasureLog()"></div>
+<div id="mm-box" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:8701;background:var(--s1);border:1px solid var(--b1);border-radius:18px;padding:20px;width:94%;max-width:400px;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <div class="D" style="font-size:20px">LICHAAMSMATEN <em style="color:var(--ac)">LOGGEN</em></div>
+    <button class="btn btn-icon" onclick="closeMeasureLog()">✕</button>
+  </div>
+  <div style="font-size:10px;color:var(--mu);margin-bottom:14px;line-height:1.5">Vul in wat je gemeten hebt (cm). Laat velden leeg om over te slaan. Datum staat standaard op vandaag.</div>
+  <input class="inp" id="mm-date" type="date" style="margin-bottom:12px">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+    <div>
+      <div class="mm-lbl">Borst</div>
+      <input class="inp" id="mm-chest" type="number" step="0.1" placeholder="cm">
+    </div>
+    <div>
+      <div class="mm-lbl">Arm</div>
+      <input class="inp" id="mm-arm" type="number" step="0.1" placeholder="cm">
+    </div>
+    <div>
+      <div class="mm-lbl">Taille</div>
+      <input class="inp" id="mm-waist" type="number" step="0.1" placeholder="cm">
+    </div>
+    <div>
+      <div class="mm-lbl">Dij</div>
+      <input class="inp" id="mm-thigh" type="number" step="0.1" placeholder="cm">
+    </div>
+    <div>
+      <div class="mm-lbl">Heup</div>
+      <input class="inp" id="mm-hip" type="number" step="0.1" placeholder="cm">
+    </div>
+    <div>
+      <div class="mm-lbl">Schouder</div>
+      <input class="inp" id="mm-shoulder" type="number" step="0.1" placeholder="cm">
+    </div>
+    <div>
+      <div class="mm-lbl">Kuit</div>
+      <input class="inp" id="mm-calf" type="number" step="0.1" placeholder="cm">
+    </div>
+    <div>
+      <div class="mm-lbl">Nek</div>
+      <input class="inp" id="mm-neck" type="number" step="0.1" placeholder="cm">
+    </div>
+  </div>
+  <textarea id="mm-note" class="inp" placeholder="Notitie (optioneel)..." style="height:60px;resize:none;margin-bottom:14px"></textarea>
+  <button class="btn btn-p" onclick="saveMeasureLog()" style="width:100%">Opslaan</button>
+</div>
 
 <!-- EXERCISE INFO MODAL -->
 <div id="info-bg" style="display:none;position:fixed;inset:0;z-index:8500;background:rgba(0,0,0,.85);backdrop-filter:blur(8px)" onclick="closeExInfo()"></div>
@@ -1112,25 +1173,7 @@ body.lt #alert{background:rgba(244,244,245,.97)}
       <section id="view-profile" class="hidden">
         <div style="margin-top:12px">
           <div class="card" id="xp-card"></div>
-          <div class="card">
-            <input class="inp" id="prof-name" placeholder="JOUW NAAM" style="margin-bottom:10px" onchange="saveName()">
-            <button class="theme-btn" onclick="toggleTheme()">
-              <span id="theme-ico">🌙</span>
-              <span id="theme-lbl">Dark mode</span>
-            </button>
-            <button class="theme-btn" onclick="toggleAutoTimer()" style="margin-top:8px">
-              <span id="autoTimer-ico">⏱️</span>
-              <span id="autoTimer-lbl">Auto rust-timer aan</span>
-            </button>
-            <button class="theme-btn" onclick="editInactivityTimeout()" style="margin-top:8px">
-              <span>💤</span>
-              <span id="inactivity-lbl">Auto-stop sessie na 30 min</span>
-            </button>
-            <button class="theme-btn" onclick="toggleGlass()" style="margin-top:8px">
-              <span id="glass-ico">🪟</span>
-              <span id="glass-lbl">Glass design</span>
-            </button>
-          </div>
+          
           <div class="card">
             <div class="card-hdr"><div class="card-title">Gewicht</div></div>
             <div style="display:flex;gap:7px;margin-bottom:10px">
@@ -1148,6 +1191,77 @@ body.lt #alert{background:rgba(244,244,245,.97)}
             <div id="wt-stats" style="margin-bottom:14px"></div>
             <div id="wt-logs"></div>
           </div>
+
+          <!-- BODY MEASUREMENTS -->
+          <div class="card">
+            <div class="card-hdr">
+              <div class="card-title">Lichaamsmaten</div>
+              <button class="ab ab-b" onclick="openMeasureLog()">+ Loggen</button>
+            </div>
+            <div id="mm-stats" style="margin-bottom:10px"></div>
+            <div style="height:160px;margin-bottom:10px"><canvas id="mm-chart"></canvas></div>
+            <div class="fp-row" style="margin-bottom:10px">
+              <div class="fp mf on" onclick="setMmType('chest',this)">Borst</div>
+              <div class="fp mf" onclick="setMmType('arm',this)">Arm</div>
+              <div class="fp mf" onclick="setMmType('waist',this)">Taille</div>
+              <div class="fp mf" onclick="setMmType('thigh',this)">Dij</div>
+              <div class="fp mf" onclick="setMmType('hip',this)">Heup</div>
+              <div class="fp mf" onclick="setMmType('shoulder',this)">Schouder</div>
+              <div class="fp mf" onclick="setMmType('calf',this)">Kuit</div>
+              <div class="fp mf" onclick="setMmType('neck',this)">Nek</div>
+            </div>
+            <div class="fp-row" style="margin-bottom:10px">
+              <div class="fp mp on" onclick="renderMmChart(30,this)">Maand</div>
+              <div class="fp mp" onclick="renderMmChart(90,this)">3 mnd</div>
+              <div class="fp mp" onclick="renderMmChart(365,this)">Jaar</div>
+              <div class="fp mp" onclick="renderMmChart(9999,this)">Altijd</div>
+            </div>
+            <div id="mm-logs"></div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="view-settings" class="hidden">
+        <div style="margin-top:12px">
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">Weergave</div></div>
+            <button class="theme-btn" onclick="toggleTheme()">
+              <span id="theme-ico">🌙</span>
+              <span id="theme-lbl">Dark mode</span>
+            </button>
+            <button class="theme-btn" onclick="toggleGlass()" style="margin-top:8px">
+              <span id="glass-ico">🪟</span>
+              <span id="glass-lbl">Glass design</span>
+            </button>
+          </div>
+
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">Sessies</div></div>
+            <button class="theme-btn" onclick="toggleAutoTimer()">
+              <span id="autoTimer-ico">⏱️</span>
+              <span id="autoTimer-lbl">Auto rust-timer aan</span>
+            </button>
+            <div style="font-size:10px;color:var(--mu);margin:6px 4px 12px;line-height:1.5">Start automatisch een rust-timer na elke set op basis van hoe het voelde.</div>
+            <button class="theme-btn" onclick="editInactivityTimeout()">
+              <span>💤</span>
+              <span id="inactivity-lbl">Auto-stop sessie na 30 min</span>
+            </button>
+            <div style="font-size:10px;color:var(--mu);margin:6px 4px 12px;line-height:1.5">Sessie stopt automatisch als er X minuten geen activiteit is. Zo voorkom je dat een vergeten sessie ineens 4 uur duurt.</div>
+            <button class="theme-btn" onclick="toggleNotifications()">
+              <span id="notif-ico">🔔</span>
+              <span id="notif-lbl">Notificaties inschakelen</span>
+            </button>
+            <div id="notif-sub" style="font-size:10px;color:var(--mu);margin:6px 4px 0;line-height:1.5"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">Profiel</div></div>
+            <input class="inp" id="prof-name" placeholder="JOUW NAAM" onchange="saveName()">
+            <div style="font-size:10px;color:var(--mu);margin:6px 4px 0;line-height:1.5">Je naam verschijnt in de begroeting en op gedeelde sessie-kaarten.</div>
+          </div>
+
           <div class="card">
             <div class="card-hdr"><div class="card-title">Data</div></div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
@@ -1155,6 +1269,16 @@ body.lt #alert{background:rgba(244,244,245,.97)}
               <button class="btn btn-g" onclick="document.getElementById('imp-file').click()" style="padding:13px 0;font-size:12px">📂 Herstellen</button>
             </div>
             <input type="file" id="imp-file" class="hidden" accept=".json" onchange="importData(event)">
+            <div style="font-size:10px;color:var(--mu);margin:8px 4px 0;line-height:1.5">Maak een backup van al je sessies, oefeningen, templates en instellingen als JSON-bestand. Herstellen overschrijft je huidige data.</div>
+          </div>
+
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">Over</div></div>
+            <div style="font-size:11px;color:var(--mu);line-height:1.6;padding:4px">
+              GymLog is een lokale app — al je data staat veilig op je apparaat. Niets wordt naar servers gestuurd.
+              <br><br>
+              <strong style="color:var(--sub)">Tip:</strong> maak regelmatig een backup via Profiel → 💾 Backup om je data niet te verliezen bij browser-resets.
+            </div>
           </div>
         </div>
       </section>
@@ -1179,6 +1303,10 @@ body.lt #alert{background:rgba(244,244,245,.97)}
     <button class="nb" id="nav-profile" onclick="showView('profile')">
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
       <span>Profiel</span>
+    </button>
+    <button class="nb" id="nav-settings" onclick="showView('settings')">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      <span>Settings</span>
     </button>
   </nav>
 
@@ -2132,6 +2260,216 @@ function endTodaySess(){
 }
 
 
+
+// ═══════════════════════════════════════════════════
+// BODY MEASUREMENTS
+// ═══════════════════════════════════════════════════
+var chartMm = null;
+var currentMmType = 'chest';
+
+var MM_LABELS = {
+  chest: 'Borst', arm: 'Arm', waist: 'Taille', thigh: 'Dij',
+  hip: 'Heup', shoulder: 'Schouder', calf: 'Kuit', neck: 'Nek'
+};
+
+function openMeasureLog(){
+  document.getElementById('mm-date').valueAsDate = new Date();
+  // Pre-fill with latest values for each type (as placeholder)
+  ['chest','arm','waist','thigh','hip','shoulder','calf','neck'].forEach(function(t){
+    var el = document.getElementById('mm-' + t);
+    if(el){
+      el.value = '';
+      var latest = getLatestMeasure(t);
+      el.placeholder = latest ? latest + ' (laatst)' : 'cm';
+    }
+  });
+  document.getElementById('mm-note').value = '';
+  document.getElementById('mm-bg').style.display = 'block';
+  document.getElementById('mm-box').style.display = 'block';
+}
+
+function closeMeasureLog(){
+  document.getElementById('mm-bg').style.display = 'none';
+  document.getElementById('mm-box').style.display = 'none';
+}
+
+function saveMeasureLog(){
+  var date = document.getElementById('mm-date').value;
+  if(!date){ toast('Kies een datum.'); return; }
+  var entry = { date: date };
+  var hasValue = false;
+  ['chest','arm','waist','thigh','hip','shoulder','calf','neck'].forEach(function(t){
+    var v = parseFloat(String(document.getElementById('mm-' + t).value).replace(',','.'));
+    if(!isNaN(v) && v > 0){
+      entry[t] = v;
+      hasValue = true;
+    }
+  });
+  if(!hasValue){ toast('Vul minimaal één meting in.'); return; }
+  var note = document.getElementById('mm-note').value.trim();
+  if(note) entry.note = note;
+  if(!user.measurements) user.measurements = [];
+  user.measurements.unshift(entry);
+  save();
+  closeMeasureLog();
+  renderMmStats();
+  renderMmLogs();
+  renderMmChart(30, null);
+  toast('Maten opgeslagen ✓');
+}
+
+function getLatestMeasure(type){
+  var logs = (user.measurements || []).filter(function(m){ return m[type] != null; });
+  if(!logs.length) return null;
+  logs.sort(function(a,b){ return new Date(b.date) - new Date(a.date); });
+  return logs[0][type];
+}
+
+function delMeasureLog(idx){
+  doConfirm('Meting verwijderen?', function(ok){
+    if(!ok) return;
+    user.measurements.splice(idx, 1);
+    save();
+    renderMmStats();
+    renderMmLogs();
+    renderMmChart(30, null);
+    toast('Verwijderd');
+  });
+}
+
+function setMmType(type, el){
+  currentMmType = type;
+  document.querySelectorAll('.mf').forEach(function(b){ b.classList.remove('on'); });
+  if(el) el.classList.add('on');
+  // Find active period button
+  var pBtn = document.querySelector('.mp.on');
+  var days = 30;
+  if(pBtn){
+    var txt = pBtn.textContent.toLowerCase();
+    if(txt.indexOf('3') !== -1) days = 90;
+    else if(txt.indexOf('jaar') !== -1) days = 365;
+    else if(txt.indexOf('altijd') !== -1) days = 9999;
+  }
+  renderMmChart(days, null);
+}
+
+function renderMmStats(){
+  var el = document.getElementById('mm-stats');
+  if(!el) return;
+  var logs = user.measurements || [];
+  if(!logs.length){
+    el.innerHTML = '<div style="text-align:center;padding:14px;color:var(--mu);font-size:12px">Nog geen metingen — tik op "+ Loggen" om te beginnen.</div>';
+    return;
+  }
+  // Show 4 main measurements with latest value + diff vs first
+  var stats = [];
+  ['chest','arm','waist','thigh'].forEach(function(t){
+    var typeLogs = logs.filter(function(m){ return m[t] != null; })
+                       .sort(function(a,b){ return new Date(a.date) - new Date(b.date); });
+    if(!typeLogs.length){
+      stats.push({label: MM_LABELS[t], v: '—', diff: 0});
+    } else {
+      var first = typeLogs[0][t];
+      var last = typeLogs[typeLogs.length-1][t];
+      var diff = +(last - first).toFixed(1);
+      stats.push({label: MM_LABELS[t], v: last, diff: diff, hasData: true});
+    }
+  });
+  el.innerHTML = '<div class="mm-stat-grid">' + stats.map(function(s){
+    var color = s.diff > 0 ? '#4ade80' : s.diff < 0 ? '#fbbf24' : 'var(--mu)';
+    var arrow = s.diff > 0 ? '▲' : s.diff < 0 ? '▼' : '';
+    return '<div class="mm-stat">'
+      + '<div class="mm-stat-v">' + (s.v === '—' ? '—' : s.v + '<span style="font-size:9px;color:var(--mu);margin-left:1px">cm</span>') + '</div>'
+      + '<div class="mm-stat-l">' + s.label + '</div>'
+      + (s.hasData && s.diff !== 0 ? '<div class="mm-stat-s" style="color:' + color + '">' + arrow + ' ' + (s.diff > 0 ? '+' : '') + s.diff + '</div>' : '')
+      + '</div>';
+  }).join('') + '</div>';
+}
+
+function renderMmChart(days, el){
+  if(el){
+    document.querySelectorAll('.mp').forEach(function(b){ b.classList.remove('on'); });
+    el.classList.add('on');
+  }
+  var allLogs = (user.measurements || []).slice();
+  var typedLogs = allLogs.filter(function(m){ return m[currentMmType] != null; });
+  typedLogs.sort(function(a,b){ return new Date(a.date) - new Date(b.date); });
+  var cutoffMs = Date.now() - days * 86400000;
+  var logs = typedLogs.filter(function(l){ return new Date(l.date).getTime() >= cutoffMs; });
+
+  var ctx = document.getElementById('mm-chart');
+  if(!ctx) return;
+  if(chartMm) chartMm.destroy();
+  if(!logs.length){
+    ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
+    return;
+  }
+
+  var labels = logs.map(function(l){
+    var d = new Date(l.date);
+    return days <= 30 ? d.toLocaleDateString('nl-NL',{day:'numeric',month:'short'})
+         : days <= 90 ? d.toLocaleDateString('nl-NL',{day:'numeric',month:'short'})
+         :              d.toLocaleDateString('nl-NL',{day:'numeric',month:'short',year:'2-digit'});
+  });
+  var data = logs.map(function(l){ return l[currentMmType]; });
+
+  chartMm = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: MM_LABELS[currentMmType] + ' (cm)',
+        data: data,
+        borderColor: '#a78bfa',
+        backgroundColor: 'rgba(167,139,250,.12)',
+        fill: true,
+        tension: .35,
+        pointRadius: 4,
+        pointBackgroundColor: '#a78bfa',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 1.5
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position:'top', align:'end', labels:{color:'#a1a1aa',font:{size:10,weight:'700'},padding:8,boxWidth:14,boxHeight:2,usePointStyle:true,pointStyleWidth:8} },
+        tooltip: { backgroundColor:'#18181b', borderColor:'#27272a', borderWidth:1, titleColor:'#fafafa', bodyColor:'#a1a1aa', padding:9,
+          callbacks: { label: function(c){ return ' ' + c.raw + ' cm'; } } }
+      },
+      scales: {
+        x: { ticks:{color:'#71717a',font:{size:9},maxRotation:30,autoSkip:true,maxTicksLimit:8}, grid:{color:'rgba(255,255,255,.03)'} },
+        y: { ticks:{color:'#71717a',font:{size:9},callback:function(v){return v+' cm';}}, grid:{color:'rgba(255,255,255,.04)'} }
+      }
+    }
+  });
+}
+
+function renderMmLogs(){
+  var el = document.getElementById('mm-logs');
+  if(!el) return;
+  var logs = (user.measurements || []).slice(0, 8);
+  if(!logs.length){
+    el.innerHTML = '';
+    return;
+  }
+  el.innerHTML = logs.map(function(m, i){
+    var dateStr = new Date(m.date).toLocaleDateString('nl-NL', {day:'numeric',month:'short',year:'numeric'});
+    var measures = [];
+    ['chest','arm','waist','thigh','hip','shoulder','calf','neck'].forEach(function(t){
+      if(m[t] != null) measures.push('<span><strong style="color:var(--ac);font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-style:italic">' + m[t] + '</strong> <span style="font-size:9px;color:var(--mu)">' + MM_LABELS[t].toLowerCase() + '</span></span>');
+    });
+    return '<div class="mm-log-item">'
+      + '<div class="mm-log-info">'
+      +   '<span class="mm-log-d">' + dateStr + '</span>'
+      +   measures.join('')
+      + '</div>'
+      + '<button class="mm-log-del" onclick="delMeasureLog(' + i + ')">&#x00D7;</button>'
+      + '</div>';
+  }).join('');
+}
+
+
 // ═══════════════════════════════════════════════════
 // EXERCISE INFO MODAL
 // ═══════════════════════════════════════════════════
@@ -3001,15 +3339,17 @@ function toast(msg) {
 // ═══════════════════════════════════════════════════
 function showView(v) {
   activeView = v;
-  ['train','stats','plan','profile'].forEach(function(n){
-    document.getElementById('view-'+n).classList.add('hidden');
-    var b=document.getElementById('nav-'+n); if(b)b.classList.remove('on');
+  ['train','stats','plan','profile','settings'].forEach(function(n){
+    var view = document.getElementById('view-'+n);
+    if(view) view.classList.add('hidden');
+    var b = document.getElementById('nav-'+n); if(b) b.classList.remove('on');
   });
   document.getElementById('view-'+v).classList.remove('hidden');
   var b=document.getElementById('nav-'+v); if(b)b.classList.add('on');
   if(v==='stats') renderStats();
   if(v==='plan')  renderPlan();
-  if(v==='profile'){renderWtChart(30,null);renderXP();setAutoTimerUI();}
+  if(v==='profile'){renderWtChart(30,null);renderXP();renderMmStats();renderMmChart(30,null);renderMmLogs();}
+  if(v==='settings'){setAutoTimerUI();setGlassUI();setNotifUI();}
 }
 
 // ═══════════════════════════════════════════════════
@@ -3837,6 +4177,132 @@ function updateTmrUI(){
 function showAlert(){
   document.getElementById('alert').classList.add('on');
   if(navigator.vibrate)navigator.vibrate([400,150,400,150,400]);
+  sendRestNotification();
+}
+
+// ═══════════════════════════════════════════════════
+// BROWSER NOTIFICATIONS
+// ═══════════════════════════════════════════════════
+function notifSupported(){
+  return typeof Notification !== 'undefined' && 'permission' in Notification;
+}
+
+function notifEnabled(){
+  return notifSupported() && Notification.permission === 'granted' && user.notifEnabled !== false;
+}
+
+function requestNotifPermission(cb){
+  if(!notifSupported()){
+    toast('Notificaties niet ondersteund.');
+    if(cb) cb(false);
+    return;
+  }
+  if(Notification.permission === 'granted'){
+    if(cb) cb(true);
+    return;
+  }
+  if(Notification.permission === 'denied'){
+    toast('Notificaties geblokkeerd. Wijzig in browser-instellingen.');
+    if(cb) cb(false);
+    return;
+  }
+  Notification.requestPermission().then(function(result){
+    if(result === 'granted'){
+      toast('Notificaties ingeschakeld ✓');
+      // Test notification
+      try{
+        new Notification('GymLog', { body: 'Je krijgt nu meldingen als de rusttimer afloopt.', icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%236366f1"/><text x="50" y="65" font-size="50" text-anchor="middle" fill="white" font-weight="bold">GL</text></svg>', silent: false });
+      }catch(_){}
+    } else if(result === 'denied'){
+      toast('Notificaties geweigerd');
+    }
+    if(cb) cb(result === 'granted');
+  });
+}
+
+function sendRestNotification(){
+  if(!notifEnabled()) return;
+  // Only show notification if page is hidden / not focused
+  if(document.visibilityState === 'visible' && document.hasFocus()) return;
+  try{
+    var notif = new Notification('Rust voorbij! ⏱️', {
+      body: 'Tijd voor de volgende set.',
+      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%236366f1"/><text x="50" y="65" font-size="50" text-anchor="middle" fill="white" font-weight="bold">GL</text></svg>',
+      badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%236366f1"/></svg>',
+      tag: 'gymlog-rest',
+      requireInteraction: false,
+      silent: false
+    });
+    notif.onclick = function(){
+      window.focus();
+      this.close();
+    };
+    // Auto-close after 10 seconds
+    setTimeout(function(){ try{ notif.close(); }catch(_){} }, 10000);
+  }catch(e){
+    console.error('Notification failed:', e);
+  }
+}
+
+function toggleNotifications(){
+  if(!notifSupported()){
+    toast('Niet ondersteund in deze browser.');
+    setNotifUI();
+    return;
+  }
+  if(Notification.permission === 'denied'){
+    toast('Geblokkeerd — wijzig in browser-instellingen.');
+    setNotifUI();
+    return;
+  }
+  if(Notification.permission !== 'granted'){
+    // Request permission
+    requestNotifPermission(function(granted){
+      if(granted){
+        user.notifEnabled = true;
+        save();
+      }
+      setNotifUI();
+    });
+    return;
+  }
+  // Already granted - toggle on/off
+  user.notifEnabled = user.notifEnabled === false ? true : false;
+  save();
+  setNotifUI();
+  toast(user.notifEnabled ? 'Notificaties aan' : 'Notificaties uit');
+}
+
+function setNotifUI(){
+  var ico = document.getElementById('notif-ico');
+  var lbl = document.getElementById('notif-lbl');
+  var sub = document.getElementById('notif-sub');
+  if(!ico || !lbl) return;
+  if(!notifSupported()){
+    ico.textContent = '🚫';
+    lbl.textContent = 'Niet ondersteund';
+    if(sub) sub.textContent = 'Je browser ondersteunt geen notificaties.';
+    return;
+  }
+  if(Notification.permission === 'denied'){
+    ico.textContent = '🚫';
+    lbl.textContent = 'Notificaties geblokkeerd';
+    if(sub) sub.textContent = 'Wijzig dit via je browser-instellingen.';
+    return;
+  }
+  if(Notification.permission === 'default'){
+    ico.textContent = '🔔';
+    lbl.textContent = 'Notificaties inschakelen';
+    if(sub) sub.textContent = 'Krijg een melding als je rust-timer afloopt, ook als de app op de achtergrond staat.';
+    return;
+  }
+  // granted
+  var on = user.notifEnabled !== false;
+  ico.textContent = on ? '🔔' : '🔕';
+  lbl.textContent = on ? 'Notificaties aan' : 'Notificaties uit';
+  if(sub) sub.textContent = on
+    ? 'Je krijgt een melding als de rust-timer afloopt.'
+    : 'Tik om opnieuw in te schakelen.';
 }
 function stopAlert(){document.getElementById('alert').classList.remove('on');resetTimer();}
 
