@@ -162,8 +162,7 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 #cat-modal.on{display:flex}
 .cm-inner{background:var(--s1);border-radius:18px;padding:22px;width:100%;max-width:340px}
 /* TEMPLATE MODAL */
-#tmpl-modal{display:none;position:fixed;inset:0;max-width:430px;margin:0 auto;z-index:300;background:var(--bg);flex-direction:column}#tmpl-modal.on{display:flex}
-#tmpl-modal.on{display:flex}
+#tmpl-modal{display:none;position:fixed;top:0;bottom:0;left:0;right:0;max-width:430px;margin:0 auto;z-index:1100;background:var(--bg);flex-direction:column;height:100dvh;max-height:100dvh}#tmpl-modal.on{display:flex}
 .tm-hdr{padding:50px 18px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--b1)}
 /* ALERT */
 #alert{display:none;position:fixed;inset:0;z-index:500;background:rgba(9,9,11,.97);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px}
@@ -350,6 +349,25 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 .mm-log-v{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;font-style:italic;color:var(--ac)}
 .mm-log-d{color:var(--mu);font-size:10px}
 .mm-log-del{background:none;border:none;color:#f87171;cursor:pointer;font-size:16px;line-height:1}
+
+/* Template modal sticky footer */
+.tm-footer{
+  flex-shrink:0;
+  padding:12px 18px calc(18px + env(safe-area-inset-bottom));
+  background:var(--bg);
+  border-top:1px solid var(--b1);
+  box-shadow:0 -8px 16px rgba(0,0,0,.12);
+}
+body.lt .tm-footer{box-shadow:0 -8px 16px rgba(0,0,0,.04)}
+body.glass .tm-footer{
+  background:rgba(15,10,35,.85);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+}
+body.glass.lt .tm-footer{
+  background:rgba(255,255,255,.85);
+}
+
 /* MONTHLY SUMMARY */
 .ms-tile{background:rgba(99,102,241,.14);border:1px solid rgba(99,102,241,.28);border-radius:11px;padding:13px 11px;text-align:center}
 .ms-tile-v{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:900;font-style:italic;line-height:1;color:#fff}
@@ -936,7 +954,9 @@ body.lt #alert{background:rgba(244,244,245,.97)}
     <div class="D" style="font-size:21px">TEMPLATE <em style="color:var(--ac)">AANMAKEN</em></div>
     <button class="btn btn-icon" onclick="closeTmplModal()">✕</button>
   </div>
-  <div style="flex:1;overflow-y:auto;display:flex;flex-direction:column">
+
+  <!-- Scrollable content -->
+  <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px">
 
     <!-- Step 1: naam + emoji -->
     <div style="padding:16px 18px 0">
@@ -968,13 +988,13 @@ body.lt #alert{background:rgba(244,244,245,.97)}
         </div>
         <span style="font-size:11px;color:var(--mu);font-weight:600;margin-left:4px">sets per oefening</span>
       </div>
-      <div id="tmpl-ex-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:0 18px 10px;max-height:280px;overflow-y:auto"></div>
+      <div id="tmpl-ex-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:0 18px 14px"></div>
     </div>
+  </div>
 
-    <!-- Opslaan -->
-    <div style="padding:12px 18px 24px;margin-top:auto">
-      <button class="btn btn-p" onclick="saveTemplate()">Template Opslaan</button>
-    </div>
+  <!-- STICKY FOOTER (outside scroll) -->
+  <div class="tm-footer">
+    <button class="btn btn-p" onclick="saveTemplate()" style="width:100%;padding:14px">Template Opslaan</button>
   </div>
 </div>
 
@@ -1244,6 +1264,11 @@ body.lt #alert{background:rgba(244,244,245,.97)}
               <span id="autoTimer-lbl">Auto rust-timer aan</span>
             </button>
             <div style="font-size:10px;color:var(--mu);margin:6px 4px 12px;line-height:1.5">Start automatisch een rust-timer na elke set op basis van hoe het voelde.</div>
+            <button class="theme-btn" onclick="toggleSmartTimer()">
+              <span id="smart-ico">🎯</span>
+              <span id="smart-lbl">Slimme rust-timer</span>
+            </button>
+            <div id="smart-sub" style="font-size:10px;color:var(--mu);margin:6px 4px 12px;line-height:1.5"></div>
             <button class="theme-btn" onclick="editInactivityTimeout()">
               <span>💤</span>
               <span id="inactivity-lbl">Auto-stop sessie na 30 min</span>
@@ -1377,292 +1402,39 @@ var EX_INFO = {
     cat:'Borst', muscle:'Pectoralis major (borst), triceps, voorste deltoid',
     desc:'De koning van de borstoefeningen. Compound beweging die pure borststerkte opbouwt.',
     tips:['Schouderbladen samenknijpen en naar beneden trekken','Voeten plat op de grond, lichte lendenboog','Stang raakt midden borst (rond tepellijn)','Pols recht houden, niet knikken','Adem in naar beneden, uit bij omhoog drukken'],
+    focus:'Stel je voor dat je de stang horizontaal uit elkaar probeert te trekken — borst spant direct aan. Duw de stang weg, niet omhoog.',
     mistakes:['Stuiteren op de borst','Ellebogen 90° flaren (gevaarlijk voor schouders, houd ~70°)','Benen losmaken van de grond'],
     youtube:'https://youtube.com/shorts/VJKA7R_oqzo'
   },
   'INCLINE DB PRESS': {
     cat:'Borst', muscle:'Bovenste borst, voorste deltoid',
-    desc:'Schuine bankdruk met dumbbells voor de bovenste borstvezels. Bredere bewegingsbaan dan de barbell.',
-    tips:['Bank op 30-45° (niet steiler, wordt schouder-oefening)','Dumbbells iets boven schouderhoogte starten','Beweging in halve cirkel, polsen boven elleboog','Knijp in de top, niet helemaal uitstrekken'],
-    mistakes:['Bank te steil instellen','Dumbbells tegen elkaar tikken in de top','Te zwaar gewicht waardoor vorm verloren gaat'],
+    desc:'Schuine bankdruk met dumbbells voor de bovenste borstvezels.',
+    tips:['Bank op 30-45°, niet steiler','Dumbbells boven schouders in start','Knijp bovenste borst samen in top','Laat dumbbells neer tot ellebogen licht onder bankhoek'],
+    focus:'Richt je blik op het punt waar de dumbbells boven je hoofd samenkomen. Voel de bovenste borst samentrekken alsof je een pen tussen je sleutelbeenderen vastklemt.',
+    mistakes:['Bank te steil (wordt dan schouder-oefening)','Dumbbells niet ver genoeg laten zakken','Te zwaar waardoor schouders compenseren'],
     youtube:'https://www.youtube.com/results?search_query=incline+dumbbell+press+tutorial'
   },
-  'PEC FLY': {
-    cat:'Borst', muscle:'Pectoralis major (vooral binnenkant)',
-    desc:'Isolatie-oefening voor de borst. Knijp-beweging zonder hulp van triceps.',
-    tips:['Lichte buiging in elleboog, vasthouden tijdens hele beweging','Rek voelen aan zijkant borst onderin','Knijp 1-2 sec in top','Langzaam tempo - dit is geen kracht-oefening'],
-    mistakes:['Ellebogen helemaal strekken (overbelast pees)','Te zwaar - dan wordt het een press','Te ver doortrekken naar achter'],
-    youtube:'https://youtube.com/shorts/u2A8ujLq5as'
-  },
-  'DIPS': {
-    cat:'Borst', muscle:'Onderste borst, triceps, voorste deltoid',
-    desc:'Bodyweight compound voor onderste borst. Voorovergeleund = meer borst, rechtop = meer triceps.',
-    tips:['Lichaam licht voorover hellen voor borst-focus','Schouders weg van oren','Zak tot bovenarm parallel met grond','Knijp triceps + borst in de top'],
-    mistakes:['Te diep zakken (schouder-blessure risico)','Schouders optrekken','Stoten of zwaaien'],
-    youtube:'https://www.youtube.com/results?search_query=dips+chest+tutorial'
-  },
-  'PUSH UPS': {
-    cat:'Borst', muscle:'Borst, triceps, voorste deltoid, core',
-    desc:'Klassieke bodyweight compound. Versie aanpassen aan niveau (knieën, normaal, verzwaard).',
-    tips:['Lichaam recht als plank, geen zakkende heupen','Handen iets breder dan schouders','Borst tot vlak boven grond','Adem in naar beneden, uit bij omhoog'],
-    mistakes:['Heupen zakken door','Niet door volledige bewegingsbaan','Hoofd voorover laten hangen'],
-    youtube:'https://www.youtube.com/results?search_query=push+up+form+tutorial'
-  },
   'CABLE CROSSOVER': {
-    cat:'Borst', muscle:'Borst (hele bereik, vooral binnenkant)',
-    desc:'Constant spanning isolatie. Hoek bepaalt focus: hoog=onderste borst, laag=bovenste, midden=middelste.',
-    tips:['Lichte voorovergebogen houding','Lichte buiging in ellebogen','Knijp handen samen in front, hold 1 sec','Trekstand bepaalt borstdeel'],
-    mistakes:['Te zwaar - dan wordt het een press','Schouders optrekken','Niet terugbewegen tot rek voelbaar'],
+    cat:'Borst', muscle:'Pectoralis major (isolatie), voorste deltoid',
+    desc:'Cable fly voor maximale borstcontractie en spanning over hele bewegingsbaan.',
+    tips:['Kabels hoog instellen voor onderste borst','Lichte voorovergebogen stand','Lichte buiging in ellebogen vasthouden','Trek diagonaal naar beneden en naar binnen','Knijp borst samen in eindpositie'],
+    focus:'Denk niet aan je handen bewegen — denk aan je ellebogen naar elkaar toe trekken. Zo schakel je de borst in en omzeil je de armen.',
+    mistakes:['Armen strekken (wordt bicep-beweging)','Te zwaar waardoor schouders mee trekken','Niet knijpen in eindpositie'],
     youtube:'https://youtube.com/shorts/ImJdbpy5cMg'
   },
-
-  // ═══ RUG ═══
-  'LAT PULLDOWN': {
-    cat:'Rug', muscle:'Latissimus dorsi (brede rug), biceps, achterste deltoid',
-    desc:'Verticale trek-oefening, opbouw richting pull-ups. Brede grip = brede V-vorm.',
-    tips:['Lichte achterwaartse leuning (10-20°)','Stang naar bovenste borst trekken','Schouderbladen naar beneden + achteren','Ellebogen recht naar beneden, niet naar achter'],
-    mistakes:['Te ver achterover hellen','Stang achter het hoofd trekken (gevaarlijk)','Te zwaar waardoor je niet kunt knijpen in onderste positie'],
-    youtube:'https://youtube.com/shorts/pbfjcArPnHs'
+  'PEC FLY': {
+    cat:'Borst', muscle:'Pectoralis major (stretch en contractie)',
+    desc:'Isolatie-oefening die de borst strekt en samenknipt. Ideaal als finisher na pressing.',
+    tips:['Lichte buiging in elleboog vasthouden door hele beweging','Rek voelen bij opening (niet pijn)','Knijp borst hard samen boven','Langzaam neerlaten (excentrisch telt!)'],
+    focus:'Stel voor je omhelst een grote boom — armen om elkaar heen, niet handen. Je borst doet het werk, niet je armen.',
+    mistakes:['Ellebogen helemaal strekken','Te ver openen (schouderblessure)','Gewicht laten vallen in neerfase'],
+    youtube:'https://youtube.com/shorts/u2A8ujLq5as'
   },
-  'DEADLIFT': {
-    cat:'Rug', muscle:'Hele posterior chain: rug, billen, hamstrings',
-    desc:'De ultieme compound-oefening. Activeert meer spiermassa dan welke andere oefening dan ook.',
-    tips:['Stang over midden van voet','Heupen scharnieren, neutrale rug','Stang dicht bij benen optillen','Knijp billen samen in top, geen overstrekking','Adem vasthouden tijdens lift (Valsalva)'],
-    mistakes:['Ronding in onderrug (blessure-risico)','Stang te ver van lichaam','Met armen trekken (laat benen het werk doen)'],
-    youtube:'https://www.youtube.com/results?search_query=deadlift+tutorial'
-  },
-  'BENT OVER ROW': {
-    cat:'Rug', muscle:'Mid-back, lats, achterste deltoid, biceps',
-    desc:'Horizontale rij. Bouwt dikte op in mid-back en houdingsspieren.',
-    tips:['Heupen scharnieren tot torso ~45°','Neutrale rug, geen ronding','Stang naar onderste ribben/navel','Knijp schouderbladen samen in top'],
-    mistakes:['Te rechtop staan (wordt shrug)','Met momentum zwaaien','Stang naar borst trekken (verkeerde focus)'],
-    youtube:'https://www.youtube.com/results?search_query=bent+over+barbell+row+tutorial'
-  },
-  'PULL UPS': {
-    cat:'Rug', muscle:'Lats, mid-back, biceps, achterste deltoid',
-    desc:'Bodyweight king voor de bovenrug. Niets bouwt brede lats zoals dit.',
-    tips:['Volledige hang in start (dead hang)','Borst naar stang in top','Schouders weg van oren','Lichaam licht achterover voor lat-focus'],
-    mistakes:['Half-rep (kin niet over stang)','Kipping/zwaaien (pas voor crossfit)','Schouders schrugen'],
-    youtube:'https://youtube.com/shorts/AjvHmdAV0LI'
-  },
-  'SEATED ROW': {
-    cat:'Rug', muscle:'Mid-back, lats, biceps',
-    desc:'Geleide horizontale rij. Veiliger dan barbell row, ideaal voor beginners en hoge volume.',
-    tips:['Borst omhoog, schouders terug','Trek naar onderste borst/buik','Knijp schouderbladen 1 sec in top','Lichte achterwaartse leuning, niet te ver'],
-    mistakes:['Te ver achterover leunen','Met onderrug trekken','Schouderbladen niet samenknijpen'],
-    youtube:'https://youtube.com/shorts/_T71qr8679M'
-  },
-  'FACE PULLS': {
-    cat:'Rug', muscle:'Achterste deltoid, mid-traps, rotator cuff',
-    desc:'Beste oefening voor schoudergezondheid en houdingsverbetering. Iedereen zou deze moeten doen.',
-    tips:['Touw naar gezicht/oren trekken','Externe rotatie in eindpositie (duimen achter hoofd)','Hoge ellebogen','Lichter gewicht, hogere reps (12-20)'],
-    mistakes:['Te zwaar waardoor het een gewone row wordt','Niet roteren in eindpositie','Stoppen voor gezicht'],
-    youtube:'https://youtube.com/shorts/mn0r9EUM21E'
-  },
-  'T-BAR ROW': {
-    cat:'Rug', muscle:'Mid-back, lats, traps',
-    desc:'Compound rij met dikke handles. Bouwt dikte in de bovenrug op.',
-    tips:['Borst op pad, neutrale rug','Trek tot handles tegen borst','Knijp schouderbladen','Gebruik chest-supported variant indien beschikbaar'],
-    mistakes:['Met onderrug trekken','Te zwaar waardoor vorm verloren gaat','Te ver doortrekken'],
-    youtube:'https://www.youtube.com/results?search_query=t+bar+row+tutorial'
-  },
-
-  // ═══ BENEN ═══
-  'SQUAT': {
-    cat:'Benen', muscle:'Quads, billen, hamstrings, core',
-    desc:'De koning van alle oefeningen. Bouwt totale onderlichaam-kracht en mass.',
-    tips:['Voeten schouderbreedte, tenen iets naar buiten','Heupen eerst naar achter, dan zakken','Knieën in lijn met tenen','Tot dijbenen parallel of dieper','Borst omhoog gedurende hele beweging'],
-    mistakes:['Knieën naar binnen vallen','Hielen los van grond','Voorover vallen (rug rond)','Niet diep genoeg (half-squat)'],
-    youtube:'https://www.youtube.com/results?search_query=barbell+squat+tutorial'
-  },
-  'LEG PRESS': {
-    cat:'Benen', muscle:'Quads, billen, hamstrings',
-    desc:'Geleide compound voor benen. Veiliger alternatief voor squat met hoge belasting.',
-    tips:['Voeten schouderbreedte op platform','Voeten hoger = meer billen/hams, lager = meer quads','Tot 90° in knie of dieper','Geen knieën helemaal strekken op top'],
-    mistakes:['Onderrug los van pad (knie-blessure)','Half-rep','Knieën naar binnen drukken'],
-    youtube:'https://youtube.com/shorts/z-5oNyPM1Sk'
-  },
-  'LEG EXTENSION': {
-    cat:'Benen', muscle:'Quadriceps (isolatie)',
-    desc:'Pure quad isolatie. Goed als finisher of pre-exhaust voor squats.',
-    tips:['Pad net boven enkel','Volledige knie-extensie, knijp 1 sec','Langzaam laten zakken (3 sec)','Hoge reps werken het best (12-20)'],
-    mistakes:['Zwaaien met momentum','Te zwaar (knie-belasting)','Niet volledig strekken in top'],
-    youtube:'https://youtube.com/shorts/zshBP6FyH0Q'
-  },
-  'LEG CURL': {
-    cat:'Benen', muscle:'Hamstrings (isolatie)',
-    desc:'Hamstring isolatie. Cruciaal voor balans tussen voor- en achterkant van bovenbeen.',
-    tips:['Pad net boven hiel','Volledige flexie tot billen','Tenen kunnen flex of point voor variatie','Langzaam laten zakken'],
-    mistakes:['Heupen optillen','Half-rep','Zwaaien met momentum'],
-    youtube:'https://www.youtube.com/results?search_query=leg+curl+tutorial'
-  },
-  'ROMANIAN DEADLIFT': {
-    cat:'Benen', muscle:'Hamstrings, billen, onderrug',
-    desc:'Hip-hinge oefening. Bouwt explosieve hamstring-kracht en billen.',
-    tips:['Lichte buiging in knieën, vasthouden','Heupen naar achter, niet zakken','Stang dicht langs benen','Tot rek in hams (meestal mid-scheen)','Heupen naar voren stuwen om omhoog te komen'],
-    mistakes:['Squatten ipv hingen','Stang te ver van benen','Onderrug ronden','Te ver doorzakken'],
-    youtube:'https://www.youtube.com/results?search_query=romanian+deadlift+tutorial'
-  },
-  'CALF RAISES': {
-    cat:'Benen', muscle:'Gastrocnemius, soleus (kuiten)',
-    desc:'Pure kuit isolatie. Hoge reps werken het best voor groei.',
-    tips:['Volledige bewegingsbaan: tot diepe rek én volledige strek','1 sec hold in top','Langzaam tempo (3-1-1)','15-25 reps werken vaak beter dan zwaar+laag'],
-    mistakes:['Stuiteren in onderkant','Half-rep in top','Te snel tempo'],
-    youtube:'https://youtube.com/shorts/hdWdMTAC0yU'
-  },
-  'LUNGES': {
-    cat:'Benen', muscle:'Quads, billen, hamstrings, core',
-    desc:'Unilateraal compound. Corrigeert links-rechts onbalans en bouwt functionele kracht.',
-    tips:['Stappen breed genoeg dat voorste knie 90° kan','Achterste knie tot vlak boven grond','Borst rechtop','Drukken via voorste hiel'],
-    mistakes:['Voorste knie voorbij tenen','Te kleine stap','Wegvallen in zijkant'],
-    youtube:'https://www.youtube.com/results?search_query=lunges+tutorial'
-  },
-
-  // ═══ SCHOUDERS ═══
-  'OHP': {
-    cat:'Schouders', muscle:'Voorste deltoid, zijdelingse deltoid, triceps, core',
-    desc:'Overhead Press - de koning van schouder-oefeningen. Bouwt volle, ronde schouders.',
-    tips:['Stang op bovenborst start','Hoofd licht naar achter, dan onder stang door','Volledige extensie, oren bij armen','Billen + core gespannen, geen lendenboog'],
-    mistakes:['Te grote lendenboog','Niet volledig overhead persen','Stang te ver voor het lichaam'],
-    youtube:'https://www.youtube.com/results?search_query=overhead+press+OHP+tutorial'
-  },
-  'LATERAL RAISE': {
-    cat:'Schouders', muscle:'Zijdelingse deltoid (isolatie)',
-    desc:'De #1 oefening voor brede schouders. Pure isolatie van de side-delts.',
-    tips:['Lichte buiging in elleboog, vasthouden','Optillen tot armen parallel, niet hoger','Pinkkant iets omhoog (uitschenken-beweging)','Lichter gewicht, hogere reps (12-20)'],
-    mistakes:['Te zwaar - traps nemen het over','Zwaaien met momentum','Te hoog optillen (boven schouderhoogte)'],
-    youtube:'https://www.youtube.com/results?search_query=lateral+raise+tutorial'
-  },
-  'FRONT RAISE': {
-    cat:'Schouders', muscle:'Voorste deltoid (isolatie)',
-    desc:'Voorste schouder isolatie. Vaak overbodig - bench press traint dit ook al.',
-    tips:['Lichte elleboog-buiging','Optillen tot schouderhoogte','Langzaam laten zakken','Afwisselend of beide tegelijk'],
-    mistakes:['Zwaaien met momentum','Te hoog optillen','Schouders schrugen'],
-    youtube:'https://www.youtube.com/results?search_query=dumbbell+front+raise+tutorial'
-  },
-  'DB SHOULDER PRESS': {
-    cat:'Schouders', muscle:'Hele deltoid, triceps',
-    desc:'Dumbbell schouder-press. Vrijere bewegingsbaan dan barbell, beter voor schouder-gezondheid.',
-    tips:['Dumbbells op schouderhoogte start','Polsen boven ellebogen','Volledige extensie zonder pijn','Lichte boog-beweging mogelijk'],
-    mistakes:['Te diep laten zakken (schouder-stress)','Dumbbells tegen elkaar tikken','Lendenboog'],
-    youtube:'https://www.youtube.com/results?search_query=dumbbell+shoulder+press+tutorial'
-  },
-  'REAR DELT FLY': {
-    cat:'Schouders', muscle:'Achterste deltoid (isolatie)',
-    desc:'Vaak vergeten maar cruciaal voor goede houding en complete schouders.',
-    tips:['Voorovergeleund of op bank liggend','Lichte elleboog-buiging','Knijp schouderbladen samen','Pinkkant iets omhoog'],
-    mistakes:['Te zwaar - dan wordt het een row','Niet ver genoeg doortrekken','Schouders schrugen'],
-    youtube:'https://www.youtube.com/results?search_query=rear+delt+fly+tutorial'
-  },
-
-  // ═══ TRICEPS ═══
-  'CABLE PUSHDOWN': {
-    cat:'Triceps', muscle:'Triceps (alle 3 koppen)',
-    desc:'De #1 isolatie voor triceps. Constante spanning over hele bewegingsbaan.',
-    tips:['Ellebogen vast langs lichaam','Onderarmen bewegen, bovenarmen niet','Volledige strek, knijp 1 sec','Langzaam terugbewegen'],
-    mistakes:['Ellebogen wijken naar voren','Met lichaamsgewicht meeduwen','Te zwaar - vorm verloren'],
-    youtube:'https://youtube.com/shorts/jhSA00GmWeQ'
-  },
-  'SKULL CRUSHERS': {
-    cat:'Triceps', muscle:'Triceps (vooral lange kop)',
-    desc:'Lying triceps extension. Bouwt mass op in de triceps, vooral de lange kop.',
-    tips:['Ellebogen op vaste positie','Stang naar voorhoofd of net achter hoofd','Bovenarmen verticaal of licht naar achter','EZ-bar comfortabeler dan straight bar'],
-    mistakes:['Ellebogen flaren','Stang op gezicht laten landen (oeps)','Te zwaar voor strakke vorm'],
-    youtube:'https://www.youtube.com/results?search_query=skull+crushers+tutorial'
-  },
-  'OVERHEAD EXTENSION': {
-    cat:'Triceps', muscle:'Triceps (vooral lange kop)',
-    desc:'Overhead positie strekt de lange kop maximaal voor optimale groei.',
-    tips:['Bovenarmen tegen oren','Volledige rek onderaan','Strekken zonder ellebogen te flaren','Kan met dumbbell, kabel of EZ-bar'],
-    mistakes:['Ellebogen wijken','Half-rep','Te zwaar gewicht'],
-    youtube:'https://www.youtube.com/results?search_query=overhead+tricep+extension+tutorial'
-  },
-  'CLOSE GRIP BENCH': {
-    cat:'Triceps', muscle:'Triceps, borst, voorste deltoid',
-    desc:'Compound triceps-oefening. Zwaarder dan isolaties - hier kun je écht laden.',
-    tips:['Handen schouderbreedte (niet smaller)','Ellebogen dicht bij lichaam','Stang naar onderborst','Volledige strek in top'],
-    mistakes:['Te smal grijpen (pols-stress)','Ellebogen flaren','Stang te hoog laten zakken'],
-    youtube:'https://www.youtube.com/results?search_query=close+grip+bench+press+tutorial'
-  },
-
-  // ═══ BICEPS ═══
-  'BICEP CURL': {
-    cat:'Biceps', muscle:'Biceps brachii, brachialis',
-    desc:'De klassieke biceps oefening. Standing met dumbbells of barbell.',
-    tips:['Ellebogen vast langs lichaam','Volledige strek onderaan','Knijp 1 sec in top','Polsen recht houden'],
-    mistakes:['Met lichaam zwaaien','Ellebogen naar voren brengen','Half-rep'],
-    youtube:'https://youtube.com/shorts/XbMjFPHAHek'
-  },
-  'HAMMER CURL': {
-    cat:'Biceps', muscle:'Brachialis, brachioradialis, biceps',
-    desc:'Neutrale grip curl. Bouwt vooral de brachialis op (onder de biceps) - meer pieken.',
-    tips:['Polsen neutraal (duimen omhoog)','Ellebogen vast','Kan afwisselend of beide tegelijk','Langzaam negatief tempo'],
-    mistakes:['Polsen draaien','Met lichaam zwaaien','Ellebogen meebewegen'],
-    youtube:'https://www.youtube.com/results?search_query=hammer+curl+tutorial'
-  },
-  'PREACHER CURL': {
-    cat:'Biceps', muscle:'Biceps (vooral korte kop)',
-    desc:'Geleide curl op preacher bench. Elimineert momentum, pure isolatie.',
-    tips:['Bovenarmen plat op pad','Niet helemaal strekken onderaan (peesbelasting)','Volledige knijp in top','Langzaam tempo'],
-    mistakes:['Volledig strekken in onderkant','Met momentum stoten','Polsen knikken'],
-    youtube:'https://www.youtube.com/results?search_query=preacher+curl+tutorial'
-  },
-  'CONCENTRATION CURL': {
-    cat:'Biceps', muscle:'Biceps (piek-vorming)',
-    desc:'Zittend, elleboog op binnenkant dij. Studies tonen dit als hoogste biceps-activatie.',
-    tips:['Zit voorover op bankje','Elleboog tegen binnen-dij gedrukt','Curl naar schouder, knijp top','Andere hand kan op andere knie steunen'],
-    mistakes:['Schouder mee bewegen','Te zwaar - vorm verloren','Te snel tempo'],
-    youtube:'https://www.youtube.com/results?search_query=concentration+curl+tutorial'
-  },
-  '21S': {
-    cat:'Biceps', muscle:'Biceps (volume techniek)',
-    desc:'7 reps onderste helft + 7 bovenste helft + 7 volledige. Brutale pomp.',
-    tips:['Lichter gewicht dan normale curl','7 reps van strek tot 90°','7 reps van 90° tot top','7 reps volledig (geen rust tussen)'],
-    mistakes:['Te zwaar gewicht kiezen','Vorm verliezen in laatste 7','Pauzeren tussen de sets van 7'],
-    youtube:'https://www.youtube.com/watch?v=8wbCS5TKNQ8'
-  },
-
-  // ═══ CORE ═══
-  'PLANK': {
-    cat:'Core', muscle:'Hele core, schouders, billen',
-    desc:'Isometrische core stabilisatie. Bouwt anti-extensie kracht op.',
-    tips:['Lichaam recht als plank','Billen + core actief gespannen','Schouders boven ellebogen','Adem rustig door'],
-    mistakes:['Heupen zakken door','Billen omhoog','Hoofd voorover/achterover'],
-    youtube:'https://www.youtube.com/results?search_query=plank+exercise+tutorial'
-  },
-  'CRUNCHES': {
-    cat:'Core', muscle:'Rectus abdominis (six-pack)',
-    desc:'Klassieke ab-isolatie. Korte bewegingsbaan, focus op contractie.',
-    tips:['Schouderbladen los van grond, niet hoger','Knijp abs 1 sec in top','Langzaam laten zakken','Niet aan nek trekken'],
-    mistakes:['Hele rug optillen (heupbuiger neemt over)','Aan nek trekken','Te snel tempo'],
-    youtube:'https://www.youtube.com/results?search_query=ab+crunch+tutorial'
-  },
-  'LEG RAISES': {
-    cat:'Core', muscle:'Onderbuik, heupbuigers',
-    desc:'Onderste ab-focus. Hangend aan stang of liggend op rug.',
-    tips:['Onderrug tegen grond/pad gedrukt','Benen recht of gebogen optillen','Knijp onderbuik in top','Langzaam laten zakken'],
-    mistakes:['Benen laten vallen (geen controle)','Onderrug los van grond','Met momentum zwaaien'],
-    youtube:'https://www.youtube.com/results?search_query=hanging+leg+raises+tutorial'
-  },
-  'RUSSIAN TWIST': {
-    cat:'Core', muscle:'Schuine buikspieren (obliques)',
-    desc:'Roterende core-oefening. Met of zonder gewicht.',
-    tips:['Voeten van grond voor extra moeilijkheid','Borst omhoog, lichte achterwaartse leuning','Roteer vanuit core, niet alleen armen','Tik gewicht naast heup, niet voor knie'],
-    mistakes:['Alleen armen bewegen','Onderrug ronden','Te snel tempo'],
-    youtube:'https://www.youtube.com/results?search_query=russian+twist+tutorial'
-  },
-  'AB WHEEL': {
-    cat:'Core', muscle:'Hele core, lats, schouders',
-    desc:'Extreem zware core anti-extensie. Voor gevorderden.',
-    tips:['Begin op knieën','Rol uit tot bijna gestrekt','Geen doorzakkende rug','Trek terug met core, niet armen'],
-    mistakes:['Te ver uitrollen (lendenboog)','Te snel uitrollen','Niet genoeg core-spanning'],
-    youtube:'https://www.youtube.com/results?search_query=ab+wheel+rollout+tutorial'
-  },
-  // ═══ EXTRA - User-specific exercises ═══
   'CABLE FLY HIGH': {
     cat:'Borst', muscle:'Onderste borst (sternale vezels)',
     desc:'Cable fly van hoog naar laag. Train de onderste borstvezels door diagonaal naar beneden te knijpen.',
     tips:['Kabels op hoogste stand','Lichte voorovergebogen houding','Trek diagonaal naar beneden naar heupen','Knijp onderkant borst in eindpositie','Lichte buiging in elleboog vasthouden'],
+    focus:'Richt op het punt onder je borst. Trek je ellebogen naar je heupbotten — voel de onderkant van de borst samenvouwen.',
     mistakes:['Te zwaar gewicht waardoor het een press wordt','Ellebogen volledig strekken','Te ver doortrekken naar achter'],
     youtube:'https://www.youtube.com/results?search_query=high+to+low+cable+fly+tutorial'
   },
@@ -1670,6 +1442,7 @@ var EX_INFO = {
     cat:'Borst', muscle:'Bovenste borst (clavicula deel)',
     desc:'Cable fly van laag naar hoog. Activeert specifiek de bovenste borstvezels.',
     tips:['Kabels op laagste stand','Lichte achterovergebogen houding','Trek diagonaal omhoog naar schouderhoogte','Knijp bovenste borst in top','Lichte elleboog-buiging vasthouden'],
+    focus:'Denk aan je sleutelbeenderen naar elkaar schuiven. Trek je ellebogen omhoog en naar binnen — de bovenste borst werkt.',
     mistakes:['Schouders optrekken','Te ver omhoog trekken','Polsen knikken'],
     youtube:'https://www.youtube.com/results?search_query=low+to+high+cable+fly+tutorial'
   },
@@ -1677,6 +1450,7 @@ var EX_INFO = {
     cat:'Borst', muscle:'Pectoralis major, voorste deltoid, triceps',
     desc:'Machine chest press waarbij de armen naar elkaar toe convergeren. Combineert pressing en knijpen.',
     tips:['Schouderbladen naar achter en omlaag','Greep iets onder schouderhoogte','Volledig doorduwen, knijp in eindpositie','Niet helemaal terugkomen, behoud spanning'],
+    focus:'Duw niet puur naar voren — duw je handen ook naar elkaar toe. Die convergerende beweging is precies wat de borst het meest activeert.',
     mistakes:['Schouders optillen tijdens persen','Pols knikken','Te lichte greep instellen'],
     youtube:'https://www.youtube.com/results?search_query=converging+chest+press+tutorial'
   },
@@ -1684,13 +1458,173 @@ var EX_INFO = {
     cat:'Borst', muscle:'Borst, voorste deltoid, triceps',
     desc:'Neutrale grip dumbbell press (palmen naar elkaar). Schoudervriendelijke variant.',
     tips:['Dumbbells palmen tegenover elkaar','Ellebogen ~45° van lichaam','Druk recht omhoog, dumbbells niet tegen elkaar','Rek voelen in onderpositie'],
+    focus:'Voel hoe de neutrale grip de spanning verschuift naar het midden van de borst. Probeer de dumbbells naar elkaar te drukken zonder ze te bewegen — borst spant aan.',
     mistakes:['Ellebogen te ver flaren','Te diep zakken','Tegen elkaar tikken in top'],
     youtube:'https://www.youtube.com/results?search_query=hammer+dumbbell+press+tutorial'
   },
-  'DUMBELL FRONT SHOULDER': {
+  'DIPS': {
+    cat:'Borst', muscle:'Borst (breed), triceps, voorste deltoid',
+    desc:'Compound beweging die borst of triceps traint afhankelijk van je lichaamshoek.',
+    tips:['Voorover leunen voor meer borstactivatie','Rechte romp voor meer triceps','Zakken tot ellebogen ~90°','Niet te ver zakken (schouderblessure)'],
+    focus:'Lean bewust voorover en voel hoe de borst de push overneemt. Als je rechtop blijft, is het een tricep-oefening — kies bewust.',
+    mistakes:['Te ver zakken','Schouders optrekken','Schokken in beweging'],
+    youtube:'https://www.youtube.com/results?search_query=dips+chest+tutorial'
+  },
+  'PUSH UPS': {
+    cat:'Borst', muscle:'Borst, triceps, voorste deltoid, core',
+    desc:'Klassieke lichaamsgewicht-oefening. Effectief voor borst en triceps.',
+    tips:['Handen iets breder dan schouders','Rechte lijn van hoofd tot hiel','Borst raakt bijna grond','Ellebogen ~45° van lichaam'],
+    focus:'Duw de grond weg van je. Stel je voor dat je je handen naar elkaar toe schuift over de vloer zonder ze te bewegen — borst activeert direct.',
+    mistakes:['Heupen zakken','Nek vooruit steken','Half-rep'],
+    youtube:'https://www.youtube.com/results?search_query=push+up+form+tutorial'
+  },
+
+  // ═══ RUG ═══
+  'LAT PULLDOWN': {
+    cat:'Rug', muscle:'Latissimus dorsi (primair), biceps, achterste deltoid',
+    desc:'Beste oefening voor brede rug. Bouwt de V-taper.',
+    tips:['Grip iets breder dan schouders','Achterover leunen ~20-30°','Trek naar sleutelbeen, niet naar borst','Schouderbladen naar achter en omlaag samentrekken'],
+    focus:'Trek met je ellebogen, niet met je handen. Stel je voor je hebt geen handen — je ellebogen trekken de stang naar beneden. De lats doen het werk.',
+    mistakes:['Teveel achterover leunen (wordt row)','Stang achter hoofd trekken (nekblessure)','Armen volledig strekken bovenaan'],
+    youtube:'https://youtube.com/shorts/pbfjcArPnHs'
+  },
+  'PULL UPS': {
+    cat:'Rug', muscle:'Latissimus dorsi, biceps, achterste deltoid',
+    desc:'King of rug-oefeningen. Volledig lichaamsgewicht, maximale lat-activatie.',
+    tips:['Schouderbladen naar achter en omlaag voor je trekt','Trek tot kin boven stang','Gecontroleerd laten zakken','Greep: overhand of neutraal'],
+    focus:'Duw de stang omlaag i.p.v. jezelf omhoog trekken. Trek je ellebogen naar je heupen. Voel de lats als vleugels uitvouwen.',
+    mistakes:['Kipping (momentum)','Nek naar stang duwen','Half-rep (niet volledig strekken)'],
+    youtube:'https://youtube.com/shorts/AjvHmdAV0LI'
+  },
+  'SEATED ROW': {
+    cat:'Rug', muscle:'Midden rug (rhomboids, mid-traps), lats, biceps',
+    desc:'Horizontale trekbeweging voor midden-rugdikte.',
+    tips:['Rug recht, lichte voorovergebogen start','Trek ellebogen langs lichaam naar achter','Schouderbladen samenpersen in eindpositie','Langzaam terug, rek in schouderbladen'],
+    focus:'Jouw tip is perfect: denk ellebogen door de muur achter je. Stel je voor een potlood tussen je schouderbladen — knijp dat potlood vast. Handen zijn slechts haken.',
+    mistakes:['Rug afronden','Met momentum zwaaien','Ellebogen te ver uitflairen'],
+    youtube:'https://youtube.com/shorts/_T71qr8679M'
+  },
+  'BENT OVER ROW': {
+    cat:'Rug', muscle:'Lats, rhomboids, mid-traps, biceps, achterkant schouder',
+    desc:'Zwaardere horizontale trekbeweging voor totale rugdikte en kracht.',
+    tips:['Romp ~45° naar voren','Stang raakt buik/borst onderkant','Ellebogen naast lichaam houden','Rug recht, geen rondtrekken'],
+    focus:'Trek de stang naar je navel, niet naar je borst. Denk: ellebogen naar plafond achter je. Voel de volledige rug samentrekken.',
+    mistakes:['Rug afronden (ernstig blessure-risico)','Knieen te ver buigen','Gewicht laten zwaaien'],
+    youtube:'https://www.youtube.com/results?search_query=bent+over+barbell+row+tutorial'
+  },
+  'T-BAR ROW': {
+    cat:'Rug', muscle:'Midden rug, lats, rhomboids, biceps',
+    desc:'Geconcentreerde rugrow met T-stang. Goed voor rugdikte.',
+    tips:['Borst op pad (bij machine-versie)','Trek ellebogen naar achter en omhoog','Schouderbladen samentrekken in top','Volledig strekken in neerfase'],
+    focus:'Laat je schouderbladen eerst zakken (depressie) voor je begint te trekken. Dan trek je ellebogen achterwaarts — midden rug komt volledig aan.',
+    mistakes:['Schokken met romp','Ellebogen uitflairen','Half-rep'],
+    youtube:'https://www.youtube.com/results?search_query=t+bar+row+tutorial'
+  },
+
+  // ═══ BENEN ═══
+  'SQUAT': {
+    cat:'Benen', muscle:'Quadriceps (primair), glutes, hamstrings, core',
+    desc:'De meest complete krachtoefening. Bouwt benen en romp in zijn geheel.',
+    tips:['Voeten schouderbreedte, licht naar buiten','Knieën volgen teenlijn','Heupen dieper dan knieën indien mogelijk','Borst omhoog, rug recht'],
+    focus:'Duw de grond uiteen met je voeten (extern roteren). Voel hoe de heupen openen en de glutes activeren. Drive omhoog vanuit je hiel.',
+    mistakes:['Knieën naar binnen zakken','Heupen hoger dan schouders uit diep (good morning)','Hakken lossen van grond'],
+    youtube:'https://www.youtube.com/results?search_query=barbell+squat+tutorial'
+  },
+  'LEG PRESS': {
+    cat:'Benen', muscle:'Quadriceps (primair), glutes, hamstrings',
+    desc:'Machine equivalent van squat. Veilig en geïsoleerd.',
+    tips:['Voeten op schouderbreedte','Knieën volgen teenlijn naar buiten','Niet helemaal strekken (knie-lock)','Lage voetpositie = meer quads, hoge = meer glutes'],
+    focus:'Duw vanuit je hiel en de buitenkant van je voet, niet van je teen. Voel de quad de knie strekken. Houd je onderrug tegen het pad gedrukt.',
+    mistakes:['Knieen naar binnen laten zakken','Onderrug van pad trekken','Te licht en te snel'],
+    youtube:'https://youtube.com/shorts/z-5oNyPM1Sk'
+  },
+  'LEG EXTENSION': {
+    cat:'Benen', muscle:'Quadriceps (isolatie, alle 4 koppen)',
+    desc:'Isolatie voor de quads. Finisher of revalidatie-oefening.',
+    tips:['Volledig strekken in top','Knijp quad hard in top','Langzaam laten zakken (excentrisch)','Houd niet te zwaar'],
+    focus:'Knijp je quad zo hard als je kunt in de bovenste positie alsof je knie door de grond wil drukken. Houd 1 seconde vast — voel de volledige quad branden.',
+    mistakes:['Schokken omhoog','Te ver terugkomen (gewricht-stress)','Te zwaar waardoor heupen lostrekken'],
+    youtube:'https://youtube.com/shorts/zshBP6FyH0Q'
+  },
+  'LEG CURL': {
+    cat:'Benen', muscle:'Hamstrings (isolatie)',
+    desc:'Isolatie voor hamstrings. Essentieel voor balans met quads.',
+    tips:['Heupen op pad houden','Volledig strekken voor je begint','Knijp hamstrings in top','Langzaam en gecontroleerd'],
+    focus:'Probeer je hiel naar je bil te trekken zonder je knie te bewegen — alsof je knie de spil is. Voel de hamstring aan de achterkant van je dij werken.',
+    mistakes:['Heupen optillen','Schokken','Half-rep'],
+    youtube:'https://www.youtube.com/results?search_query=leg+curl+tutorial'
+  },
+  'ROMANIAN DEADLIFT': {
+    cat:'Benen', muscle:'Hamstrings (rek), glutes, lower back',
+    desc:'Hip-hinge voor hamstrings en glutes. Beter voor rek dan leg curl.',
+    tips:['Lichte buiging in knieën houden','Stang langs schenen naar beneden','Rek hamstrings voelen voor je terugkomt','Heupen naar achter — niet omlaag'],
+    focus:'Duw je heupen naar de muur achter je — niet omlaag. Voel de hamstrings strekken als een elastiek. Span glutes aan als je terugkomt.',
+    mistakes:['Rug afronden','Knieën te ver buigen (wordt normale deadlift)','Niet diep genoeg gaan'],
+    youtube:'https://www.youtube.com/results?search_query=romanian+deadlift+tutorial'
+  },
+  'LUNGES': {
+    cat:'Benen', muscle:'Quadriceps, glutes, hamstrings (unilateraal)',
+    desc:'Unilaterale beenoefening. Corrigeert links-rechts onbalans.',
+    tips:['Grote stap naar voren','Knie raakt bijna grond','Voorste knie niet voorbij teen','Romp recht omhoog'],
+    focus:'Duw vanuit je voorste hiel omhoog — niet omhoog duwen met je achterste been. Voel de gluteus van het voorste been het werk doen.',
+    mistakes:['Knie naar binnen','Romp te ver voorover','Te kleine stap'],
+    youtube:'https://www.youtube.com/results?search_query=lunges+tutorial'
+  },
+  'CALF RAISES': {
+    cat:'Benen', muscle:'Gastrocnemius, soleus (kuiten)',
+    desc:'Isolatie voor kuiten. Hoge reps werken het beste voor kuiten.',
+    tips:['Volledige range of motion (diep zak + hoge tip)','Houd 1 sec in top','Doe langzaam — niet springen','Rechte knie = gastrocnemius, gebogen = soleus'],
+    focus:'Rijs op de bal van je voet, niet op je tenen. Duw de grond omlaag. Voel de kuit samentrekken als je omhoog komt — houd even vast.',
+    mistakes:['Half-rep (niet diep genoeg zakken)','Springen/momentum','Te zwaar, slechte ROM'],
+    youtube:'https://youtube.com/shorts/hdWdMTAC0yU'
+  },
+
+  // ═══ SCHOUDERS ═══
+  'OHP': {
+    cat:'Schouders', muscle:'Voorste en middelste deltoid, triceps',
+    desc:'Overhead press met stang. De compound schouderoefening.',
+    tips:['Grip iets breder dan schouders','Stang raakt bovenste borst in start','Duw hoofd door na lockout','Core aanspannen — geen lendenboog'],
+    focus:'Duw de stang naar het plafond én iets naar achter. Voel hoe de schouder het gewicht boven je hoofd "vergrendelt" als je lockout bereikt.',
+    mistakes:['Te veel lendenboog (rugblessure)','Ellebogen te ver voor (niet schouder-width)','Stang niet volledig strekken'],
+    youtube:'https://www.youtube.com/results?search_query=overhead+press+OHP+tutorial'
+  },
+  'DB SHOULDER PRESS': {
+    cat:'Schouders', muscle:'Alle drie deltoid-koppen, triceps',
+    desc:'Dumbbell shoulder press. Grotere range of motion dan barbell-versie.',
+    tips:['Dumbbells op schouderhoogte beginnen','Duw recht omhoog tot bijna vergrendeld','Licht naar binnen komen in top','Niet te snel laten zakken'],
+    focus:'Duw je ellebogen naar buiten terwijl je omhoog duwt — niet naar voren. Voel de zijkant van de schouder activeren naast de voorkant.',
+    mistakes:['Te zwaar, romp compensatie','Ellebogen voor het lichaam (pijnlijk gewricht)','Half-rep'],
+    youtube:'https://www.youtube.com/results?search_query=dumbbell+shoulder+press+tutorial'
+  },
+  'SHOULDERPRESS': {
+    cat:'Schouders', muscle:'Hele deltoid, triceps',
+    desc:'Algemene schouder-press, kan met machine, dumbbells of barbell.',
+    tips:['Schouderbladen samen en naar beneden','Polsen recht boven ellebogen','Volledige strek zonder schouderpijn','Geen lendenboog'],
+    focus:'Span je core aan alsof je een klap verwacht. Duw dan de gewichten weg — niet omhoog, weg van je lichaam. Schouder blijft stabiel.',
+    mistakes:['Te diep laten zakken','Lendenboog overdrijven','Half-rep'],
+    youtube:'https://www.youtube.com/results?search_query=shoulder+press+tutorial'
+  },
+  'LATERAL RAISE': {
+    cat:'Schouders', muscle:'Middelste deltoid (isolatie)',
+    desc:'Dé oefening voor brede schouders. Pure middelste delt-isolatie.',
+    tips:['Lichte buiging in elleboog','Pinkzijde iets omhoog (pinky up)','Lift tot schouderhoogte, niet hoger','Langzaam laten zakken (excentrisch!)'],
+    focus:'Stel je voor je draagt een dienblad — til je ellebogen op, niet je handen. Voel de zijkant van je schouder (niet de bovenkant/traps) het gewicht heffen.',
+    mistakes:['Schouders optrekken (traps compensatie)','Te zwaar (momentum)','Handen hoger dan ellebogen'],
+    youtube:'https://www.youtube.com/results?search_query=lateral+raise+tutorial'
+  },
+  'FRONT RAISE': {
     cat:'Schouders', muscle:'Voorste deltoid (isolatie)',
+    desc:'Isolatie voor de voorste schouder. Aanvullend op press-oefeningen.',
+    tips:['Lichte buiging in elleboog','Lift tot schouderhoogte','Langzaam laten zakken','Een hand tegelijk of beide'],
+    focus:'Til je elleboog, niet je hand. Voel de voorkant van je schouder (net boven je borstspier) het gewicht heffen.',
+    mistakes:['Te hoog tillen','Met momentum zwaaien','Schouders schrugen'],
+    youtube:'https://www.youtube.com/results?search_query=dumbbell+front+raise+tutorial'
+  },
+  'DUMBELL FRONT SHOULDER': {
+    cat:'Schouders', muscle:'Voorste deltoid',
     desc:'Front raise met dumbbell. Isolatie voor de voorste schouderkop.',
     tips:['Lichte buiging in elleboog','Optillen tot schouderhoogte','Pinkkant licht omhoog','Langzaam laten zakken','Een hand tegelijk of beide samen'],
+    focus:'Voel de kop van de schouder aan de voorkant — ter hoogte van je kraagbeen. Til enkel dáárvanuit, niet vanuit je rug of traps.',
     mistakes:['Met momentum zwaaien','Te hoog optillen','Schouders schrugen'],
     youtube:'https://www.youtube.com/results?search_query=dumbbell+front+raise+tutorial'
   },
@@ -1698,20 +1632,47 @@ var EX_INFO = {
     cat:'Schouders', muscle:'Voorste deltoid',
     desc:'Front raise met kabel. Constante spanning over hele bewegingsbaan.',
     tips:['Kabel laag instellen','Lichte buiging in elleboog vasthouden','Optillen tot schouderhoogte','Langzaam terug, behoud spanning'],
-    mistakes:['Te zwaar - dan momentum','Schouders optrekken','Te hoog tillen'],
+    focus:'De kabel geeft spanning in elke positie — gebruik dat. Voel hoe de voorste delt ook onderaan al werkt, anders dan een dumbbell.',
+    mistakes:['Te zwaar — dan momentum','Schouders optrekken','Te hoog tillen'],
     youtube:'https://www.youtube.com/results?search_query=cable+front+raise+tutorial'
   },
-  'SHOULDERPRESS': {
-    cat:'Schouders', muscle:'Hele deltoid, triceps',
-    desc:'Algemene schouder-press, kan met machine, dumbbells of barbell.',
-    tips:['Schouderbladen samen en naar beneden','Polsen recht boven ellebogen','Volledige strek zonder schouder pijn','Geen lendenboog'],
-    mistakes:['Te diep laten zakken','Lendenboog overdrijven','Half-rep'],
-    youtube:'https://www.youtube.com/results?search_query=shoulder+press+tutorial'
+  'FACE PULLS': {
+    cat:'Schouders', muscle:'Achterste deltoid, mid-traps, rotator cuff',
+    desc:'Beste oefening voor schoudergezondheid en houding.',
+    tips:['Touw naar gezicht/oren trekken','Externe rotatie in eindpositie (duimen achter hoofd)','Hoge ellebogen','Lichter gewicht, hogere reps (12-20)'],
+    focus:'Trek het touw uiteen terwijl je het naar je gezicht haalt. Externe rotatie is het sleutelwoord — duimen wijzen naar achter. Voel de achterkant van je schouder en mid-traps aanspannen.',
+    mistakes:['Te zwaar — wordt een row','Niet roteren in eindpositie','Stoppen voor gezicht'],
+    youtube:'https://youtube.com/shorts/mn0r9EUM21E'
+  },
+  'FACEPULL': {
+    cat:'Schouders', muscle:'Achterste deltoid, mid-traps, rotator cuff',
+    desc:'Face pull. Beste oefening voor schoudergezondheid en houding.',
+    tips:['Touw naar gezicht/oren trekken','Externe rotatie in eindpositie (duimen achter hoofd)','Hoge ellebogen','Lichter gewicht, hogere reps (12-20)'],
+    focus:'Trek het touw uiteen terwijl je het naar je gezicht haalt. Externe rotatie is het sleutelwoord — duimen wijzen naar achter. Voel de achterkant van je schouder en mid-traps aanspannen.',
+    mistakes:['Te zwaar — wordt een row','Niet roteren in eindpositie','Stoppen voor gezicht'],
+    youtube:'https://youtube.com/shorts/mn0r9EUM21E'
+  },
+  'REAR DELT FLY': {
+    cat:'Schouders', muscle:'Achterste deltoid, mid-traps, rhomboids',
+    desc:'Achterste deltoid isolatie. Essentieel voor schouderbalans.',
+    tips:['Voorover leunen of op bank liggen','Lichte elleboog-buiging','Trek tot armen parallel zijn','Pinkkant licht omhoog in eindpositie'],
+    focus:'Duw je ellebogen naar het plafond achter je — niet naar achter. Stel je voor je ellebogen zijn de punten van een vliegtuigvleugel die omhoog klappen.',
+    mistakes:['Te zwaar','Te ver doortrekken (schouder compensatie)','Traps nemen over'],
+    youtube:'https://www.youtube.com/results?search_query=rear+delt+fly+tutorial'
+  },
+  'REAR DELT': {
+    cat:'Schouders', muscle:'Achterste deltoid',
+    desc:'Achterste deltoid isolatie. Cruciaal voor goede houding en uitgebalanceerde schouders.',
+    tips:['Voorovergeleund of op pad liggend','Lichte elleboog-buiging','Trek tot armen parallel met grond','Knijp schouderbladen samen','Pinkkant iets omhoog'],
+    focus:'Duw je ellebogen naar achter en omhoog. Voel de kleine spier achter op je schouder (achterkant delt) — die is klein, dus ga lichter dan je denkt.',
+    mistakes:['Te zwaar - wordt een row','Niet ver genoeg doortrekken','Schouders optrekken'],
+    youtube:'https://www.youtube.com/results?search_query=rear+delt+fly+tutorial'
   },
   'DUMBELL TRAPEZ': {
     cat:'Schouders', muscle:'Trapezius (boven), nek',
     desc:'Dumbbell shrug. Optrek-beweging voor de bovenste trapezius.',
     tips:['Dumbbells naast lichaam','Trek alleen schouders recht omhoog','Knijp 1 sec in top','Niet roteren of voorover hellen'],
+    focus:'Trek je schouders naar je oren, dan knijp je ze samen achter je. Voel de traps als een rol die omhoog rolt. Geen nekcompensatie.',
     mistakes:['Schouders rondrollen','Met armen optillen ipv schouders','Hoofd voorover'],
     youtube:'https://www.youtube.com/results?search_query=dumbbell+shrug+tutorial'
   },
@@ -1719,79 +1680,192 @@ var EX_INFO = {
     cat:'Schouders', muscle:'Trapezius',
     desc:'Cable shrug met stang. Constante spanning maakt deze effectiever dan dumbbell-versie voor sommigen.',
     tips:['Stang vastpakken op schouderbreedte','Recht omhoog optrekken','Knijp top, langzaam laten zakken','Volledige range of motion'],
+    focus:'Voel de bovenkant van je rug (trapezius) als een schild — trek het omhoog en samen. De kabel geeft ook spanning onderin, gebruik dat voordeel.',
     mistakes:['Niet hoog genoeg trekken','Schouders rollen','Met armen meetrekken'],
     youtube:'https://www.youtube.com/results?search_query=cable+shrug+tutorial'
   },
-  'REAR DELT': {
-    cat:'Schouders', muscle:'Achterste deltoid',
-    desc:'Achterste deltoid isolatie. Cruciaal voor goede houding en uitgebalanceerde schouders.',
-    tips:['Voorovergeleund of op pad liggend','Lichte elleboog-buiging','Trek tot armen parallel met grond','Knijp schouderbladen samen','Pinkkant iets omhoog'],
-    mistakes:['Te zwaar - wordt een row','Niet ver genoeg doortrekken','Schouders optrekken'],
-    youtube:'https://www.youtube.com/results?search_query=rear+delt+fly+tutorial'
-  },
-  'FACEPULL': {
-    cat:'Schouders', muscle:'Achterste deltoid, mid-traps, rotator cuff',
-    desc:'Face pull. Beste oefening voor schoudergezondheid en houding.',
-    tips:['Touw naar gezicht/oren trekken','Externe rotatie in eindpositie (duimen achter hoofd)','Hoge ellebogen','Lichter gewicht, hogere reps (12-20)'],
-    mistakes:['Te zwaar - wordt een row','Niet roteren in eindpositie','Stoppen voor gezicht'],
-    youtube:'https://youtube.com/shorts/mn0r9EUM21E'
+
+  // ═══ TRICEPS ═══
+  'CABLE PUSHDOWN': {
+    cat:'Triceps', muscle:'Triceps (alle 3 koppen, nadruk lateraal)',
+    desc:'Cable pushdown. Meest populaire tricep-isolatie.',
+    tips:['Ellebogen vast langs lichaam','Volledige strek, knijp 1 sec','Langzaam omhoog komen','Bovenarm beweegt niet mee'],
+    focus:'Duw je ellebogen in je zijden — alsof je ze wil instoppen — en duw dan de stang naar beneden. Knijp de tricep keihard in de onderste positie.',
+    mistakes:['Ellebogen wijken naar voren','Te zwaar, rug compensatie','Geen squeeze'],
+    youtube:'https://youtube.com/shorts/jhSA00GmWeQ'
   },
   'TRICEP CABLE ROPE': {
     cat:'Triceps', muscle:'Triceps (alle 3 koppen)',
     desc:'Cable pushdown met touw. Splits het touw in eindpositie voor extra contractie.',
     tips:['Ellebogen vast langs lichaam','Touw uit elkaar trekken in onderkant','Volledige strek, knijp 1 sec','Langzaam tempo'],
-    mistakes:['Ellebogen wijken naar voren','Te zwaar - vorm verloren','Touw niet splitsen'],
+    focus:'In de onderste positie: trek het touw uit elkaar en druk je polsen naar buiten. Dat kleine extra beweging maximaliseert de tricep-contractie.',
+    mistakes:['Ellebogen wijken naar voren','Te zwaar, vorm verloren','Touw niet splitsen'],
     youtube:'https://youtube.com/shorts/jhSA00GmWeQ'
   },
   'TRICEP CABLE SINGLE L & R': {
     cat:'Triceps', muscle:'Triceps (per kant)',
     desc:'Eenarmige cable pushdown. Corrigeert links-rechts onbalans.',
     tips:['Een hand tegelijk werken','Andere hand tegen heup steunen','Volledige strek, knijp 1 sec','Beide kanten gelijk aantal reps'],
+    focus:'Met één arm voel je precies of jouw tricep het werk doet of je shoulder compenseert. Hou de elleboog strak langs je zij — voel de tricep strekken.',
     mistakes:['Lichaam roteren','Schouders mee bewegen','Niet diep genoeg'],
     youtube:'https://www.youtube.com/results?search_query=single+arm+tricep+pushdown+tutorial'
   },
   'TRICEP CABLE V STEAL': {
-    cat:'Triceps', muscle:'Triceps (vooral mediale en laterale kop)',
+    cat:'Triceps', muscle:'Triceps (mediale en laterale kop)',
     desc:'Pushdown met V-bar. Stevige grip, beste voor zwaardere belasting.',
     tips:['V-bar overhand grip','Ellebogen vast langs lichaam','Volledige strek','Langzaam laten omhoog komen'],
+    focus:'Druk je ellebogen als ankerpunten in je zij. Van daar duw je naar beneden. Voel de buitenkant van je bovenarm (laterale kop) het meest aanspannen.',
     mistakes:['Ellebogen flaren','Met lichaam meeduwen','Te zwaar voor strakke vorm'],
     youtube:'https://www.youtube.com/results?search_query=v+bar+tricep+pushdown+tutorial'
+  },
+  'SKULL CRUSHERS': {
+    cat:'Triceps', muscle:'Triceps (lange kop, nadruk)',
+    desc:'Lying tricep extension. Maximale rek voor de lange tricepskop.',
+    tips:['Stang naar oren/voorhoofd laten zakken','Ellebogen wijzen recht omhoog','Bovenarmen bewegen niet','Gecontroleerd laten zakken'],
+    focus:'Houd je bovenarmen stil als pilaren. Alleen de onderarmen bewegen — als een scharnier. Voel de rek in de lange tricepskop bij elke herhaling.',
+    mistakes:['Ellebogen uitflairen','Bovenarm mee bewegen','Gewicht laten vallen'],
+    youtube:'https://www.youtube.com/results?search_query=skull+crushers+tutorial'
+  },
+  'OVERHEAD EXTENSION': {
+    cat:'Triceps', muscle:'Triceps (lange kop, maximale rek)',
+    desc:'Overhead tricep extension. Optimale rek voor de lange kop.',
+    tips:['Bovenarmen langs oren houden','Volledige rek onderaan','Strekken zonder ellebogen flaren','Niet te zwaar'],
+    focus:'In de diepste positie voel je een intense rek — dát is de lange kop. Strek volledig uit en focus op die lange kop die samentrekt, niet je ellebogen bewegen.',
+    mistakes:['Ellebogen wijken naar buiten','Bovenarm mee bewegen','Half-rep'],
+    youtube:'https://www.youtube.com/results?search_query=overhead+tricep+extension+tutorial'
   },
   'OVERHEAD CABLE EXTENSION': {
     cat:'Triceps', muscle:'Triceps (lange kop)',
     desc:'Cable overhead extension. Optimale stretch voor de lange tricepskop.',
     tips:['Met rug naar kabel staan','Bovenarmen tegen oren','Volledige rek onderaan','Strekken zonder ellebogen flaren'],
+    focus:'Houd je bovenarmen verticaal. Voer alleen de onderarm-beweging uit, alsof je armen van het ellebooggewricht draaien. Voel de lange kop maximaal strekken.',
     mistakes:['Ellebogen wijken','Lichaam mee bewegen','Half-rep'],
     youtube:'https://www.youtube.com/results?search_query=overhead+cable+tricep+extension+tutorial'
   },
+  'CLOSE GRIP BENCH': {
+    cat:'Triceps', muscle:'Triceps (alle koppen), borst binnenste',
+    desc:'Close grip bench press. Compound tricep-builder.',
+    tips:['Grip schouderbreedte of iets smaller','Ellebogen langs lichaam houden','Volledige beweging','Pols recht houden'],
+    focus:'Duw de stang niet omhoog maar weg van je. Ellebogen strak langs het lichaam — voel hoe de triceps dan de hoofdrol nemen over de borst.',
+    mistakes:['Grip te smal (polsklachten)','Ellebogen te ver uitflairen','Stuiteren op borst'],
+    youtube:'https://www.youtube.com/results?search_query=close+grip+bench+press+tutorial'
+  },
   'SEATED TRICEP PRESS': {
     cat:'Triceps', muscle:'Triceps (alle koppen)',
-    desc:'Zittend tricep extension met dumbbell of machine. Voorkomt momentum.',
+    desc:'Zittend tricep extension met dumbbell of machine.',
     tips:['Rug stevig tegen pad','Dumbbell achter hoofd','Ellebogen wijzen omhoog en niet flaren','Volledige strek in top'],
+    focus:'Houd je bovenarmen als pijlen die recht naar het plafond wijzen — die bewegen niet. Voel je onderarmen als een scharnier op en neer gaan.',
     mistakes:['Ellebogen wijken naar buiten','Half-rep','Lichaam meebuigen'],
     youtube:'https://www.youtube.com/results?search_query=seated+overhead+tricep+extension+tutorial'
   },
+
+  // ═══ BICEPS ═══
+  'BICEP CURL': {
+    cat:'Biceps', muscle:'Biceps brachii, brachialis',
+    desc:'De klassieke bicep curl. Fundamentele arm-oefening.',
+    tips:['Ellebogen vast langs lichaam','Volledig strekken onderaan','Bovenkant: draai pols licht naar buiten (supinatie)','Knijp bicep in top'],
+    focus:'Houd je ellebogen als ankers naast je lichaam. Draai je pols naar buiten terwijl je omhoog gaat — die supinatie-beweging activeert de bicep maximaal.',
+    mistakes:['Ellebogen naar voren schieten','Momentum gebruiken','Half-rep'],
+    youtube:'https://youtube.com/shorts/XbMjFPHAHek'
+  },
+  'HAMMER CURL': {
+    cat:'Biceps', muscle:'Brachialis, brachioradialis, biceps',
+    desc:'Neutrale grip curl. Traint brachialis onder bicep voor armdikte.',
+    tips:['Duimen omhoog grip (neutraal)','Ellebogen vast langs lichaam','Langzaam en gecontroleerd','Beide armen tegelijk of afwisselend'],
+    focus:'Voer de beweging bewust langzamer uit dan een normale curl. De brachialis reageert beter op langzame, gecontroleerde beweging. Voel het midden van je bovenarm.',
+    mistakes:['Ellebogen naar voren','Momentum','Te snel'],
+    youtube:'https://www.youtube.com/results?search_query=hammer+curl+tutorial'
+  },
+  'PREACHER CURL': {
+    cat:'Biceps', muscle:'Biceps (lange kop isolatie)',
+    desc:'Op bank gesteunde curl. Elimineert momentum volledig.',
+    tips:['Bovenarm plat op bank','Volledig strekken onderaan','Knijp bicep in top','Langzaam, gecontroleerd'],
+    focus:'De bank is je vriend — laat hem het cheatwerk voorkomen. Voel hoe de bicep zonder hulp de volledige last draagt. Focus op de rek onderaan.',
+    mistakes:['Ellebogen van bank optillen','Te ver terugkomen (hyperextensie)','Met schouder trekken'],
+    youtube:'https://www.youtube.com/results?search_query=preacher+curl+tutorial'
+  },
+  'CONCENTRATION CURL': {
+    cat:'Biceps', muscle:'Biceps (piekcontractie)',
+    desc:'Zittende concentratie-curl. Maximale piek-contractie.',
+    tips:['Elleboog steunt op binnenkant dij','Volledig strekken','Langzaam omhoog','Draai pols bij bovenaan'],
+    focus:'Dit is de meest geïsoleerde bicep-oefening. Kijk naar je bicep terwijl je werkt — de mind-muscle verbinding is hier wetenschappelijk bewezen te verbeteren.',
+    mistakes:['Elleboog niet steunen','Momentum','Te zwaar'],
+    youtube:'https://www.youtube.com/results?search_query=concentration+curl+tutorial'
+  },
   'ONDERARMEN UP': {
     cat:'Biceps', muscle:'Onderarmen (flexoren)',
-    desc:'Wrist curl, palmen omhoog. Bouwt onderarm-flexoren op voor sterkere grip.',
-    tips:['Onderarmen op bank, polsen over rand','Palmen omhoog (supinated)','Laat gewicht zakken tot vingerstoppen','Curl omhoog door pols te flexeren','Hoge reps (15-25)'],
+    desc:'Wrist curl, palmen omhoog. Bouwt onderarm-flexoren.',
+    tips:['Onderarmen op bank, polsen over rand','Palmen omhoog','Laat gewicht zakken tot vingerstoppen','Curl omhoog door pols te flexeren','Hoge reps (15-25)'],
+    focus:'Voel het in de binnenkant van je onderarm (palmzijde). Laat het gewicht helemaal rollen naar je vingers voor je curlt — maximale range of motion.',
     mistakes:['Onderarm meebewegen','Te zwaar gewicht','Half-rep'],
     youtube:'https://youtube.com/shorts/4dzPwW9Mf-Q'
   },
   'ONDERARMEN DOWN': {
     cat:'Biceps', muscle:'Onderarmen (extensoren)',
-    desc:'Reverse wrist curl, palmen omlaag. Train de extensor-spieren voor balans en pols-gezondheid.',
+    desc:'Reverse wrist curl, palmen omlaag.',
     tips:['Onderarmen op bank, palmen omlaag','Laat gewicht zakken tot vingerstoppen','Curl omhoog met pols-extensie','Lichter gewicht dan onderarmen up'],
+    focus:'Voel het in de buitenkant/bovenkant van je onderarm. Langzaam — de extensoren zijn zwakker en reageren goed op gecontroleerd tempo.',
     mistakes:['Te zwaar - polsblessure risico','Onderarm meebewegen','Half-rep'],
     youtube:'https://youtube.com/shorts/4dzPwW9Mf-Q'
   },
+
+  // ═══ CORE ═══
+  'DEADLIFT': {
+    cat:'Core', muscle:'Hamstrings, glutes, lower back, traps, core (stabilisatie)',
+    desc:'Meest complete krachtoefening. Traint bijna elk spier in het lichaam.',
+    tips:['Stang boven voet-middenpunt','Heupen naar stang (niet squat-positie)','Rug recht, borst omhoog','Duw de grond weg','Trek stang langs schenen omhoog'],
+    focus:'Denk: grond wegduwen, niet gewicht optillen. Span je lats aan alsof je de stang naar je lichaam wil trekken voor je begint. Core als een rots.',
+    mistakes:['Rug afronden (ernstig blessure-risico)','Stang ver van lichaam','Heupen te laag (wordt squat)'],
+    youtube:'https://www.youtube.com/results?search_query=deadlift+tutorial'
+  },
+  'PLANK': {
+    cat:'Core', muscle:'Rectus abdominis, transversus, obliques, schouders',
+    desc:'Isometrische core-stabilisatie. Fundament van coresterkte.',
+    tips:['Rechte lijn van hoofd tot hiel','Heupen niet zakken of omhoog','Blik op de grond','Adem door — niet inhouden'],
+    focus:'Trek je navel naar je ruggengraat. Dan span je glutes aan. Dan knijp je je armen en benen naar elkaar. Voel hoe je hele core een eenheid wordt.',
+    mistakes:['Heupen zakken','Heupen te hoog','Nek omhoog houden'],
+    youtube:'https://www.youtube.com/results?search_query=plank+exercise+tutorial'
+  },
+  'CRUNCHES': {
+    cat:'Core', muscle:'Rectus abdominis (bovenste deel)',
+    desc:'Basis buikspieroefening. Hoge reps, gecontroleerd.',
+    tips:['Alleen schouderbladen van grond','Handen achter hoofd, niet trekken','Uitademen bij omhoog','Kin van borst houden'],
+    focus:'Rol je ribbenkast naar je heupen — niet je hoofd naar je knieën. Stel je voor een touwtje trekt je borstbeen naar je navel. Adem uit bij elke contractie.',
+    mistakes:['Met nek trekken','Te ver omhoog komen (hip flexors nemen over)','Niet uitademen'],
+    youtube:'https://www.youtube.com/results?search_query=ab+crunch+tutorial'
+  },
+  'LEG RAISES': {
+    cat:'Core', muscle:'Rectus abdominis (onderste deel), hip flexors',
+    desc:'Onderste buikspieroefening. Hangen of liggend.',
+    tips:['Kleine lendenboog houden','Benen samen houden','Gecontroleerd laten zakken','Adem uit omhoog'],
+    focus:'Het gaat om pelvic tilt, niet been-beweging. Draai je heupen naar je ribbenkast toe als je omhoog gaat — dán voelt de onderbuik het. Niet je benen opzwaaien.',
+    mistakes:['Lendenboog te groot','Zwaaien met benen','Snelheid ipv controle'],
+    youtube:'https://www.youtube.com/results?search_query=hanging+leg+raises+tutorial'
+  },
+  'RUSSIAN TWIST': {
+    cat:'Core', muscle:'Obliques, rectus abdominis',
+    desc:'Rotatiebeweging voor de schuine buikspieren.',
+    tips:['Voeten van de grond voor meer uitdaging','Roteer vanuit de taille','Niet met armen zwaaien','Gewicht of bal voor weerstand'],
+    focus:'Roteer je ribbenkast — niet je schouders. Voel de schuine buikspieren aan de zijkanten van je romp samentrekken bij elke rotatie.',
+    mistakes:['Armen zwaaien ipv rotateren','Voeten op grond (te makkelijk voor gevorderden)','Nek naar voren'],
+    youtube:'https://www.youtube.com/results?search_query=russian+twist+tutorial'
+  },
+  'AB WHEEL': {
+    cat:'Core', muscle:'Hele core, lats, schouders',
+    desc:'Extreem zware core anti-extensie. Voor gevorderden.',
+    tips:['Begin op knieën','Rol uit tot bijna gestrekt','Geen doorzakkende rug','Trek terug met core, niet armen'],
+    focus:'Span je core aan als een harnas voor je begint. Rol uit terwijl je core uitgerekt blijft maar strak. De abs werken als rem — ze stoppen je van doorzakken.',
+    mistakes:['Te ver uitrollen (lendenboog)','Te snel uitrollen','Niet genoeg core-spanning'],
+    youtube:'https://www.youtube.com/results?search_query=ab+wheel+rollout+tutorial'
+  },
   'ROTARY TORSO': {
     cat:'Core', muscle:'Schuine buikspieren (obliques), serratus',
-    desc:'Machine voor torso-rotatie. Train de schuine buikspieren door gecontroleerde rotatie.',
+    desc:'Machine voor torso-rotatie. Train de schuine buikspieren.',
     tips:['Heupen vast op pad','Roteer alleen vanuit core','Knijp 1 sec in eindpositie','Langzaam terugbewegen','Beide kanten gelijke reps'],
+    focus:'Blokkeer je heupen bewust — ze mogen niet mee draaien. Voel hoe de oblique aan de zijkant van je buik de rotatie stuurt.',
     mistakes:['Heupen mee draaien','Te zwaar gewicht','Met momentum zwaaien'],
     youtube:'https://www.youtube.com/results?search_query=rotary+torso+machine+tutorial'
-  },
+  }
 };
 
 // Aliases - common name variations all point to same info
@@ -2524,7 +2598,15 @@ function openExInfo(name){
         + info.tips.map(function(t){ return '<li>' + esc(t) + '</li>'; }).join('')
         + '</ul></div>';
     }
-    
+
+    // Mind-muscle focus
+    if(info.focus){
+      html += '<div style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.22);border-radius:10px;padding:12px 13px;margin-bottom:12px">'
+        + '<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#a78bfa;margin-bottom:7px">🧠 Mind-muscle focus</div>'
+        + '<div style="font-size:12px;line-height:1.65;color:var(--sub);font-style:italic">' + esc(info.focus) + '</div>'
+        + '</div>';
+    }
+
     // Common mistakes
     if(info.mistakes && info.mistakes.length){
       html += '<div class="info-section">'
@@ -3359,7 +3441,7 @@ function showView(v) {
   if(v==='plan')  renderPlan();
   if(v==='profile'){renderWtChart(30,null);renderXP();renderMmStats();renderMmChart(30,null);renderMmLogs();}
   if(v==='settings'){
-    setAutoTimerUI(); setGlassUI(); setNotifUI();
+    setAutoTimerUI(); setGlassUI(); setNotifUI(); setSmartTimerUI();
     var vEl = document.getElementById('app-version');
     if(vEl) vEl.textContent = 'GymLog v' + APP_VERSION + ' • ' + APP_BUILD;
   }
@@ -5141,6 +5223,90 @@ function setGlassUI(){
   if(lbl) lbl.textContent = on ? 'Glass design aan' : 'Glass design';
 }
 
+
+
+// ═══════════════════════════════════════════════════
+// SMART REST TIMER - exercise classification
+// ═══════════════════════════════════════════════════
+// Base rest times in seconds, per exercise type
+var REST_BASE = {
+  heavyCompound: 150,
+  lightCompound: 120,
+  isolation:     75,
+  small:         60
+};
+
+var EX_CLASS = {
+  'BENCH PRESS':'heavyCompound','INCLINE DB PRESS':'heavyCompound','CHEST HAMMER DUMBBELL':'heavyCompound',
+  'DIPS':'heavyCompound','PUSH UPS':'heavyCompound','DEADLIFT':'heavyCompound','ROMANIAN DEADLIFT':'heavyCompound',
+  'BENT OVER ROW':'heavyCompound','T-BAR ROW':'heavyCompound','PULL UPS':'heavyCompound',
+  'SQUAT':'heavyCompound','LUNGES':'heavyCompound','OHP':'heavyCompound','DB SHOULDER PRESS':'heavyCompound',
+  'SHOULDERPRESS':'heavyCompound','CLOSE GRIP BENCH':'heavyCompound',
+  'LEG PRESS':'lightCompound','LAT PULLDOWN':'lightCompound','SEATED ROW':'lightCompound','CONVERGING CHESTPRESS':'lightCompound',
+  'PEC FLY':'isolation','CABLE CROSSOVER':'isolation','CABLE FLY HIGH':'isolation','CABLE FLY LOW':'isolation',
+  'LEG CURL':'isolation','LEG EXTENSION':'isolation','LATERAL RAISE':'isolation','FRONT RAISE':'isolation',
+  'DUMBELL FRONT SHOULDER':'isolation','CABLE FRONT SHOULDERS':'isolation','REAR DELT FLY':'isolation','REAR DELT':'isolation',
+  'FACE PULLS':'isolation','FACEPULL':'isolation','SKULL CRUSHERS':'isolation','OVERHEAD EXTENSION':'isolation',
+  'OVERHEAD CABLE EXTENSION':'isolation','CABLE PUSHDOWN':'isolation','TRICEP CABLE ROPE':'isolation',
+  'TRICEP CABLE SINGLE L & R':'isolation','TRICEP CABLE V STEAL':'isolation','SEATED TRICEP PRESS':'isolation',
+  'BICEP CURL':'isolation','HAMMER CURL':'isolation','PREACHER CURL':'isolation','CONCENTRATION CURL':'isolation',
+  '21S':'isolation','DUMBELL TRAPEZ':'isolation','TRAPEZ CABLE (BAR)':'isolation',
+  'CALF RAISES':'small','ONDERARMEN UP':'small','ONDERARMEN DOWN':'small',
+  'PLANK':'small','CRUNCHES':'small','LEG RAISES':'small','RUSSIAN TWIST':'small','AB WHEEL':'small','ROTARY TORSO':'small'
+};
+
+var CAT_DEFAULT_CLASS = {
+  'Borst':'lightCompound','Rug':'lightCompound','Benen':'lightCompound',
+  'Schouders':'isolation','Triceps':'isolation','Biceps':'isolation','Core':'small','Overig':'isolation'
+};
+
+function classifyExercise(exName){
+  if(!exName) return 'isolation';
+  var norm = exName.toUpperCase().trim();
+  if(EX_CLASS[norm]) return EX_CLASS[norm];
+  if(EX_ALIASES[norm] && EX_CLASS[EX_ALIASES[norm]]) return EX_CLASS[EX_ALIASES[norm]];
+  for(var k in EX_CLASS){
+    if(norm.indexOf(k) !== -1) return EX_CLASS[k];
+  }
+  var cat = (e2cat()[norm]) || 'Overig';
+  return CAT_DEFAULT_CLASS[cat] || 'isolation';
+}
+
+function calcSmartRest(exName, feel, reps){
+  var cls = classifyExercise(exName);
+  var base = REST_BASE[cls] || 90;
+  var feelMult = 1.0;
+  if(feel === 'EASY') feelMult = 0.80;
+  else if(feel === 'HARD') feelMult = 1.30;
+  var repMult = 1.0;
+  var r = parseInt(reps) || 0;
+  if(r > 0 && r <= 5) repMult = 1.25;
+  else if(r >= 13) repMult = 0.85;
+  var total = Math.round(base * feelMult * repMult);
+  return Math.max(30, Math.min(360, total));
+}
+
+// ═══════════════════════════════════════════════════
+// SMART TIMER TOGGLE
+// ═══════════════════════════════════════════════════
+function toggleSmartTimer(){
+  user.smartTimer = user.smartTimer === true ? false : true;
+  setSmartTimerUI();
+  save();
+  toast(user.smartTimer ? 'Slimme rust-timer aan' : 'Standaard rust-timer');
+}
+
+function setSmartTimerUI(){
+  var on = user.smartTimer === true;
+  var ico = document.getElementById('smart-ico');
+  var lbl = document.getElementById('smart-lbl');
+  var sub = document.getElementById('smart-sub');
+  if(ico) ico.textContent = on ? '🧠' : '🎯';
+  if(lbl) lbl.textContent = on ? 'Slimme rust-timer aan' : 'Slimme rust-timer';
+  if(sub) sub.textContent = on
+    ? 'Rust wordt aangepast op basis van oefening type (compound/isolatie), je gevoel én aantal reps.'
+    : 'Standaard: 60s (easy) / 90s (goed) / 150s (zwaar). Tik om wetenschap-gebaseerde timer aan te zetten.';
+}
 
 function toggleAutoTimer(){
   user.autoTimer = user.autoTimer === false ? true : false;
