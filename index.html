@@ -640,6 +640,44 @@ body.glass.lt .set-row .inp-sm{
 body.lt{--bg:#f4f4f5;--s1:#fff;--s2:#e4e4e7;--s3:#d4d4d8;--b1:rgba(0,0,0,.09);--b2:#a1a1aa;--tx:#09090b;--sub:#52525b;--mu:#71717a}
 body.lt #tmr{background:rgba(244,244,245,.94)}
 body.lt #alert{background:rgba(244,244,245,.97)}
+
+
+/* ═══════════════════════════════════════════════════════════
+   SHORT-VIEWPORT OPTIMIZATION
+   Targets cover-style foldable screens (e.g. Galaxy Z Fold 8
+   cover display: 1248x1972px @ ~424ppi -> ~657 CSS px tall,
+   10:16 ratio) and any other phone with a wide-but-short
+   viewport. Standard tall phones (iPhone etc.) are untouched.
+   Goal: reclaim vertical space in the header/nav chrome and
+   the repeating set-row so the active workout view needs less
+   scrolling on a shorter screen.
+   ═══════════════════════════════════════════════════════════ */
+@media (max-height: 700px) {
+  #hdr{padding:20px 16px 0 !important}
+  .logo{font-size:24px}
+  #greeting{font-size:10px}
+
+  #nav{min-height:52px;padding-top:5px}
+  .nb svg{width:18px;height:18px}
+  .nb span{font-size:8px}
+
+  #tmr{padding:4px 16px}
+
+  .sc-top{margin-bottom:4px}
+  .sc-name{font-size:18px}
+  .ex-hd{padding:7px 11px}
+  .ex-nm{font-size:12px}
+  .ex-mt{font-size:9px;margin-top:1px}
+
+  .set-row{margin-bottom:4px}
+  .inp-sm{padding:6px 4px;font-size:14px}
+  .feel-cell{min-height:28px;padding:3px 2px}
+  .add-set{padding:6px}
+
+  .sheet-ft{padding:8px 11px}
+  .card{padding:12px}
+  .card-hdr{margin-bottom:8px}
+}
 </style>
 </head>
 <body>
