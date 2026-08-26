@@ -2011,8 +2011,9 @@ var LIB_DEFAULT = {
   'Core':      ['PLANK','CRUNCHES','LEG RAISES','RUSSIAN TWIST','AB WHEEL']
 };
 
-var APP_VERSION = '1.0.0';
-var APP_BUILD = '2026.05.18';
+var APP_VERSION = '1.0.1';
+var APP_BUILD = '2026.08.26';
+var APP_NOTE = 'Fold 8 optimized';
 
 var sessions  = [];
 var library   = {};
@@ -3481,7 +3482,7 @@ function showView(v) {
   if(v==='settings'){
     setAutoTimerUI(); setGlassUI(); setNotifUI(); setSmartTimerUI();
     var vEl = document.getElementById('app-version');
-    if(vEl) vEl.textContent = 'GymLog v' + APP_VERSION + ' • ' + APP_BUILD;
+    if(vEl) vEl.textContent = 'GymLog v' + APP_VERSION + ' • ' + APP_BUILD + ' • ' + APP_NOTE;
   }
 }
 
