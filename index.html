@@ -127,18 +127,30 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 .ex-stack-simple .ex-bl{margin-bottom:8px}
 .ex-stack-simple .ex-bl.pr-glow{border-color:rgba(251,191,36,.5);box-shadow:0 4px 20px rgba(251,191,36,.14)}
 .focus-empty{padding:24px;text-align:center;color:var(--mu);font-size:12px;background:var(--bg);border:1px dashed var(--b2);border-radius:2px}
-/* ── Reorder buttons, passport format only. The phone accordion already
-     has small ↑/↓ icon-buttons (.ob) mixed in with info/note/swap/delete
-     in the header row — fine for a narrow screen where every pixel of
-     header width matters, but easy to miss and too small to ask for
-     "clearly visible" on the wider passport canvas. This is a dedicated,
-     separate row: full-width, filled background, text-labeled, sitting
-     between the header and the set details so it stays visible and
-     reachable whether the exercise is expanded or collapsed. ── */
-.ex-reorder-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 12px 10px}
-.ex-reorder-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border-radius:2px;background:var(--s2);border:1px solid var(--b1);color:var(--sub);font-size:12px;font-weight:700;cursor:pointer}
-.ex-reorder-btn svg{width:14px;height:14px;flex-shrink:0}
-.ex-reorder-btn[disabled]{opacity:.35;pointer-events:none}
+/* ── Drag handle reorder, passport format only. Replaces an earlier
+     "clearly visible Omhoog/Omlaag button row" version — that solved
+     visibility but introduced its own problems: a full extra row on
+     EVERY card whether or not you ever reorder, up to N-1 taps to move
+     something far, and no direct manipulation feel.
+
+     This is a small grip icon (⠿, six dots) in the header — tap-and-hold
+     then drag vertically to reorder in one motion. Deliberately narrow
+     in scope compared to earlier sleep-gesture attempts in this app
+     (a horizontal filmstrip swipe, then a whole-card swipe-up) that were
+     each rejected: those made an ENTIRE card or a whole screen area
+     implicitly draggable, which repeatedly created accidental-trigger
+     problems. This drag starts ONLY from a small, explicit handle — nothing
+     else on the card responds to a vertical drag — so accidentally
+     triggering a reorder while trying to type a weight or tap a button
+     elsewhere in the card is not a live concern the way whole-card or
+     whole-screen dragging was. ── */
+.ex-grip{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:28px;height:28px;color:var(--mu);cursor:grab;touch-action:none}
+.ex-grip:active{cursor:grabbing;color:var(--sub)}
+.ex-grip svg{width:16px;height:16px}
+.ex-bl.dragging{opacity:.4}
+.ex-bl.drag-ghost{position:fixed;z-index:500;pointer-events:none;box-shadow:0 12px 32px rgba(0,0,0,.5);border-color:var(--ac)}
+.ex-drop-line{height:3px;background:var(--ac);border-radius:2px;margin:0 12px 8px;opacity:0;transition:opacity .1s}
+.ex-drop-line.show{opacity:1}
 /* EXERCISE BLOCK */
 .ex-bl{background:var(--bg);border:1px solid var(--b1);border-radius:2px;margin-bottom:7px;overflow:hidden;transition:border-color .15s}
 .ex-bl.active{border-color:rgba(99,102,241,.4)}
@@ -4092,6 +4104,7 @@ function renderSessions() {
     });
   });
   list.innerHTML=h;
+  attachReorderDrag();
 }
 
 function toggleMon2(gi){ toggleMon(_gkArr[gi]); }
@@ -4229,7 +4242,21 @@ function renderExercises(s) {
   function buildExerciseHeader(ex, xi, isPR, metaText, compact){
     var isCollapsed = compact && collapsedEx.has(ex.id);
     var headerClick = compact ? 'toggleExCollapse(' + ex.id + ')' : 'setActiveEx(' + s.id + ',' + ex.id + ')';
+    // Drag handle: passport format only (compact=true). A small, explicit
+    // grip icon — the ONLY part of the card that starts a drag. Everything
+    // else keeps its normal tap behavior (header still collapses/expands
+    // via headerClick above; this icon is a separate element inside the
+    // header, not layered over it, so the two never compete for the same
+    // touch). data-ex-id/data-session let the drag handler in
+    // attachReorderDrag() identify which exercise this handle belongs to
+    // without needing a closure per-card.
+    var gripHtml = compact
+      ? '<div class="ex-grip" data-ex-id="' + ex.id + '" data-session="' + s.id + '" onclick="event.stopPropagation()">'
+        + '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="5" cy="3" r="1.3"/><circle cx="11" cy="3" r="1.3"/><circle cx="5" cy="8" r="1.3"/><circle cx="11" cy="8" r="1.3"/><circle cx="5" cy="13" r="1.3"/><circle cx="11" cy="13" r="1.3"/></svg>'
+        + '</div>'
+      : '';
     return '<div class="ex-hd" onclick="' + headerClick + '">'
+      + gripHtml
       + (compact ? '<div class="ex-collapse-chevron' + (isCollapsed?'':' open') + '">›</div>' : '')
       + '<div style="flex:1;min-width:0">'
       + '<div class="ex-nm">' + esc(ex.name) + (isPR ? ' <span style="font-size:9px;color:#f59e0b">🏆 PR</span>' : '') + '</div>'
@@ -4292,27 +4319,13 @@ function renderExercises(s) {
   // exercise's detail renders unconditionally.
   var stackHtml;
   if(s.exercises.length){
-    stackHtml = '<div class="ex-stack-simple">';
+    stackHtml = '<div class="ex-stack-simple" data-session="' + s.id + '">';
     s.exercises.forEach(function(ex, xi){
       var m = metaFor(ex);
-      var atTop = xi === 0;
-      var atBottom = xi === s.exercises.length - 1;
-      // Dedicated, clearly-visible reorder row for the passport format —
-      // see the CSS comment above .ex-reorder-row for why this exists
-      // separately from the phone accordion's small .ob ↑/↓ icons.
-      // Rendered unconditionally (not gated by collapsedEx) so reordering
-      // stays available whether or not the exercise's sets are shown.
-      var reorderRow = '<div class="ex-reorder-row">'
-        + '<button class="ex-reorder-btn"' + (atTop ? ' disabled' : '') + ' onclick="event.stopPropagation();moveEx(' + s.id + ',' + xi + ',-1)">'
-        + '<svg fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5M5 12l7-7 7 7"/></svg>'
-        + 'Omhoog</button>'
-        + '<button class="ex-reorder-btn"' + (atBottom ? ' disabled' : '') + ' onclick="event.stopPropagation();moveEx(' + s.id + ',' + xi + ',1)">'
-        + '<svg fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12l7 7 7-7"/></svg>'
-        + 'Omlaag</button>'
-        + '</div>';
-      stackHtml += '<div class="ex-bl' + (m.isPR ? ' pr-glow' : '') + '">'
+      // data-ex-id on the block itself (not just the grip) lets the drag
+      // handler find and reorder the actual DOM node during a drag.
+      stackHtml += '<div class="ex-bl' + (m.isPR ? ' pr-glow' : '') + '" data-ex-id="' + ex.id + '">'
         + buildExerciseHeader(ex, xi, m.isPR, m.text, true)
-        + reorderRow
         + (collapsedEx.has(ex.id) ? '' : buildExerciseDetail(ex))
         + '</div>';
     });
@@ -4396,6 +4409,112 @@ function moveEx(sId,xi,dir){
   if(!s||to<0||to>=s.exercises.length)return;
   var tmp=s.exercises[xi];s.exercises[xi]=s.exercises[to];s.exercises[to]=tmp;
   saveRender();
+}
+// Direct-position move for drag-and-drop: removes the exercise at fromIdx
+// and reinserts it at toIdx, shifting everything between — unlike moveEx
+// above (an adjacent swap, one step at a time), this handles a single
+// drag from any position to any other position in one operation.
+function moveExToIndex(sId, fromIdx, toIdx){
+  var s = sessions.find(function(x){ return x.id === sId; });
+  if(!s) return;
+  if(fromIdx < 0 || fromIdx >= s.exercises.length) return;
+  toIdx = Math.max(0, Math.min(s.exercises.length - 1, toIdx));
+  if(fromIdx === toIdx) return;
+  var moved = s.exercises.splice(fromIdx, 1)[0];
+  s.exercises.splice(toIdx, 0, moved);
+  saveRender();
+}
+
+// ── Drag-to-reorder, attached to every .ex-grip handle after each render.
+//    Scoped per .ex-stack-simple container (one per open session) so a
+//    drag can never move an exercise from one session's list into
+//    another's. The drag ONLY starts from the grip icon itself — nothing
+//    else on the card responds to a touch-and-drag — which is the
+//    deliberate difference from earlier, since-removed sleep gestures in
+//    this app that made a whole card or a whole screen implicitly
+//    draggable and kept causing accidental triggers. ──
+function attachReorderDrag(){
+  document.querySelectorAll('.ex-stack-simple').forEach(function(container){
+    var sId = parseInt(container.dataset.session, 10);
+    container.querySelectorAll('.ex-grip').forEach(function(grip){
+      var startY = null, dragging = false, block = null;
+      var blocks = [], blockTops = [], blockHeights = [], draggedIdx = -1;
+      var pendingDropIdx = -1;
+
+      grip.addEventListener('touchstart', function(e){
+        startY = e.touches[0].clientY;
+        block = grip.closest('.ex-bl');
+        dragging = true;
+        block.classList.add('dragging');
+        // Snapshot every block's top AND height once at drag-start. Height
+        // matters as much as position here: a collapsed exercise's block is
+        // much shorter than an expanded one, so "gap size" cannot be safely
+        // inferred from the distance between consecutive tops alone — an
+        // earlier version of this function did exactly that and produced a
+        // wrong, out-of-range index when dragging past the last block
+        // (verified with controlled test values before writing this fix).
+        blocks = Array.from(container.querySelectorAll('.ex-bl'));
+        blockTops = blocks.map(function(b){ return b.getBoundingClientRect().top; });
+        blockHeights = blocks.map(function(b){ return b.getBoundingClientRect().height; });
+        draggedIdx = blocks.indexOf(block);
+        pendingDropIdx = draggedIdx;
+      }, {passive:true});
+
+      grip.addEventListener('touchmove', function(e){
+        if(!dragging) return;
+        var dy = e.touches[0].clientY - startY;
+        block.style.transform = 'translateY(' + dy + 'px)';
+        block.style.position = 'relative';
+        block.style.zIndex = '50';
+
+        // Count how many OTHER blocks' own midpoints (from the snapshot)
+        // the dragged block's current midpoint has moved past. This count
+        // IS directly the correct resting index after removal-and-reinsert
+        // — verified algebraically and with simulated array splice/insert
+        // against several hand-checked scenarios, including uneven heights
+        // and dragging past every other block, before relying on it here.
+        var draggedMid = blockTops[draggedIdx] + dy + blockHeights[draggedIdx]/2;
+        var passed = 0;
+        for(var i = 0; i < blocks.length; i++){
+          if(i === draggedIdx) continue;
+          var otherMid = blockTops[i] + blockHeights[i]/2;
+          if(draggedMid > otherMid) passed++;
+        }
+        pendingDropIdx = passed;
+        showDropLine(container, blocks, block, passed);
+      }, {passive:true});
+
+      grip.addEventListener('touchend', function(){
+        if(!dragging) return;
+        dragging = false;
+        block.classList.remove('dragging');
+        block.style.transform = '';
+        block.style.position = '';
+        block.style.zIndex = '';
+        hideDropLine(container);
+        if(pendingDropIdx !== draggedIdx){
+          moveExToIndex(sId, draggedIdx, pendingDropIdx);
+        }
+      });
+    });
+  });
+}
+
+function showDropLine(container, blocks, draggedBlock, idx){
+  hideDropLine(container);
+  var line = document.createElement('div');
+  line.className = 'ex-drop-line show';
+  line.id = 'ex-drop-line-active';
+  var others = blocks.filter(function(b){ return b !== draggedBlock; });
+  if(idx >= others.length){
+    container.appendChild(line);
+  } else {
+    container.insertBefore(line, others[idx]);
+  }
+}
+function hideDropLine(container){
+  var existing = document.getElementById('ex-drop-line-active');
+  if(existing) existing.remove();
 }
 
 // ═══════════════════════════════════════════════════
