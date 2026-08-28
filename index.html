@@ -10,12 +10,12 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-:root{--bg:#09090b;--s1:#18181b;--s2:#27272a;--s3:#3f3f46;--b1:rgba(255,255,255,.08);--b2:#52525b;--ac:#6366f1;--ac2:#818cf8;--tx:#fafafa;--sub:#a1a1aa;--mu:#71717a;--r:14px}
+:root{--bg:#09090b;--s1:#18181b;--s2:#27272a;--s3:#3f3f46;--b1:rgba(255,255,255,.08);--b2:#52525b;--ac:#6366f1;--ac2:#818cf8;--tx:#fafafa;--sub:#a1a1aa;--mu:#71717a;--r:2px}
 *,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
 html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);font-family:'DM Sans',sans-serif;font-size:14px;margin:0;padding:0}
 .D{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-style:italic}
 .hidden{display:none!important}
-.tmpl-set-btn{padding:6px 12px;border-radius:7px;font-size:13px;font-weight:800;background:var(--s2);border:1px solid var(--b2);color:var(--mu);cursor:pointer;transition:all .15s;font-family:"Barlow Condensed",sans-serif}
+.tmpl-set-btn{padding:6px 12px;border-radius:2px;font-size:13px;font-weight:800;background:var(--s2);border:1px solid var(--b2);color:var(--mu);cursor:pointer;transition:all .15s;font-family:"Barlow Condensed",sans-serif}
 .tmpl-set-btn.on{background:var(--ac);border-color:var(--ac);color:#fff}
 /* APP SHELL */
 #app{width:100%;max-width:430px;margin:0 auto;position:relative}
@@ -34,7 +34,7 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 .logo em{color:var(--ac);font-style:normal}
 #dash-strip{display:flex;gap:6px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:none}
 #dash-strip::-webkit-scrollbar{display:none}
-.dc{flex-shrink:0;background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:10px 12px;min-width:80px}
+.dc{flex-shrink:0;background:var(--s1);border:1px solid var(--b1);border-radius:2px;padding:10px 12px;min-width:80px}
 .dc.hi{background:rgba(99,102,241,.1);border-color:rgba(99,102,241,.35)}
 .dc-v{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;font-style:italic;line-height:1}
 .dc-l{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--mu);margin-top:2px}
@@ -42,32 +42,32 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 #tmr{position:sticky;top:0;z-index:50;background:rgba(9,9,11,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--b1);padding:6px 16px}
 .tmr-row{display:flex;align-items:center;gap:8px}
 .tmr-disp{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;font-style:italic;color:var(--ac);min-width:58px;text-align:center}
-.tmr-in{background:var(--s2);border:1px solid var(--b1);border-radius:7px;padding:5px;width:40px;text-align:center;color:var(--tx);font-weight:700;font-size:13px;outline:none}
+.tmr-in{background:var(--s2);border:1px solid var(--b1);border-radius:2px;padding:5px;width:40px;text-align:center;color:var(--tx);font-weight:700;font-size:13px;outline:none}
 .tmr-sep{color:var(--mu);font-weight:700}
 /* CARD */
 .card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:16px;margin-bottom:10px}
 .card-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:8px}
-.card-title{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;font-style:italic;text-transform:uppercase}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;font-style:italic;text-transform:uppercase;letter-spacing:.03em}
 /* BUTTONS */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:10px;cursor:pointer;font-weight:700;transition:all .15s;outline:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:2px;cursor:pointer;font-weight:700;transition:all .15s;outline:none}
 .btn:active{transform:scale(.94);opacity:.85}
 .btn-p{background:var(--ac);color:#fff;padding:13px 16px;width:100%;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-style:italic;text-transform:uppercase;letter-spacing:.04em;box-shadow:0 4px 16px rgba(99,102,241,.3)}
 .btn-g{background:var(--s3);color:var(--tx);padding:9px 13px;font-size:12px;border:1px solid var(--b2)}
-.btn-icon{width:34px;height:34px;border-radius:8px;background:var(--s3);border:1px solid var(--b2);font-size:15px}
+.btn-icon{width:34px;height:34px;border-radius:2px;background:var(--s3);border:1px solid var(--b2);font-size:15px}
 /* ACTION BUTTONS */
-.ab{padding:5px 9px;border-radius:6px;font-size:10px;font-weight:700;border:1px solid;cursor:pointer;display:inline-flex;align-items:center;gap:3px;transition:all .15s;background:none}
+.ab{padding:5px 9px;border-radius:2px;font-size:10px;font-weight:700;border:1px solid;cursor:pointer;display:inline-flex;align-items:center;gap:3px;transition:all .15s;background:none}
 .ab:active{transform:scale(.94)}
 .ab-g{background:rgba(34,197,94,.14);color:#86efac;border-color:rgba(34,197,94,.4)}
 .ab-b{background:rgba(99,102,241,.14);color:#c7d2fe;border-color:rgba(99,102,241,.35)}
 .ab-r{background:rgba(239,68,68,.14);color:#fca5a5;border-color:rgba(239,68,68,.35)}
 /* INPUT */
-.inp{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:12px 14px;width:100%;color:var(--tx);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;outline:none;transition:border-color .15s;-webkit-appearance:none;appearance:none}
+.inp{background:var(--s2);border:1px solid var(--b1);border-radius:2px;padding:12px 14px;width:100%;color:var(--tx);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;outline:none;transition:border-color .15s;-webkit-appearance:none;appearance:none}
 .inp:focus{border-color:var(--ac)}
 .inp::placeholder{color:var(--mu)}
-.inp-sm{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:9px 4px;width:100%;text-align:center;color:var(--tx);font-weight:800;font-size:15px;outline:none;transition:border-color .15s;-webkit-appearance:none}
+.inp-sm{background:var(--s2);border:1px solid var(--b1);border-radius:2px;padding:9px 4px;width:100%;text-align:center;color:var(--tx);font-weight:800;font-size:15px;outline:none;transition:border-color .15s;-webkit-appearance:none}
 .inp-sm:focus{border-color:var(--ac)}
 /* FILTER PILLS */
-.fp{padding:5px 10px;border-radius:6px;font-size:10px;font-weight:700;text-transform:uppercase;background:var(--s2);border:1px solid var(--b2);color:var(--mu);cursor:pointer;transition:all .15s;white-space:nowrap}
+.fp{padding:5px 10px;border-radius:2px;font-size:10px;font-weight:700;text-transform:uppercase;background:var(--s2);border:1px solid var(--b2);color:var(--mu);cursor:pointer;transition:all .15s;white-space:nowrap}
 .fp.on{background:var(--ac);border-color:var(--ac);color:#fff}
 .fp-row{display:flex;gap:5px;flex-wrap:wrap}
 /* MONTH LABEL */
@@ -82,7 +82,7 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 .sc-acts{display:flex;gap:4px;flex-shrink:0;align-items:center}
 .sc-meta{display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding-bottom:10px}
 .sc-date{font-size:10px;color:var(--mu);font-weight:600}
-.sc-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 6px;border-radius:4px;background:rgba(99,102,241,.1);color:#a5b4fc;border:1px solid rgba(99,102,241,.2)}
+.sc-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 6px;border-radius:2px;background:rgba(99,102,241,.1);color:#a5b4fc;border:1px solid rgba(99,102,241,.2)}
 .sc-tag.td{background:rgba(99,102,241,.22);color:#c7d2fe;border-color:rgba(99,102,241,.4)}
 /* KPI ROW */
 .sc-kpi{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--b1)}
@@ -95,49 +95,38 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 .sc-vf{height:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6)}
 /* TOGGLE */
 .sc-tog{display:flex;align-items:center;gap:7px;padding:9px 13px;cursor:pointer;border-top:1px solid var(--b1)}
-.sc-chev{width:18px;height:18px;border-radius:4px;background:var(--s2);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--sub);transition:transform .2s,background .15s;flex-shrink:0}
+.sc-chev{width:18px;height:18px;border-radius:2px;background:var(--s2);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--sub);transition:transform .2s,background .15s;flex-shrink:0}
 .sc-chev.open{transform:rotate(90deg);background:rgba(99,102,241,.2);color:var(--ac2)}
 .sc-tog-l{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mu)}
 /* SESSION BODY */
 .sc-body{padding:8px 10px 4px}
 
-/* ── Passport filmstrip+focus view: hidden by default (phone shows .ex-stack) ── */
+/* ── Passport exercise list: hidden by default (phone shows .ex-stack) ──
+     History of this format's exercise picker, briefly: horizontal
+     filmstrip -> vertical tile list -> chip-wrap -> card-stack with
+     prev/next navigation and peek cards. All four were replaced on
+     request in favor of the simplest option: every exercise, fully
+     expanded, stacked one under the next — no navigation, no single-
+     "active" exercise, no peek cards. Reuses .ex-bl (the same block
+     class the phone accordion uses) inside its own .ex-stack-simple
+     wrapper, but unlike the phone accordion, every exercise's detail
+     renders unconditionally rather than only the active one's. ── */
 .ex-passport{display:none}
-/* ── Vertical exercise list — replaces the horizontal filmstrip.
-     Full-width tiles: no sideways swipe needed (a precise horizontal
-     gesture is exactly the wrong ask for sweaty gym hands mid-set).
-     Tiles are also larger than the old 84px cards, since the passport
-     canvas has width to spare — name, status dots, and current max
-     weight all sit comfortably on one row instead of being cramped
-     into a small square. ── */
-.ex-list{display:flex;flex-direction:column;gap:7px;padding:0 2px 10px}
-.ex-tile{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--s2);border:1.5px solid var(--b1);border-radius:12px;cursor:pointer;transition:all .15s}
-.ex-tile.active{border-color:var(--ac);background:rgba(99,102,241,.1)}
-.ex-tile-main{flex:1;min-width:0}
-.ex-tile-nm{font-size:13px;font-weight:800;color:var(--tx);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ex-tile-dots{display:flex;gap:4px;margin-top:5px}
-.ex-tile-side{flex-shrink:0;display:flex;align-items:center;gap:8px}
-.ex-tile-max{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:900;font-style:italic;color:var(--sub)}
-.ex-tile-chevron{color:var(--mu);font-size:14px;transition:transform .15s}
-.ex-tile.active .ex-tile-chevron{color:var(--ac);transform:rotate(90deg)}
-.ex-dot{width:6px;height:6px;border-radius:50%;background:var(--s3)}
-.ex-dot.filled{background:var(--ac)}
-.ex-tile-add{display:flex;align-items:center;justify-content:center;gap:6px;padding:11px;border:1.5px dashed var(--b2);border-radius:12px;color:var(--mu);font-size:12px;font-weight:700;cursor:pointer}
-.focus{background:var(--bg);border:1px solid var(--b1);border-radius:10px;overflow:hidden}
-.focus-arrows{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--b1)}
-.focus-arrow{background:var(--s2);border:none;color:var(--sub);font-size:11px;font-weight:700;padding:7px;cursor:pointer}
-.focus-arrow:disabled{color:var(--s3);cursor:default}
-.focus-empty{padding:24px;text-align:center;color:var(--mu);font-size:12px;background:var(--bg);border:1px dashed var(--b2);border-radius:10px}
+.ex-stack-simple .ex-bl{margin-bottom:8px}
+.ex-stack-simple .ex-bl.pr-glow{border-color:rgba(251,191,36,.5);box-shadow:0 4px 20px rgba(251,191,36,.14)}
+.focus-empty{padding:24px;text-align:center;color:var(--mu);font-size:12px;background:var(--bg);border:1px dashed var(--b2);border-radius:2px}
 /* EXERCISE BLOCK */
-.ex-bl{background:var(--bg);border:1px solid var(--b1);border-radius:10px;margin-bottom:7px;overflow:hidden;transition:border-color .15s}
+.ex-bl{background:var(--bg);border:1px solid var(--b1);border-radius:2px;margin-bottom:7px;overflow:hidden;transition:border-color .15s}
 .ex-bl.active{border-color:rgba(99,102,241,.4)}
 .ex-hd{padding:10px 11px;display:flex;justify-content:space-between;align-items:center;gap:6px;cursor:pointer}
+.ex-collapse-chevron{flex-shrink:0;width:18px;height:18px;display:flex;align-items:center;justify-content:center;color:var(--mu);font-size:14px;transition:transform .18s;transform:rotate(0deg)}
+.ex-collapse-chevron.open{transform:rotate(90deg);color:var(--ac2)}
 .ex-nm{font-weight:800;font-size:13px;line-height:1.2}
 .ex-mt{font-size:10px;color:var(--mu);margin-top:2px}
 .ex-ct{display:flex;align-items:center;gap:3px;flex-shrink:0}
 .ob{background:none;border:none;color:var(--mu);font-size:14px;padding:2px 4px;cursor:pointer;line-height:1}
 .ob:active{color:var(--ac)}
-.eb{padding:4px 7px;border-radius:5px;font-size:9px;font-weight:700;border:1px solid;cursor:pointer;background:none;line-height:1.4}
+.eb{padding:4px 7px;border-radius:2px;font-size:9px;font-weight:700;border:1px solid;cursor:pointer;background:none;line-height:1.4}
 .eb-s{color:#a5b4fc;border-color:rgba(99,102,241,.3);background:rgba(99,102,241,.1)}
 .eb-d{color:#fca5a5;border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.1)}
 /* SETS TABLE */
@@ -148,24 +137,25 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 .s-num{display:flex;flex-direction:column;align-items:center}
 .s-n{font-size:11px;font-weight:800;color:var(--sub)}
 .s-o{font-size:8px;color:rgba(99,102,241,.7);font-weight:700}
-.feel-cell{border-radius:7px;padding:5px 2px;cursor:pointer;font-size:8px;font-weight:800;text-align:center;text-transform:uppercase;border:1px solid var(--b1);color:var(--mu);transition:all .15s;min-height:36px;display:flex;align-items:center;justify-content:center;line-height:1.2;word-break:break-word}
+.feel-cell{border-radius:2px;padding:5px 2px;cursor:pointer;font-size:8px;font-weight:800;text-align:center;text-transform:uppercase;border:1px solid var(--b1);color:var(--mu);transition:all .15s;min-height:36px;display:flex;align-items:center;justify-content:center;line-height:1.2;word-break:break-word}
 .feel-cell.fe{background:rgba(34,197,94,.14);border-color:rgba(34,197,94,.4);color:#4ade80}
 .feel-cell.fg{background:rgba(99,102,241,.14);border-color:rgba(99,102,241,.4);color:#a5b4fc}
 .feel-cell.fh{background:rgba(239,68,68,.14);border-color:rgba(239,68,68,.4);color:#f87171}
-.s-del{background:none;border:none;color:var(--s3);font-size:17px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;transition:color .15s}
+.s-del{width:26px;height:26px;flex-shrink:0;background:var(--s2);border:none;border-radius:50%;color:var(--mu);font-size:14px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s}
+.s-del:active{background:var(--s3);color:var(--tx)}
 .s-del:active{color:#ef4444}
-.add-set{width:100%;border:1px dashed rgba(99,102,241,.3);border-radius:8px;padding:8px;font-size:11px;font-weight:700;color:rgba(99,102,241,.6);cursor:pointer;background:rgba(99,102,241,.04);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:4px}
+.add-set{width:100%;border:1px dashed rgba(99,102,241,.3);border-radius:2px;padding:8px;font-size:11px;font-weight:700;color:rgba(99,102,241,.6);cursor:pointer;background:rgba(99,102,241,.04);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:4px}
 .add-set:active{border-color:var(--ac);color:var(--ac2);background:rgba(99,102,241,.1)}
-.add-ex{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:12px;margin:4px 0;background:var(--ac);color:#fff;border:none;border-radius:10px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;font-style:italic;text-transform:uppercase;cursor:pointer;box-shadow:0 3px 12px rgba(99,102,241,.3);transition:all .15s}
+.add-ex{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:12px;margin:4px 0;background:var(--ac);color:#fff;border:none;border-radius:2px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;font-style:italic;text-transform:uppercase;cursor:pointer;box-shadow:0 3px 12px rgba(99,102,241,.3);transition:all .15s}
 .add-ex:active{opacity:.85;transform:scale(.97)}
 /* FEEL SHEET */
 .sh-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200}
 .sh-bg.on{display:block}
-.sh{position:fixed;bottom:64px;left:0;right:0;max-width:430px;margin:0 auto;z-index:201;background:var(--s1);border:1px solid var(--b1);border-radius:20px 20px 0 0;padding:20px 20px 24px;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:80vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sh{position:fixed;bottom:64px;left:0;right:0;max-width:430px;margin:0 auto;z-index:201;background:var(--s1);border:1px solid var(--b1);border-radius:2px 20px 0 0;padding:20px 20px 24px;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:80vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .sh.on{transform:translateY(0)}
 .sh-handle{width:36px;height:4px;background:var(--s2);border-radius:2px;margin:0 auto 18px}
 .feel-opts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
-.fo{border-radius:10px;padding:14px 6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;font-style:italic;text-transform:uppercase;text-align:center;border:2px solid transparent;transition:all .15s;color:#fff}
+.fo{border-radius:2px;padding:14px 6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;font-style:italic;text-transform:uppercase;text-align:center;border:2px solid transparent;transition:all .15s;color:#fff}
 .fo.fe{background:rgba(34,197,94,.2);border-color:rgba(34,197,94,.3)}
 .fo.fg{background:rgba(99,102,241,.2);border-color:rgba(99,102,241,.3)}
 .fo.fh{background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.3)}
@@ -178,10 +168,10 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 .em-hdr{padding:50px 18px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--b1)}
 .cat-row{display:flex;gap:7px;overflow-x:auto;padding:12px 18px;border-bottom:1px solid var(--b1);scrollbar-width:none}
 .cat-row::-webkit-scrollbar{display:none}
-.cp{padding:7px 14px;border-radius:18px;white-space:nowrap;font-size:11px;font-weight:700;text-transform:uppercase;background:var(--s1);border:1px solid var(--b1);color:var(--mu);cursor:pointer;transition:all .15s}
+.cp{padding:7px 14px;border-radius:2px;white-space:nowrap;font-size:11px;font-weight:700;text-transform:uppercase;background:var(--s1);border:1px solid var(--b1);color:var(--mu);cursor:pointer;transition:all .15s}
 .cp.on{background:var(--ac);border-color:var(--ac);color:#fff}
 .ex-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.eg-card{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:12px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:5px}
+.eg-card{background:var(--s1);border:1px solid var(--b1);border-radius:2px;padding:12px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:5px}
 .eg-card:active{border-color:var(--ac);transform:scale(.97)}
 .eg-name{font-size:12px;font-weight:700}
 .eg-del{font-size:10px;color:var(--mu);align-self:flex-end}
@@ -189,7 +179,7 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 /* CAT MODAL */
 #cat-modal{display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.85);align-items:center;justify-content:center;padding:20px}
 #cat-modal.on{display:flex}
-.cm-inner{background:var(--s1);border-radius:18px;padding:22px;width:100%;max-width:340px}
+.cm-inner{background:var(--s1);border-radius:2px;padding:22px;width:100%;max-width:340px}
 /* TEMPLATE MODAL */
 #tmpl-modal{display:none;position:fixed;top:0;bottom:0;left:0;right:0;max-width:430px;margin:0 auto;z-index:1100;background:var(--bg);flex-direction:column;height:100dvh;max-height:100dvh}#tmpl-modal.on{display:flex}
 .tm-hdr{padding:50px 18px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--b1)}
@@ -197,19 +187,19 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 #alert{display:none;position:fixed;inset:0;z-index:500;background:rgba(9,9,11,.97);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px}
 #alert.on{display:flex}
 /* TOAST */
-#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--s1);border:1px solid var(--b2);border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:600;white-space:nowrap;pointer-events:none}
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--s1);border:1px solid var(--b2);border-radius:2px;padding:9px 18px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:600;white-space:nowrap;pointer-events:none}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 /* QUICK NAMES */
 #qnames{display:flex;gap:5px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none}
 #qnames::-webkit-scrollbar{display:none}
-.qn{flex-shrink:0;padding:5px 11px;border-radius:18px;font-size:11px;font-weight:700;text-transform:uppercase;background:var(--s2);border:1px solid var(--b2);color:var(--sub);cursor:pointer;white-space:nowrap;transition:all .15s}
+.qn{flex-shrink:0;padding:5px 11px;border-radius:2px;font-size:11px;font-weight:700;text-transform:uppercase;background:var(--s2);border:1px solid var(--b2);color:var(--sub);cursor:pointer;white-space:nowrap;transition:all .15s}
 .qn:active{background:rgba(99,102,241,.2);border-color:var(--ac);color:#c7d2fe}
 /* ACTIVE BANNER */
 .ab-ban{border-radius:var(--r);padding:12px 14px;margin-bottom:8px;background:linear-gradient(135deg,rgba(99,102,241,.18),rgba(139,92,246,.08));border:1px solid rgba(99,102,241,.4);display:flex;align-items:center;gap:10px}
 .ab-dot{width:7px;height:7px;border-radius:50%;background:var(--ac2);flex-shrink:0;animation:pdot 2s infinite}
 @keyframes pdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.5)}}
 /* EDIT INPUT */
-.edit-inp{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:900;font-style:italic;text-transform:uppercase;background:var(--s2);border:1px solid var(--ac);border-radius:8px;padding:3px 9px;color:var(--tx);outline:none;width:100%}
+.edit-inp{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:900;font-style:italic;text-transform:uppercase;background:var(--s2);border:1px solid var(--ac);border-radius:2px;padding:3px 9px;color:var(--tx);outline:none;width:100%}
 /* STATS */
 .stats-hero{border-radius:var(--r);padding:20px;margin-bottom:10px;background:linear-gradient(135deg,rgba(99,102,241,.22),rgba(139,92,246,.12));border:1px solid rgba(99,102,241,.3);display:flex;justify-content:space-between;align-items:center}
 .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
@@ -222,7 +212,7 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 .kpi-t.up{color:#4ade80}.kpi-t.dn{color:#f87171}.kpi-t.fl{color:var(--mu)}
 /* HEATMAP */
 .hm-grid{display:grid;grid-template-columns:repeat(15,1fr);gap:3px;margin-bottom:8px}
-.hm-c{aspect-ratio:1;border-radius:3px;background:#1a1a2e;border:1px solid rgba(255,255,255,.03)}
+.hm-c{aspect-ratio:1;border-radius:2px;background:#1a1a2e;border:1px solid rgba(255,255,255,.03)}
 .hm-c[d="1"]{background:rgba(99,102,241,.28);border-color:transparent}
 .hm-c[d="2"]{background:rgba(99,102,241,.58);border-color:transparent}
 .hm-c[d="3"]{background:var(--ac);border-color:transparent}
@@ -230,11 +220,11 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 .vb-row{margin-bottom:9px}
 .vb-lbl{display:flex;justify-content:space-between;margin-bottom:3px;font-size:11px;font-weight:700}
 .vb-lbl span:last-child{color:var(--mu);font-size:10px;font-weight:500}
-.vb-tr{background:var(--s2);border-radius:4px;height:7px;overflow:hidden}
-.vb-fl{height:100%;border-radius:4px;background:linear-gradient(90deg,#6366f1,#8b5cf6);transition:width .8s}
+.vb-tr{background:var(--s2);border-radius:2px;height:7px;overflow:hidden}
+.vb-fl{height:100%;border-radius:2px;background:linear-gradient(90deg,#6366f1,#8b5cf6);transition:width .8s}
 /* RECORDS */
 .rec-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.rec-card{background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.18);border-radius:11px;padding:13px 11px;display:flex;flex-direction:column;gap:3px}
+.rec-card{background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.18);border-radius:2px;padding:13px 11px;display:flex;flex-direction:column;gap:3px}
 .rec-ex{font-size:9px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rec-w{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;font-style:italic;color:var(--ac2);line-height:1}
 .rec-r{font-size:11px;color:#4ade80;font-weight:700}
@@ -245,29 +235,29 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 /* FEEL BARS (stats) */
 .fb-row{display:grid;grid-template-columns:66px 1fr 34px;align-items:center;gap:9px;margin-bottom:9px}
 .fb-lbl{font-size:11px;font-weight:700;text-transform:uppercase}
-.fb-tr{background:var(--s2);border-radius:4px;height:7px;overflow:hidden}
-.fb-fl{height:100%;border-radius:4px;transition:width .8s}
+.fb-tr{background:var(--s2);border-radius:2px;height:7px;overflow:hidden}
+.fb-fl{height:100%;border-radius:2px;transition:width .8s}
 .fb-n{font-size:11px;font-weight:700;color:var(--mu);text-align:right}
 /* PLAN */
 .week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:12px}
 .day-col{display:flex;flex-direction:column;align-items:center;gap:3px}
 .day-lbl{font-size:9px;font-weight:800;text-transform:uppercase;color:var(--mu);letter-spacing:.04em}
-.day-cell{width:100%;min-height:42px;border-radius:7px;background:var(--s2);border:1px dashed var(--b2);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--mu);text-align:center;cursor:pointer;transition:all .15s;padding:3px;position:relative}
+.day-cell{width:100%;min-height:42px;border-radius:2px;background:var(--s2);border:1px dashed var(--b2);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--mu);text-align:center;cursor:pointer;transition:all .15s;padding:3px;position:relative}
 .day-cell.tc{border-color:var(--ac);box-shadow:0 0 0 1px var(--ac)}
 .day-cell.tr{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.4);color:#4ade80;border-style:solid}
 .day-cell.pl{background:rgba(99,102,241,.14);border-color:rgba(99,102,241,.4);color:#a5b4fc;border-style:solid}
 .day-rm{position:absolute;top:1px;right:2px;font-size:10px;color:var(--mu);cursor:pointer;background:none;border:none;line-height:1;padding:0}
 .day-rm:active{color:#f87171}
 /* TEMPLATE CARD */
-.tc-card{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:13px;margin-bottom:7px;display:flex;align-items:center;gap:10px}
-.tc-icon{width:38px;height:38px;border-radius:8px;background:rgba(99,102,241,.2);border:1px solid rgba(99,102,241,.3);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.tc-card{background:var(--s2);border:1px solid var(--b1);border-radius:2px;padding:13px;margin-bottom:7px;display:flex;align-items:center;gap:10px}
+.tc-icon{width:38px;height:38px;border-radius:2px;background:rgba(99,102,241,.2);border:1px solid rgba(99,102,241,.3);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
 .tc-info{flex:1;min-width:0}
 .tc-name{font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tc-sub{font-size:10px;color:var(--mu);margin-top:2px}
 .tc-acts{display:flex;gap:4px;flex-shrink:0}
 /* ACHIEVEMENTS */
 .ach-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.ach-c{border-radius:10px;padding:13px 11px;background:var(--s2);border:1px solid var(--b1);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px}
+.ach-c{border-radius:2px;padding:13px 11px;background:var(--s2);border:1px solid var(--b1);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px}
 .ach-c.ul{background:rgba(99,102,241,.1);border-color:rgba(99,102,241,.35)}
 .ach-c.gd{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.3)}
 .ach-ico{font-size:26px;line-height:1;filter:grayscale(1) opacity(.3)}
@@ -275,33 +265,42 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 .ach-nm{font-size:11px;font-weight:800;color:var(--sub)}
 .ach-c.ul .ach-nm,.ach-c.gd .ach-nm{color:var(--tx)}
 .ach-ds{font-size:9px;color:var(--mu)}
-.ach-pb{width:100%;background:var(--s3);border-radius:3px;height:4px;overflow:hidden}
-.ach-pf{height:100%;border-radius:3px;background:var(--ac);transition:width .8s}
+.ach-pb{width:100%;background:var(--s3);border-radius:2px;height:4px;overflow:hidden}
+.ach-pf{height:100%;border-radius:2px;background:var(--ac);transition:width .8s}
 /* CHALLENGE CARD */
-.ch-c{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:13px;margin-bottom:7px}
+.ch-c{background:var(--s2);border:1px solid var(--b1);border-radius:2px;padding:13px;margin-bottom:7px}
 .ch-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .ch-nm{font-weight:800;font-size:13px}
-.ch-bdg{font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px}
+.ch-bdg{font-size:9px;font-weight:700;padding:2px 7px;border-radius:2px}
 .ch-bdg.ac{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.3)}
 .ch-bdg.dn{background:rgba(99,102,241,.15);color:#a5b4fc;border:1px solid rgba(99,102,241,.3)}
-.ch-pb{background:var(--s3);border-radius:4px;height:6px;overflow:hidden;margin:7px 0 3px}
-.ch-pf{height:100%;border-radius:4px;background:linear-gradient(90deg,#6366f1,#8b5cf6);transition:width .8s}
+.ch-pb{background:var(--s3);border-radius:2px;height:6px;overflow:hidden;margin:7px 0 3px}
+.ch-pf{height:100%;border-radius:2px;background:linear-gradient(90deg,#6366f1,#8b5cf6);transition:width .8s}
 /* XP */
-.xp-bar{background:var(--s2);border-radius:6px;height:9px;overflow:hidden;margin:7px 0 3px}
-.xp-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#6366f1,#8b5cf6);transition:width 1s}
+/* ── C-shaped ring, open at the bottom — matches the reference's
+   calorie-progress dial shape, applied here to XP/level progress.
+   Colors kept as the existing indigo/violet — only the FORM changes. ── */
+.xp-ring-wrap{display:flex;align-items:center;gap:16px;margin-top:8px}
+.xp-ring{position:relative;width:100px;height:100px;flex-shrink:0}
+.xp-ring svg{width:100%;height:100%}
+.xp-ring-track{fill:none;stroke:var(--s2);stroke-width:9;stroke-linecap:round}
+.xp-ring-fill{fill:none;stroke:url(#xpRingGradient);stroke-width:9;stroke-linecap:round;transition:d 1s cubic-bezier(.4,0,.2,1)}
+.xp-ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.xp-ring-pct{font-size:19px;font-weight:800;font-family:'Barlow Condensed',sans-serif;font-style:italic}
+.xp-ring-lbl{font-size:7.5px;color:var(--mu);font-weight:700;text-transform:uppercase;margin-top:1px;text-align:center;max-width:60px;line-height:1.2}
 /* PROFILE */
-.wl-item{display:flex;justify-content:space-between;align-items:center;padding:9px 13px;background:var(--s2);border-radius:8px;margin-bottom:5px}
-.theme-btn{display:flex;align-items:center;gap:9px;padding:13px 14px;background:var(--s2);border:1px solid var(--b1);border-radius:10px;cursor:pointer;width:100%;font-size:13px;font-weight:600;transition:border-color .15s;color:var(--tx)}
+.wl-item{display:flex;justify-content:space-between;align-items:center;padding:9px 13px;background:var(--s2);border-radius:2px;margin-bottom:5px}
+.theme-btn{display:flex;align-items:center;gap:9px;padding:13px 14px;background:var(--s2);border:1px solid var(--b1);border-radius:2px;cursor:pointer;width:100%;font-size:13px;font-weight:600;transition:border-color .15s;color:var(--tx)}
 .theme-btn:active{border-color:var(--ac)}
 /* DIFF BADGE */
 .diff{font-size:8px;font-weight:700;position:absolute;top:-7px;right:1px;pointer-events:none}
 .diff.p{color:#4ade80}.diff.n{color:#f87171}
 
 /* NOTE BUTTON & BANNER */
-.ex-note-btn{padding:4px 6px!important;border-radius:5px;display:flex;align-items:center;justify-content:center;color:var(--mu);transition:all .15s}
+.ex-note-btn{padding:4px 6px!important;border-radius:2px;display:flex;align-items:center;justify-content:center;color:var(--mu);transition:all .15s}
 .ex-note-btn:active{color:var(--ac)}
 .ex-note-btn.has-note{color:var(--ac2);background:rgba(99,102,241,.1)}
-.ex-note-banner{margin:0 12px 8px;padding:9px 11px;background:var(--s2);border:1px solid var(--b1);border-left:3px solid var(--ac);border-radius:7px;font-size:11px;color:var(--sub);display:flex;align-items:flex-start;gap:8px;line-height:1.4}
+.ex-note-banner{margin:0 12px 8px;padding:9px 11px;background:var(--s2);border:1px solid var(--b1);border-left:3px solid var(--ac);border-radius:2px;font-size:11px;color:var(--sub);display:flex;align-items:flex-start;gap:8px;line-height:1.4}
 .ex-note-edit{padding:0!important;color:var(--mu);transition:color .15s;flex-shrink:0;display:flex;align-items:center;justify-content:center;width:20px;height:20px}
 .ex-note-edit:active{color:var(--ac)}
 
@@ -315,22 +314,22 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 
 /* VOLUME TARGETS */
 .vt-grid{display:grid;grid-template-columns:1fr;gap:7px}
-.vt-card{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:11px 13px;cursor:pointer;transition:transform .12s}
+.vt-card{background:var(--s2);border:1px solid var(--b1);border-radius:2px;padding:11px 13px;cursor:pointer;transition:transform .12s}
 .vt-card:active{transform:scale(.98)}
 .vt-card.vt-low{border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.04)}
 .vt-card.vt-opt{border-color:rgba(74,222,128,.35);background:rgba(74,222,128,.05)}
 .vt-card.vt-high{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05)}
 .vt-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .vt-name{font-size:13px;font-weight:800}
-.vt-status{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:2px 7px;border-radius:4px}
+.vt-status{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:2px 7px;border-radius:2px}
 .vt-card.vt-low .vt-status{background:rgba(248,113,113,.18);color:#fca5a5}
 .vt-card.vt-opt .vt-status{background:rgba(74,222,128,.18);color:#86efac}
 .vt-card.vt-high .vt-status{background:rgba(251,191,36,.18);color:#fcd34d}
 .vt-val{display:flex;align-items:baseline;gap:5px;margin-bottom:7px}
 .vt-val .D{font-size:24px;color:var(--tx);line-height:1}
 .vt-target{font-size:10px;color:var(--mu);font-weight:600}
-.vt-bar{position:relative;height:6px;background:var(--s3);border-radius:3px;overflow:hidden}
-.vt-bar-fill{height:100%;border-radius:3px;transition:width .8s}
+.vt-bar{position:relative;height:6px;background:var(--s3);border-radius:2px;overflow:hidden}
+.vt-bar-fill{height:100%;border-radius:2px;transition:width .8s}
 .vt-card.vt-low .vt-bar-fill{background:#f87171}
 .vt-card.vt-opt .vt-bar-fill{background:#4ade80}
 .vt-card.vt-high .vt-bar-fill{background:#fbbf24}
@@ -339,12 +338,12 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 #pr-celebration{display:none;position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.92);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:20px;overflow:hidden}
 #pr-celebration.on{display:flex}
 .pr-confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.pr-confetti span{position:absolute;top:-15px;width:9px;height:14px;border-radius:1px;animation:fallConfetti linear forwards}
+.pr-confetti span{position:absolute;top:-15px;width:9px;height:14px;border-radius:2px;animation:fallConfetti linear forwards}
 @keyframes fallConfetti{
   0%{transform:translateY(0) rotate(0);opacity:1}
   100%{transform:translateY(110vh) rotate(720deg);opacity:0}
 }
-.pr-card{position:relative;background:linear-gradient(135deg,#1a1a2e 0%,#0f0f1f 100%);border:2px solid #fbbf24;border-radius:20px;padding:28px 24px;width:92%;max-width:360px;text-align:center;box-shadow:0 20px 80px rgba(251,191,36,.3),0 0 60px rgba(251,191,36,.15);animation:prPop .4s cubic-bezier(.34,1.56,.64,1)}
+.pr-card{position:relative;background:linear-gradient(135deg,#1a1a2e 0%,#0f0f1f 100%);border:2px solid #fbbf24;border-radius:2px;padding:28px 24px;width:92%;max-width:360px;text-align:center;box-shadow:0 20px 80px rgba(251,191,36,.3),0 0 60px rgba(251,191,36,.15);animation:prPop .4s cubic-bezier(.34,1.56,.64,1)}
 @keyframes prPop{
   0%{transform:scale(.3);opacity:0}
   100%{transform:scale(1);opacity:1}
@@ -356,7 +355,7 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
   100%{transform:rotate(0) scale(1)}
 }
 .pr-list{display:flex;flex-direction:column;gap:9px}
-.pr-item{display:flex;align-items:center;gap:11px;padding:11px 13px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:10px;text-align:left}
+.pr-item{display:flex;align-items:center;gap:11px;padding:11px 13px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:2px;text-align:left}
 .pr-icon{font-size:22px;line-height:1;flex-shrink:0}
 .pr-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#fbbf24;margin-bottom:3px}
 .pr-vals{display:flex;align-items:baseline;gap:6px}
@@ -369,11 +368,11 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 /* MEASUREMENTS */
 .mm-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--mu);margin-bottom:4px}
 .mm-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.mm-stat{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:8px 6px;text-align:center}
+.mm-stat{background:var(--s2);border:1px solid var(--b1);border-radius:2px;padding:8px 6px;text-align:center}
 .mm-stat-v{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;font-style:italic;line-height:1;color:var(--tx)}
 .mm-stat-l{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);margin-top:3px}
 .mm-stat-s{font-size:8px;color:var(--mu);margin-top:2px;font-weight:600}
-.mm-log-item{display:flex;justify-content:space-between;align-items:center;padding:8px 11px;background:var(--s2);border-radius:7px;margin-bottom:4px;font-size:11px;font-weight:600}
+.mm-log-item{display:flex;justify-content:space-between;align-items:center;padding:8px 11px;background:var(--s2);border-radius:2px;margin-bottom:4px;font-size:11px;font-weight:600}
 .mm-log-info{display:flex;gap:7px;align-items:baseline;flex-wrap:wrap}
 .mm-log-v{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;font-style:italic;color:var(--ac)}
 .mm-log-d{color:var(--mu);font-size:10px}
@@ -398,20 +397,20 @@ body.glass.lt .tm-footer{
 }
 
 /* MONTHLY SUMMARY */
-.ms-tile{background:rgba(99,102,241,.14);border:1px solid rgba(99,102,241,.28);border-radius:11px;padding:13px 11px;text-align:center}
+.ms-tile{background:rgba(99,102,241,.14);border:1px solid rgba(99,102,241,.28);border-radius:2px;padding:13px 11px;text-align:center}
 .ms-tile-v{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:900;font-style:italic;line-height:1;color:#fff}
 .ms-tile-l{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:rgba(165,180,252,.75);margin-top:4px}
 .ms-tile-s{font-size:9px;color:rgba(165,180,252,.55);margin-top:2px;font-weight:600}
 .ms-section-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#a5b4fc}
-.ms-cal-day{aspect-ratio:1;border-radius:5px;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,.4);position:relative}
+.ms-cal-day{aspect-ratio:1;border-radius:2px;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,.4);position:relative}
 .ms-cal-day.trained{background:rgba(99,102,241,.55);color:#fff}
 .ms-cal-day.high{background:#6366f1;color:#fff;box-shadow:0 0 10px rgba(99,102,241,.5)}
 .ms-cal-day.today{outline:2px solid #fbbf24;outline-offset:1px}
 .ms-cal-day.empty{visibility:hidden}
 .ms-mb-row{display:flex;align-items:center;gap:9px;margin-bottom:7px}
 .ms-mb-name{flex-shrink:0;width:80px;font-size:11px;font-weight:700;color:#fff}
-.ms-mb-bar{flex:1;height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden}
-.ms-mb-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#6366f1,#8b5cf6)}
+.ms-mb-bar{flex:1;height:8px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
+.ms-mb-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#6366f1,#8b5cf6)}
 .ms-mb-val{font-size:10px;color:rgba(165,180,252,.7);font-weight:700;min-width:36px;text-align:right}
 .ms-ex-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
 .ms-ex-row:last-child{border:none}
@@ -425,16 +424,16 @@ body.glass.lt .tm-footer{
 .ms-pr-val{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;font-style:italic;color:#fbbf24}
 .ms-feel-row{display:grid;grid-template-columns:60px 1fr 32px;align-items:center;gap:7px;margin-bottom:5px}
 .ms-feel-lbl{font-size:10px;font-weight:700;text-transform:uppercase}
-.ms-feel-tr{background:rgba(255,255,255,.06);border-radius:4px;height:6px;overflow:hidden}
-.ms-feel-fl{height:100%;border-radius:4px}
+.ms-feel-tr{background:rgba(255,255,255,.06);border-radius:2px;height:6px;overflow:hidden}
+.ms-feel-fl{height:100%;border-radius:2px}
 .ms-feel-n{font-size:10px;color:rgba(165,180,252,.65);font-weight:700;text-align:right}
-.ms-cmp-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:9px;margin-bottom:6px}
+.ms-cmp-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:2px;margin-bottom:6px}
 .ms-cmp-row:last-child{margin-bottom:0}
 .ms-cmp-l{font-size:11px;font-weight:700;color:rgba(255,255,255,.7)}
 .ms-cmp-v{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;font-style:italic;display:flex;align-items:center;gap:4px}
 /* WEIGHT STATS */
 .wt-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
-.wt-stat{background:var(--s2);border:1px solid var(--b1);border-radius:9px;padding:10px 8px;text-align:center}
+.wt-stat{background:var(--s2);border:1px solid var(--b1);border-radius:2px;padding:10px 8px;text-align:center}
 .wt-stat-l{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);margin-bottom:3px}
 .wt-stat-v{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;font-style:italic;line-height:1;color:var(--tx)}
 .wt-stat-s{font-size:8px;color:var(--mu);margin-top:2px;font-weight:600}
@@ -454,16 +453,16 @@ body.glass.lt .tm-footer{
 .info-section{margin-bottom:16px}
 .info-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);margin-bottom:6px;display:flex;align-items:center;gap:5px}
 .info-desc{font-size:13px;line-height:1.5;color:var(--sub)}
-.info-muscle{font-size:12px;color:var(--ac2);font-weight:600;line-height:1.4;background:rgba(99,102,241,.08);padding:9px 12px;border-radius:8px;border-left:3px solid var(--ac)}
+.info-muscle{font-size:12px;color:var(--ac2);font-weight:600;line-height:1.4;background:rgba(99,102,241,.08);padding:9px 12px;border-radius:2px;border-left:3px solid var(--ac)}
 .info-list{list-style:none;padding:0;margin:0}
 .info-list li{font-size:12px;line-height:1.5;color:var(--sub);padding:6px 0 6px 22px;position:relative}
 .info-list.tips li::before{content:'✓';position:absolute;left:0;color:#4ade80;font-weight:800}
 .info-list.mistakes li::before{content:'✕';position:absolute;left:0;color:#f87171;font-weight:800}
-.info-yt-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:#ff0000;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;margin-top:6px}
+.info-yt-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:#ff0000;color:#fff;border:none;border-radius:2px;font-weight:700;font-size:13px;cursor:pointer;margin-top:6px}
 .info-yt-btn:active{opacity:.85}
 .info-empty{text-align:center;padding:30px 16px;color:var(--mu)}
 .info-empty-icon{font-size:36px;margin-bottom:10px;opacity:.4}
-.info-btn{padding:4px 6px!important;border-radius:5px;display:flex;align-items:center;justify-content:center;color:var(--mu);transition:all .15s}
+.info-btn{padding:4px 6px!important;border-radius:2px;display:flex;align-items:center;justify-content:center;color:var(--mu);transition:all .15s}
 .info-btn:active{color:var(--ac2)}
 .info-btn.has-info{color:var(--ac2)}
 
@@ -670,6 +669,33 @@ body.lt{--bg:#f4f4f5;--s1:#fff;--s2:#e4e4e7;--s3:#d4d4d8;--b1:rgba(0,0,0,.09);--
 body.lt #tmr{background:rgba(244,244,245,.94)}
 body.lt #alert{background:rgba(244,244,245,.97)}
 
+/* ── NAV-ONLY LIGHT MODE ──
+   A separate toggle from the app-wide dark/light theme (body.lt above):
+   this makes ONLY the bottom navigation bar white/light, independent of
+   whatever theme the rest of the app is in. Deliberately its own class
+   (body.nav-lt) rather than reusing body.lt, since the two are meant to
+   be combinable independently — e.g. dark app + light nav, or light app
+   + light nav (in which case body.lt's own #nav styling — inherited
+   background:rgba(9,9,11,.97), which is dark and would look wrong on a
+   light body — needs the same override, so this rule does not condition
+   on body.lt being absent). */
+body.nav-lt #nav{
+  background:rgba(255,255,255,.97) !important;
+  border-top-color:rgba(0,0,0,.08) !important;
+  backdrop-filter:blur(20px) !important;
+  -webkit-backdrop-filter:blur(20px) !important;
+}
+body.nav-lt .nb{color:#71717a !important}
+body.nav-lt .nb.on{color:var(--ac) !important}
+body.nav-lt .nb.on svg{filter:drop-shadow(0 0 6px rgba(99,102,241,.35)) !important}
+/* !important here is deliberate: this is a small, fully self-contained
+   rule set (5 declarations total) covering exactly one toggle's effect,
+   so it can't create a maintenance problem elsewhere — and it removes
+   any possibility of an unrelated rule (present now or added later, in
+   this file or a future edit) winning the cascade by coincidence rather
+   than by design. Cheaper to guarantee this always wins than to keep
+   re-auditing specificity/source-order every time nav styling changes. */
+
 
 /* ═══════════════════════════════════════════════════════════
    PASSPORT-FORMAT LAYOUT (Samsung Galaxy Z Fold 8 cover screen
@@ -678,19 +704,37 @@ body.lt #alert{background:rgba(244,244,245,.97)}
    Cover screen: 1248x1972px @ 5.5" -> ~416x657 CSS px @ DPR 3.0
    Ratio 0.633 (width/height) vs a typical phone's ~0.46.
 
-   STRUCTURAL change (not a resize): the app's per-exercise
-   accordion (.ex-stack, one exercise expanded at a time, scroll
-   to find it) is replaced on this format by a vertical exercise
-   list (.ex-list — every exercise in the session as a full-width
-   tappable tile: name, fill-status dots, current max weight) plus
-   a single full-width focus panel (.focus — full set/rep/feel
-   detail for only the tapped exercise). This is deliberately a
-   vertical tap-list, NOT a horizontal filmstrip: a precise sideways
-   swipe is the wrong gesture to ask of sweaty gym hands mid-set,
-   and it always hides some exercises off-screen. Vertical scroll
-   is the forgiving, familiar gym-app gesture. No information is
-   duplicated: tiles show only fill-status dots and max weight,
-   the actual weight/reps/PR/diff detail lives only in .focus.
+   STRUCTURAL change (not a resize), current state: on this format,
+   .ex-passport now renders every exercise fully expanded, stacked one
+   under the next — the SAME simple pattern .ex-stack (the phone
+   accordion) uses for its markup (.ex-bl blocks via buildExerciseHeader/
+   buildExerciseDetail), just without that accordion's "only the active
+   one expands" restriction. No navigation, no single-active-exercise
+   concept, no peek cards. This is the FIFTH iteration on this specific
+   problem (how to present a session's exercise list on a wide-short
+   viewport), landing on request at the simplest option after four more
+   elaborate ones were each tried and reverted:
+   (1) horizontal filmstrip — wrong gesture (sideways swipe) for sweaty
+       gym hands mid-set, and always hid exercises off-screen;
+   (2) vertical list of FULL-WIDTH tiles — fixed the gesture, but a long
+       session's tiles could push the actual sets far below the fold;
+   (3) wrapping chip picker — fixed the space problem too, but was
+       rejected as visually/interactionally immature (a flat picker-
+       then-panel two-step, not a real "workbench");
+   (4) card stack with prev/next buttons, a progress bar, and peek
+       cards — added real depth and a "workbench" feel, but the
+       navigation itself (the buttons, then a swipe-up gesture, then
+       the buttons again after swipe was dropped) was the thing that
+       kept needing removal on request, round after round, until the
+       ask became: drop navigation entirely, just show everything.
+   setActiveEx()/toggleExCollapse() remain in use here (via the same
+   buildExerciseHeader compact=true path — tapping a header still
+   collapses/expands THAT exercise's own detail individually);
+   stepActiveEx() is no longer called from anywhere in this format's
+   UI (no button remains that steps between exercises) but is left
+   defined rather than deleted, since it's still valid, self-contained
+   logic that costs nothing sitting unused, and deleting working code
+   on a guess it's truly permanent is a needless risk.
    Both .ex-stack and .ex-passport are always rendered by JS;
    this media query is the ONLY thing that decides which one is
    visible, so no JS branching on screen size is needed anywhere.
@@ -725,16 +769,6 @@ body.lt #alert{background:rgba(244,244,245,.97)}
   .s-o{font-size:9px}
   .diff{font-size:9px;top:-8px}
 
-  /* ── Focus-panel prev/next: bigger tap targets, not thin text rows —
-     these are the primary navigation while your hands are busy. ── */
-  .focus-arrow{padding:11px}
-
-  /* ── New vertical exercise tiles: comfortably large, full-width ── */
-  .ex-tile{padding:14px 15px}
-  .ex-tile-nm{font-size:14px}
-  .ex-tile-max{font-size:14px}
-  .ex-dot{width:7px;height:7px}
-
   /* ── Session card / exercise block chrome ── */
   .sc-top{margin-bottom:5px}
   .sc-name{font-size:19px}
@@ -747,6 +781,14 @@ body.lt #alert{background:rgba(244,244,245,.97)}
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="xpRingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+  </defs>
+</svg>
 
 <!-- ALERT -->
 <div id="alert">
@@ -795,7 +837,7 @@ body.lt #alert{background:rgba(244,244,245,.97)}
 
 <!-- CONFIRM DIALOG -->
 <div id="confirm-bg" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.75);align-items:center;justify-content:center;padding:20px"></div>
-<div id="confirm-box" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9001;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:22px;width:90%;max-width:320px">
+<div id="confirm-box" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9001;background:var(--s1);border:1px solid var(--b1);border-radius:2px;padding:22px;width:90%;max-width:320px">
   <div id="confirm-msg" class="D" style="font-size:17px;margin-bottom:18px;color:var(--tx)"></div>
   <div style="display:flex;gap:8px">
     <button class="btn btn-g" style="flex:1;padding:12px;font-size:13px" onclick="confirmReject()">Annuleren</button>
@@ -806,7 +848,7 @@ body.lt #alert{background:rgba(244,244,245,.97)}
 
 <!-- INPUT DIALOG -->
 <div id="input-bg" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.75)"></div>
-<div id="input-box" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9001;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:22px;width:90%;max-width:340px">
+<div id="input-box" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9001;background:var(--s1);border:1px solid var(--b1);border-radius:2px;padding:22px;width:90%;max-width:340px">
   <div id="input-msg" class="D" style="font-size:17px;margin-bottom:14px;color:var(--tx)"></div>
   <input id="input-field" class="inp" style="margin-bottom:16px" onkeydown="if(event.keyCode===13)inputAccept()">
   <div style="display:flex;gap:8px">
@@ -819,7 +861,7 @@ body.lt #alert{background:rgba(244,244,245,.97)}
 
 <!-- BODY MEASUREMENTS MODAL -->
 <div id="mm-bg" style="display:none;position:fixed;inset:0;z-index:8700;background:rgba(0,0,0,.85);backdrop-filter:blur(8px)" onclick="closeMeasureLog()"></div>
-<div id="mm-box" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:8701;background:var(--s1);border:1px solid var(--b1);border-radius:18px;padding:20px;width:94%;max-width:400px;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch">
+<div id="mm-box" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:8701;background:var(--s1);border:1px solid var(--b1);border-radius:2px;padding:20px;width:94%;max-width:400px;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
     <div class="D" style="font-size:20px">LICHAAMSMATEN <em style="color:var(--ac)">LOGGEN</em></div>
     <button class="btn btn-icon" onclick="closeMeasureLog()">✕</button>
@@ -866,16 +908,24 @@ body.lt #alert{background:rgba(244,244,245,.97)}
 
 <!-- EXERCISE INFO MODAL -->
 <div id="info-bg" style="display:none;position:fixed;inset:0;z-index:8500;background:rgba(0,0,0,.85);backdrop-filter:blur(8px)" onclick="closeExInfo()"></div>
-<div id="info-box" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:8501;width:94%;max-width:430px;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--s1);border:1px solid var(--b1);border-radius:18px">
-  <!-- Header -->
-  <div style="position:sticky;top:0;background:var(--s1);border-bottom:1px solid var(--b1);padding:16px 18px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;border-radius:18px 18px 0 0;z-index:1">
-    <div style="flex:1;min-width:0">
-      <div id="info-cat" style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--ac2);margin-bottom:3px"></div>
-      <div id="info-name" class="D" style="font-size:22px;color:var(--tx);line-height:1.1"></div>
+<div id="info-box" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:8501;width:94%;max-width:430px;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--s1);border:1px solid var(--b1);border-radius:2px">
+  <!-- Header — indigo block with a wave transition into the content,
+       matching the reference's colored-header + wave-cutout pattern.
+       Colors stay the app's existing indigo (--ac); only the FORM
+       (flat header -> curved wave edge) is new. -->
+  <div style="position:relative;background:linear-gradient(160deg,var(--ac) 0%,#5457d4 100%);padding:20px 18px 34px;border-radius:2px 2px 0 0">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+      <div style="flex:1;min-width:0">
+        <div id="info-cat" style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.75);margin-bottom:3px"></div>
+        <div id="info-name" class="D" style="font-size:22px;color:#fff;line-height:1.1"></div>
+      </div>
+      <button class="btn btn-icon" style="background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.25);color:#fff" onclick="closeExInfo()">✕</button>
     </div>
-    <button class="btn btn-icon" onclick="closeExInfo()">✕</button>
+    <svg viewBox="0 0 430 24" preserveAspectRatio="none" style="position:absolute;bottom:-1px;left:0;width:100%;height:24px;display:block">
+      <path d="M0,0 C 107,24 322,24 430,0 L430,24 L0,24 Z" fill="var(--s1)"/>
+    </svg>
   </div>
-  <div id="info-body" style="padding:16px 18px 22px"></div>
+  <div id="info-body" style="padding:12px 18px 22px"></div>
 </div>
 
 
@@ -887,7 +937,7 @@ body.lt #alert{background:rgba(244,244,245,.97)}
     <button class="btn btn-icon" onclick="closeMonthSummary()" style="width:34px;height:34px;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);color:#fff">✕</button>
   </div>
 
-  <div id="ms-card" style="background:linear-gradient(160deg,#0a0a1a 0%,#1a1430 50%,#0a0a1a 100%);border-radius:20px;padding:24px;color:#fff;position:relative;overflow:hidden;border:1px solid rgba(99,102,241,.35);box-shadow:0 24px 70px rgba(0,0,0,.6)">
+  <div id="ms-card" style="background:linear-gradient(160deg,#0a0a1a 0%,#1a1430 50%,#0a0a1a 100%);border-radius:2px;padding:24px;color:#fff;position:relative;overflow:hidden;border:1px solid rgba(99,102,241,.35);box-shadow:0 24px 70px rgba(0,0,0,.6)">
 
     <!-- Decorative glows -->
     <div style="position:absolute;top:-80px;right:-80px;width:260px;height:260px;background:radial-gradient(circle,rgba(99,102,241,.35),transparent 70%);pointer-events:none"></div>
@@ -898,11 +948,11 @@ body.lt #alert{background:rgba(244,244,245,.97)}
     <div style="position:relative;text-align:center;margin-bottom:18px">
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:900;font-style:italic;color:#a5b4fc;letter-spacing:.16em">GYMLOG WRAPPED</div>
       <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-top:2px">
-        <button id="ms-prev" onclick="msNavMonth(-1)" style="background:rgba(99,102,241,.18);border:1px solid rgba(99,102,241,.35);color:#a5b4fc;width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s">
+        <button id="ms-prev" onclick="msNavMonth(-1)" style="background:rgba(99,102,241,.18);border:1px solid rgba(99,102,241,.35);color:#a5b4fc;width:36px;height:36px;border-radius:2px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
         </button>
         <div id="ms-month" class="D" style="font-size:32px;color:#fff;line-height:1.05;flex:1;min-width:0"></div>
-        <button id="ms-next" onclick="msNavMonth(1)" style="background:rgba(99,102,241,.18);border:1px solid rgba(99,102,241,.35);color:#a5b4fc;width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s">
+        <button id="ms-next" onclick="msNavMonth(1)" style="background:rgba(99,102,241,.18);border:1px solid rgba(99,102,241,.35);color:#a5b4fc;width:36px;height:36px;border-radius:2px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
         </button>
       </div>
@@ -921,38 +971,38 @@ body.lt #alert{background:rgba(244,244,245,.97)}
     <div id="ms-compare" style="position:relative;margin-bottom:16px"></div>
 
     <!-- Calendar heatmap -->
-    <div style="position:relative;margin-bottom:16px;padding:13px;background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.18);border-radius:11px">
+    <div style="position:relative;margin-bottom:16px;padding:13px;background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.18);border-radius:2px">
       <div class="ms-section-title">Trainingsdagen</div>
       <div id="ms-cal" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:8px"></div>
       <div id="ms-cal-sub" style="font-size:10px;color:rgba(165,180,252,.6);margin-top:8px;text-align:right"></div>
     </div>
 
     <!-- Top muscle groups -->
-    <div style="position:relative;margin-bottom:16px;padding:13px;background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.18);border-radius:11px">
+    <div style="position:relative;margin-bottom:16px;padding:13px;background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.18);border-radius:2px">
       <div class="ms-section-title">Top spiergroepen</div>
       <div id="ms-muscles" style="margin-top:8px"></div>
     </div>
 
     <!-- Top 3 exercises -->
-    <div style="position:relative;margin-bottom:16px;padding:13px;background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.18);border-radius:11px">
+    <div style="position:relative;margin-bottom:16px;padding:13px;background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.18);border-radius:2px">
       <div class="ms-section-title">Meest gedaan</div>
       <div id="ms-exercises" style="margin-top:8px"></div>
     </div>
 
     <!-- PR list -->
-    <div id="ms-prs-wrap" style="position:relative;margin-bottom:16px;padding:13px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.22);border-radius:11px;display:none">
+    <div id="ms-prs-wrap" style="position:relative;margin-bottom:16px;padding:13px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.22);border-radius:2px;display:none">
       <div class="ms-section-title" style="color:#fcd34d">🏆 Persoonlijke records</div>
       <div id="ms-prs" style="margin-top:8px"></div>
     </div>
 
     <!-- Feel distribution -->
-    <div style="position:relative;margin-bottom:16px;padding:13px;background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.18);border-radius:11px">
+    <div style="position:relative;margin-bottom:16px;padding:13px;background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.18);border-radius:2px">
       <div class="ms-section-title">Hoe voelde het</div>
       <div id="ms-feel" style="margin-top:8px"></div>
     </div>
 
     <!-- Best week -->
-    <div id="ms-bestweek-wrap" style="position:relative;margin-bottom:16px;padding:13px;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:11px;display:none">
+    <div id="ms-bestweek-wrap" style="position:relative;margin-bottom:16px;padding:13px;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:2px;display:none">
       <div class="ms-section-title" style="color:#86efac">🔥 Beste week</div>
       <div id="ms-bestweek" style="margin-top:8px"></div>
     </div>
@@ -988,7 +1038,7 @@ body.lt #alert{background:rgba(244,244,245,.97)}
   </div>
 
   <!-- Visual share card (this is what gets shown) -->
-  <div id="share-card" style="background:linear-gradient(135deg,#0f0f1f 0%,#1a1a2e 50%,#0f0f1f 100%);border-radius:18px;padding:24px;color:#fff;position:relative;overflow:hidden;border:1px solid rgba(99,102,241,.3);box-shadow:0 20px 60px rgba(0,0,0,.5)">
+  <div id="share-card" style="background:linear-gradient(135deg,#0f0f1f 0%,#1a1a2e 50%,#0f0f1f 100%);border-radius:2px;padding:24px;color:#fff;position:relative;overflow:hidden;border:1px solid rgba(99,102,241,.3);box-shadow:0 20px 60px rgba(0,0,0,.5)">
     <!-- Glow effect -->
     <div style="position:absolute;top:-50px;right:-50px;width:200px;height:200px;background:radial-gradient(circle,rgba(99,102,241,.3),transparent 70%);pointer-events:none"></div>
     <div style="position:absolute;bottom:-50px;left:-50px;width:200px;height:200px;background:radial-gradient(circle,rgba(139,92,246,.2),transparent 70%);pointer-events:none"></div>
@@ -1007,15 +1057,15 @@ body.lt #alert{background:rgba(244,244,245,.97)}
 
     <!-- KPI bar -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;position:relative">
-      <div style="background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:9px 6px;text-align:center">
+      <div style="background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:2px;padding:9px 6px;text-align:center">
         <div id="sc-kpi-ex" class="D" style="font-size:22px;color:#fff;line-height:1"></div>
         <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(165,180,252,.7);margin-top:3px">Oefeningen</div>
       </div>
-      <div style="background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:9px 6px;text-align:center">
+      <div style="background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:2px;padding:9px 6px;text-align:center">
         <div id="sc-kpi-sets" class="D" style="font-size:22px;color:#fff;line-height:1"></div>
         <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(165,180,252,.7);margin-top:3px">Sets</div>
       </div>
-      <div style="background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:9px 6px;text-align:center">
+      <div style="background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:2px;padding:9px 6px;text-align:center">
         <div id="sc-kpi-vol" class="D" style="font-size:22px;color:#fff;line-height:1"></div>
         <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(165,180,252,.7);margin-top:3px">Volume</div>
       </div>
@@ -1116,7 +1166,7 @@ body.lt #alert{background:rgba(244,244,245,.97)}
         <div id="greeting" style="font-size:11px;color:var(--mu);text-align:right;line-height:1.4"></div>
       </div>
       <!-- Session in progress timer -->
-      <div id="sess-timer" style="display:none;align-items:center;gap:8px;padding:8px 12px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);border-radius:10px;margin-bottom:10px">
+      <div id="sess-timer" style="display:none;align-items:center;gap:8px;padding:8px 12px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);border-radius:2px;margin-bottom:10px">
         <div style="width:8px;height:8px;border-radius:50%;background:#4ade80;animation:pdot 2s infinite"></div>
         <div style="flex:1;display:flex;flex-direction:column;line-height:1.1">
           <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:#86efac;letter-spacing:.06em">Bezig</span>
@@ -1187,10 +1237,10 @@ body.lt #alert{background:rgba(244,244,245,.97)}
             <div class="hm-grid" id="hm-grid"></div>
             <div style="display:flex;align-items:center;gap:5px">
               <span style="font-size:10px;color:var(--mu)">Minder</span>
-              <div style="width:11px;height:11px;border-radius:3px;background:#1a1a2e;border:1px solid #333"></div>
-              <div style="width:11px;height:11px;border-radius:3px;background:rgba(99,102,241,.28)"></div>
-              <div style="width:11px;height:11px;border-radius:3px;background:rgba(99,102,241,.58)"></div>
-              <div style="width:11px;height:11px;border-radius:3px;background:var(--ac)"></div>
+              <div style="width:11px;height:11px;border-radius:2px;background:#1a1a2e;border:1px solid #333"></div>
+              <div style="width:11px;height:11px;border-radius:2px;background:rgba(99,102,241,.28)"></div>
+              <div style="width:11px;height:11px;border-radius:2px;background:rgba(99,102,241,.58)"></div>
+              <div style="width:11px;height:11px;border-radius:2px;background:var(--ac)"></div>
               <span style="font-size:10px;color:var(--mu)">Meer</span>
             </div>
           </div>
@@ -1359,6 +1409,11 @@ body.lt #alert{background:rgba(244,244,245,.97)}
               <span id="glass-ico">🪟</span>
               <span id="glass-lbl">Glass design</span>
             </button>
+            <button class="theme-btn" onclick="toggleNavLight()" style="margin-top:8px">
+              <span id="navlight-ico">⬛</span>
+              <span id="navlight-lbl">Navigatie: donker</span>
+            </button>
+            <div style="font-size:10px;color:var(--mu);margin:6px 4px 0;line-height:1.5">Maakt alleen de onderste navigatiebalk licht, los van het thema van de rest van de app.</div>
           </div>
 
           <div class="card">
@@ -2077,8 +2132,8 @@ var LIB_DEFAULT = {
   'Core':      ['PLANK','CRUNCHES','LEG RAISES','RUSSIAN TWIST','AB WHEEL']
 };
 
-var APP_VERSION = '1.0.0';
-var APP_BUILD = '2026.05.18';
+var APP_VERSION = '1.0.2';
+var APP_BUILD = '2026.08.28b';
 
 var sessions  = [];
 var library   = {};
@@ -2095,6 +2150,13 @@ var activeEx = {}; // {sessionId: exerciseId} — the SINGLE active exercise per
 // that could silently drift out of sync — e.g. across a Fold device's live
 // cover<->inner screen transition, where the SAME session must show the SAME
 // active exercise regardless of which physical screen is rendering it.
+var collapsedEx = new Set(); // exercise ids (globally unique already) whose set-detail
+// body is currently hidden. Deliberately a SEPARATE concept from activeEx: "which
+// exercise is active" and "is the active exercise's body expanded" are orthogonal —
+// an exercise can be active AND collapsed (you're still on it, you just don't need
+// to see its sets right now). Keyed by exercise id alone (not per-session) since
+// exercise ids are already globally unique in this app; collapsing one instance of
+// a repeated exercise name in a different session is intentionally independent.
 var _importIdCounter = 0; // guards against Date.now() collisions when importData assigns fallback ids in a tight loop
 var openMonths = new Set();
 var editSessId = null;
@@ -2713,7 +2775,7 @@ function openExInfo(name){
 
     // Mind-muscle focus
     if(info.focus){
-      html += '<div style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.22);border-radius:10px;padding:12px 13px;margin-bottom:12px">'
+      html += '<div style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.22);border-radius:2px;padding:12px 13px;margin-bottom:12px">'
         + '<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#a78bfa;margin-bottom:7px">🧠 Mind-muscle focus</div>'
         + '<div style="font-size:12px;line-height:1.65;color:var(--sub);font-style:italic">' + esc(info.focus) + '</div>'
         + '</div>';
@@ -2843,7 +2905,7 @@ function renderVolumeTargets(){
   var totalLow = cats.filter(function(c){ return vol[c] < VOLUME_TARGETS[c].min; }).length;
   var totalOk  = cats.filter(function(c){ var v=vol[c]; return v >= VOLUME_TARGETS[c].min && v <= VOLUME_TARGETS[c].max; }).length;
   var totalHigh= cats.filter(function(c){ return vol[c] > VOLUME_TARGETS[c].max; }).length;
-  html += '<div style="margin-top:12px;padding:10px 12px;background:var(--s2);border-radius:8px;display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:700">'
+  html += '<div style="margin-top:12px;padding:10px 12px;background:var(--s2);border-radius:2px;display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:700">'
     + '<span style="color:#f87171">' + totalLow + ' te weinig</span>'
     + '<span style="color:#4ade80">' + totalOk + ' optimaal</span>'
     + '<span style="color:#fbbf24">' + totalHigh + ' teveel</span>'
@@ -2964,7 +3026,7 @@ function editVolumeTarget(cat){
   if(!box){
     box = document.createElement('div');
     box.id = 'vt-edit-box';
-    box.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9001;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:22px;width:92%;max-width:340px;display:none';
+    box.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9001;background:var(--s1);border:1px solid var(--b1);border-radius:2px;padding:22px;width:92%;max-width:340px;display:none';
     document.body.appendChild(box);
   }
 
@@ -3464,6 +3526,7 @@ function init() {
 
   if (!user.achievements) user.achievements = [];
   if (user.theme === 'lt') { document.body.classList.add('lt'); setThemeUI(true); }
+  if (user.navLight === true) { document.body.classList.add('nav-lt'); setNavLightUI(true); }
 
   document.getElementById('sess-date').valueAsDate = new Date();
   document.getElementById('prof-name').value = user.name || '';
@@ -3553,7 +3616,7 @@ function showView(v) {
   if(v==='plan')  renderPlan();
   if(v==='profile'){renderWtChart(30,null);renderXP();renderMmStats();renderMmChart(30,null);renderMmLogs();}
   if(v==='settings'){
-    setAutoTimerUI(); setGlassUI(); setNotifUI(); setSmartTimerUI();
+    setAutoTimerUI(); setGlassUI(); setNotifUI(); setSmartTimerUI(); setNavLightUI(document.body.classList.contains('nav-lt'));
     var vEl = document.getElementById('app-version');
     if(vEl) vEl.textContent = 'GymLog v' + APP_VERSION + ' • ' + APP_BUILD;
   }
@@ -3919,6 +3982,13 @@ function stepActiveEx(sessionId, delta){
   activeEx[sessionId] = s.exercises[nextIdx].id;
   renderSessions();
 }
+
+function toggleExCollapse(exId){
+  if(collapsedEx.has(exId)) collapsedEx.delete(exId);
+  else collapsedEx.add(exId);
+  renderSessions();
+}
+
 function toggleMon(k){if(openMonths.has(k))openMonths.delete(k);else openMonths.add(k);renderSessions();}
 
 // ═══════════════════════════════════════════════════
@@ -4108,7 +4178,7 @@ function renderExercises(s) {
                       : prevFeel === 'HARD' ? '→ Herhaal vorige (was zwaar)'
                       : '→ Zelfde als vorige';
         dh += '<div style="display:grid;grid-template-columns:28px 1fr 22px;gap:4px;align-items:center;margin:-4px 0 7px 0;padding:0 0 4px;cursor:pointer" onclick="applySuggestion(' + s.id + ',' + ex.id + ',' + si + ',' + sugW + ',' + sugR + ')">'
-          + '<div></div><div style="font-size:9px;color:rgba(99,102,241,.7);font-weight:600;background:rgba(99,102,241,.06);border:1px dashed rgba(99,102,241,.25);border-radius:6px;padding:3px 6px;display:flex;justify-content:space-between;align-items:center">'
+          + '<div></div><div style="font-size:9px;color:rgba(99,102,241,.7);font-weight:600;background:rgba(99,102,241,.06);border:1px dashed rgba(99,102,241,.25);border-radius:2px;padding:3px 6px;display:flex;justify-content:space-between;align-items:center">'
           + '<span>' + sugText + '</span><span style="font-size:8px;opacity:.7">' + sugReason + '</span></div><div></div></div>';
       }
     });
@@ -4122,9 +4192,18 @@ function renderExercises(s) {
   // ── Shared: exercise header (name, PR badge, meta text, action buttons).
   //    `compact` drops the reorder arrows for the fold focus panel, where
   //    reordering happens via the filmstrip's natural left-to-right order
-  //    instead of dedicated up/down buttons — one less redundant control. ──
+  //    instead of dedicated up/down buttons — one less redundant control.
+  //    Header-tap behavior differs by context: on the phone accordion
+  //    (compact=false) tapping the header makes THIS exercise active —
+  //    that's how you switch between exercises there. On the card stack
+  //    (compact=true) the header already belongs to the active exercise,
+  //    so tapping it instead toggles whether its set-detail body is
+  //    shown at all (collapsedEx), with a chevron indicating state. ──
   function buildExerciseHeader(ex, xi, isPR, metaText, compact){
-    return '<div class="ex-hd" onclick="setActiveEx(' + s.id + ',' + ex.id + ')">'
+    var isCollapsed = compact && collapsedEx.has(ex.id);
+    var headerClick = compact ? 'toggleExCollapse(' + ex.id + ')' : 'setActiveEx(' + s.id + ',' + ex.id + ')';
+    return '<div class="ex-hd" onclick="' + headerClick + '">'
+      + (compact ? '<div class="ex-collapse-chevron' + (isCollapsed?'':' open') + '">›</div>' : '')
       + '<div style="flex:1;min-width:0">'
       + '<div class="ex-nm">' + esc(ex.name) + (isPR ? ' <span style="font-size:9px;color:#f59e0b">🏆 PR</span>' : '') + '</div>'
       + '<div class="ex-mt">' + metaText + '</div></div>'
@@ -4173,41 +4252,33 @@ function renderExercises(s) {
 
   // ── VIEW B: filmstrip + focus panel, fold-format. Same activeEx value
   //    highlights the filmstrip card AND fills the focus panel. ──
-  var exList = '<div class="ex-list">';
-  s.exercises.forEach(function(ex){
-    var isActive = activeEx[s.id] === ex.id;
-    var dots = ex.sets.map(function(st){ return '<div class="ex-dot' + (st.w && st.r ? ' filled' : '') + '"></div>'; }).join('');
-    var mw = 0;
-    ex.sets.forEach(function(st){ var w = w2f(st.w); if(w > mw) mw = w; });
-    exList += '<div class="ex-tile' + (isActive ? ' active' : '') + '" onclick="setActiveEx(' + s.id + ',' + ex.id + ')">'
-      + '<div class="ex-tile-main"><div class="ex-tile-nm">' + esc(ex.name) + '</div>'
-      + '<div class="ex-tile-dots">' + dots + '</div></div>'
-      + '<div class="ex-tile-side">'
-      + (mw > 0 ? '<span class="ex-tile-max">' + mw + 'kg</span>' : '')
-      + '<span class="ex-tile-chevron">›</span>'
-      + '</div></div>';
-  });
-  exList += '<div class="ex-tile-add" onclick="swapExId=null;openExModal(' + s.id + ')">+ Oefening toevoegen</div></div>';
-
-  var focusPanelHtml;
-  var focusedExercise = s.exercises.find(function(e){ return e.id === activeEx[s.id]; });
-  if(focusedExercise){
-    var fxi = s.exercises.indexOf(focusedExercise);
-    var fm = metaFor(focusedExercise);
-    var curIdx = fxi;
-    focusPanelHtml = '<div class="focus">'
-      + buildExerciseHeader(focusedExercise, fxi, fm.isPR, fm.text, true)
-      + '<div class="focus-arrows">'
-      + '<button class="focus-arrow" onclick="stepActiveEx(' + s.id + ',-1)"' + (curIdx<=0?' disabled':'') + '>‹ Vorige</button>'
-      + '<button class="focus-arrow" onclick="stepActiveEx(' + s.id + ',1)"' + (curIdx>=s.exercises.length-1?' disabled':'') + '>Volgende ›</button>'
-      + '</div>'
-      + buildExerciseDetail(focusedExercise)
-      + '</div>';
+  // ── Card-stack presentation: active exercise as a full card, next
+  //    1-2 exercises peeking behind it at decreasing scale/opacity. ──
+  // Simple stacked list: every exercise, fully expanded, one under the
+  // next. No navigation, no single-active-exercise concept, no peek
+  // cards — this format previously went through three navigation-based
+  // iterations (filmstrip, chip-wrap, card-stack-with-prev/next) before
+  // landing here on request: just the exercises, in order, all visible,
+  // scroll to see them all. Reuses the exact same buildExerciseHeader/
+  // buildExerciseDetail functions the phone accordion uses, but WITHOUT
+  // that accordion's "only the active one expands" behavior — every
+  // exercise's detail renders unconditionally.
+  var stackHtml;
+  if(s.exercises.length){
+    stackHtml = '<div class="ex-stack-simple">';
+    s.exercises.forEach(function(ex, xi){
+      var m = metaFor(ex);
+      stackHtml += '<div class="ex-bl' + (m.isPR ? ' pr-glow' : '') + '">'
+        + buildExerciseHeader(ex, xi, m.isPR, m.text, true)
+        + (collapsedEx.has(ex.id) ? '' : buildExerciseDetail(ex))
+        + '</div>';
+    });
+    stackHtml += '</div>';
   } else {
-    focusPanelHtml = '<div class="focus-empty">Geen oefeningen — tik op + om te beginnen.</div>';
+    stackHtml = '<div class="focus-empty">Geen oefeningen — tik op + om te beginnen.</div>';
   }
 
-  var passportHtml = '<div class="ex-passport">' + exList + focusPanelHtml + '</div>';
+  var passportHtml = '<div class="ex-passport">' + stackHtml + '</div>';
 
   return stackedHtml + passportHtml
     + '<button class="add-ex" onclick="swapExId=null;openExModal(' + s.id + ')">'
@@ -5166,7 +5237,7 @@ function renderTmplExGrid(){
     // Check if already added
     var already = tmplExList.some(function(e){ return e.name === ex.toUpperCase(); });
     var card = document.createElement('div');
-    card.style.cssText = 'background:var('+(already?'--ac':'--s1')+');border:1px solid var('+(already?'--ac':'--b1')+');border-radius:10px;padding:11px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:4px';
+    card.style.cssText = 'background:var('+(already?'--ac':'--s1')+');border:1px solid var('+(already?'--ac':'--b1')+');border-radius:2px;padding:11px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:4px';
     card.innerHTML = '<div style="font-size:12px;font-weight:700;color:'+(already?'#fff':'var(--tx)')+'">'+esc(ex)+'</div>'
       +'<div style="font-size:9px;color:'+(already?'rgba(255,255,255,.7)':'var(--mu)')+'">'+tmplSelSets+' sets '+(already?'&#10003; Toegevoegd':'+ Toevoegen')+'</div>';
     if(!already){
@@ -5208,12 +5279,12 @@ function refreshTmplEx(){
   }
   tmplExList.forEach(function(e, i){
     var row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:9px 10px;background:var(--s2);border-radius:8px;margin-bottom:6px';
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:9px 10px;background:var(--s2);border-radius:2px;margin-bottom:6px';
     var nm = document.createElement('span');
     nm.style.cssText = 'flex:1;font-size:12px;font-weight:700';
     nm.textContent = e.name;
     var st = document.createElement('span');
-    st.style.cssText = 'font-size:10px;color:var(--mu);background:var(--s3);padding:2px 7px;border-radius:4px';
+    st.style.cssText = 'font-size:10px;color:var(--mu);background:var(--s3);padding:2px 7px;border-radius:2px';
     st.textContent = e.sets + 'x';
     var btn = document.createElement('button');
     btn.style.cssText = 'background:none;border:none;color:#f87171;cursor:pointer;font-size:18px;line-height:1;padding:0';
@@ -5346,15 +5417,40 @@ function xpLevel(xp){
   var pct=nxt>cur?Math.round((xp-cur)/(nxt-cur)*100):100;
   return {lv:lv+1,title:ttl[lv],pct:pct};
 }
+// ── C-shaped arc geometry, open at the bottom (matches the reference's
+//    calorie-dial shape). Clamped away from exact 0/100 to avoid a
+//    degenerate zero-sweep SVG arc that browsers refuse to draw. ──
+function ringArcPath(cx, cy, r, pct){
+  var startAngle = 125, sweepTotal = 290;
+  pct = Math.max(0.1, Math.min(99.9, pct));
+  var swept = sweepTotal * (pct/100);
+  var endAngle = (startAngle + swept) % 360;
+  function polar(a){ var rad = a*Math.PI/180; return [cx+r*Math.cos(rad), cy+r*Math.sin(rad)]; }
+  var p1 = polar(startAngle), p2 = polar(endAngle);
+  var large = swept > 180 ? 1 : 0;
+  return 'M '+p1[0].toFixed(2)+','+p1[1].toFixed(2)+' A '+r+','+r+' 0 '+large+' 1 '+p2[0].toFixed(2)+','+p2[1].toFixed(2);
+}
+function ringTrackPath(cx, cy, r){
+  // The full track (100%, unclamped visually since it's just the background) —
+  // reuse the same formula at 99.9 so the track and fill share identical geometry.
+  return ringArcPath(cx, cy, r, 100);
+}
+
 function renderXP(){
   var xp=calcXP(),lv=xpLevel(xp);
   var el=document.getElementById('xp-card');if(!el)return;
+  var cx=50, cy=50, r=41;
   el.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
     +'<div><div class="D" style="font-size:19px">LEVEL '+lv.lv+' &middot; '+lv.title.toUpperCase()+'</div>'
     +'<div style="font-size:10px;color:var(--mu)">'+xp.toLocaleString()+' XP totaal</div></div>'
     +'<div class="D" style="font-size:30px;color:var(--ac)">'+lv.lv+'</div></div>'
-    +'<div class="xp-bar"><div class="xp-fill" style="width:'+lv.pct+'%"></div></div>'
-    +'<div style="font-size:9px;color:var(--mu);text-align:right">'+lv.pct+'% naar Level '+(lv.lv+1)+'</div>';
+    +'<div class="xp-ring-wrap">'
+    +'<div class="xp-ring"><svg viewBox="0 0 100 100">'
+    +'<path class="xp-ring-track" d="'+ringTrackPath(cx,cy,r)+'"/>'
+    +'<path class="xp-ring-fill" d="'+ringArcPath(cx,cy,r,lv.pct)+'"/>'
+    +'</svg><div class="xp-ring-center"><div class="xp-ring-pct D">'+lv.pct+'%</div><div class="xp-ring-lbl">naar level '+(lv.lv+1)+'</div></div></div>'
+    +'<div style="flex:1"><div style="font-size:11px;color:var(--sub);line-height:1.6">Nog <b style="color:var(--tx)">'+(100-lv.pct)+'%</b> te gaan voor het volgende level.</div></div>'
+    +'</div>';
   checkAch();
 }
 
@@ -5370,6 +5466,19 @@ function toggleTheme(){
 function setThemeUI(lt){
   document.getElementById('theme-ico').textContent=lt?'☀️':'🌙';
   document.getElementById('theme-lbl').textContent=lt?'Light mode':'Dark mode';
+}
+
+// ── Nav-only light mode: independent toggle from the app-wide theme above ──
+function toggleNavLight(){
+  var navLt=document.body.classList.toggle('nav-lt');
+  user.navLight=navLt;
+  setNavLightUI(navLt);save();
+}
+function setNavLightUI(navLt){
+  var ico=document.getElementById('navlight-ico');
+  var lbl=document.getElementById('navlight-lbl');
+  if(ico) ico.textContent=navLt?'⬜':'⬛';
+  if(lbl) lbl.textContent=navLt?'Navigatie: licht':'Navigatie: donker';
 }
 
 
@@ -5709,7 +5818,7 @@ function renderWtStats(logs, allLogs){
     var goal = parseFloat(user.weightGoal);
     var toGo = +(last.w - goal).toFixed(1);
     var goalDir = toGo > 0 ? 'kg te verliezen' : toGo < 0 ? 'kg te winnen' : 'doel bereikt!';
-    goalHtml = '<div style="grid-column:1 / -1;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:9px 12px;margin-top:6px;display:flex;justify-content:space-between;align-items:center">'
+    goalHtml = '<div style="grid-column:1 / -1;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:2px;padding:9px 12px;margin-top:6px;display:flex;justify-content:space-between;align-items:center">'
       + '<div><div style="font-size:9px;font-weight:800;text-transform:uppercase;color:#fbbf24;letter-spacing:.07em">Doel</div>'
       + '<div style="font-size:11px;color:var(--sub);margin-top:2px">' + Math.abs(toGo) + ' ' + goalDir + '</div></div>'
       + '<div class="D" style="font-size:22px;color:#fbbf24">' + goal + '<span style="font-size:11px;color:rgba(245,158,11,.6);margin-left:2px">kg</span></div>'
