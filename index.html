@@ -100,8 +100,37 @@ html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--tx);fon
 .sc-tog-l{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mu)}
 /* SESSION BODY */
 .sc-body{padding:8px 10px 4px}
+
+/* ── Passport filmstrip+focus view: hidden by default (phone shows .ex-stack) ── */
+.ex-passport{display:none}
+/* ── Vertical exercise list — replaces the horizontal filmstrip.
+     Full-width tiles: no sideways swipe needed (a precise horizontal
+     gesture is exactly the wrong ask for sweaty gym hands mid-set).
+     Tiles are also larger than the old 84px cards, since the passport
+     canvas has width to spare — name, status dots, and current max
+     weight all sit comfortably on one row instead of being cramped
+     into a small square. ── */
+.ex-list{display:flex;flex-direction:column;gap:7px;padding:0 2px 10px}
+.ex-tile{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--s2);border:1.5px solid var(--b1);border-radius:12px;cursor:pointer;transition:all .15s}
+.ex-tile.active{border-color:var(--ac);background:rgba(99,102,241,.1)}
+.ex-tile-main{flex:1;min-width:0}
+.ex-tile-nm{font-size:13px;font-weight:800;color:var(--tx);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ex-tile-dots{display:flex;gap:4px;margin-top:5px}
+.ex-tile-side{flex-shrink:0;display:flex;align-items:center;gap:8px}
+.ex-tile-max{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:900;font-style:italic;color:var(--sub)}
+.ex-tile-chevron{color:var(--mu);font-size:14px;transition:transform .15s}
+.ex-tile.active .ex-tile-chevron{color:var(--ac);transform:rotate(90deg)}
+.ex-dot{width:6px;height:6px;border-radius:50%;background:var(--s3)}
+.ex-dot.filled{background:var(--ac)}
+.ex-tile-add{display:flex;align-items:center;justify-content:center;gap:6px;padding:11px;border:1.5px dashed var(--b2);border-radius:12px;color:var(--mu);font-size:12px;font-weight:700;cursor:pointer}
+.focus{background:var(--bg);border:1px solid var(--b1);border-radius:10px;overflow:hidden}
+.focus-arrows{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--b1)}
+.focus-arrow{background:var(--s2);border:none;color:var(--sub);font-size:11px;font-weight:700;padding:7px;cursor:pointer}
+.focus-arrow:disabled{color:var(--s3);cursor:default}
+.focus-empty{padding:24px;text-align:center;color:var(--mu);font-size:12px;background:var(--bg);border:1px dashed var(--b2);border-radius:10px}
 /* EXERCISE BLOCK */
-.ex-bl{background:var(--bg);border:1px solid var(--b1);border-radius:10px;margin-bottom:7px;overflow:hidden}
+.ex-bl{background:var(--bg);border:1px solid var(--b1);border-radius:10px;margin-bottom:7px;overflow:hidden;transition:border-color .15s}
+.ex-bl.active{border-color:rgba(99,102,241,.4)}
 .ex-hd{padding:10px 11px;display:flex;justify-content:space-between;align-items:center;gap:6px;cursor:pointer}
 .ex-nm{font-weight:800;font-size:13px;line-height:1.2}
 .ex-mt{font-size:10px;color:var(--mu);margin-top:2px}
@@ -643,40 +672,77 @@ body.lt #alert{background:rgba(244,244,245,.97)}
 
 
 /* ═══════════════════════════════════════════════════════════
-   SHORT-VIEWPORT OPTIMIZATION
-   Targets cover-style foldable screens (e.g. Galaxy Z Fold 8
-   cover display: 1248x1972px @ ~424ppi -> ~657 CSS px tall,
-   10:16 ratio) and any other phone with a wide-but-short
-   viewport. Standard tall phones (iPhone etc.) are untouched.
-   Goal: reclaim vertical space in the header/nav chrome and
-   the repeating set-row so the active workout view needs less
-   scrolling on a shorter screen.
+   PASSPORT-FORMAT LAYOUT (Samsung Galaxy Z Fold 8 cover screen
+   and similar wide-short viewports)
+
+   Cover screen: 1248x1972px @ 5.5" -> ~416x657 CSS px @ DPR 3.0
+   Ratio 0.633 (width/height) vs a typical phone's ~0.46.
+
+   STRUCTURAL change (not a resize): the app's per-exercise
+   accordion (.ex-stack, one exercise expanded at a time, scroll
+   to find it) is replaced on this format by a vertical exercise
+   list (.ex-list — every exercise in the session as a full-width
+   tappable tile: name, fill-status dots, current max weight) plus
+   a single full-width focus panel (.focus — full set/rep/feel
+   detail for only the tapped exercise). This is deliberately a
+   vertical tap-list, NOT a horizontal filmstrip: a precise sideways
+   swipe is the wrong gesture to ask of sweaty gym hands mid-set,
+   and it always hides some exercises off-screen. Vertical scroll
+   is the forgiving, familiar gym-app gesture. No information is
+   duplicated: tiles show only fill-status dots and max weight,
+   the actual weight/reps/PR/diff detail lives only in .focus.
+   Both .ex-stack and .ex-passport are always rendered by JS;
+   this media query is the ONLY thing that decides which one is
+   visible, so no JS branching on screen size is needed anywhere.
    ═══════════════════════════════════════════════════════════ */
-@media (max-height: 700px) {
-  #hdr{padding:20px 16px 0 !important}
+@media (max-height: 700px) and (min-aspect-ratio: 55/100) {
+
+  /* ── THE view switch: stacked accordion -> filmstrip + focus ── */
+  .ex-stack{display:none}
+  .ex-passport{display:block}
+
+  /* ── Reclaim vertical space in fixed chrome ── */
+  #hdr{padding:20px 16px 0}
   .logo{font-size:24px}
   #greeting{font-size:10px}
-
   #nav{min-height:52px;padding-top:5px}
   .nb svg{width:18px;height:18px}
   .nb span{font-size:8px}
-
   #tmr{padding:4px 16px}
 
-  .sc-top{margin-bottom:4px}
-  .sc-name{font-size:18px}
-  .ex-hd{padding:7px 11px}
-  .ex-nm{font-size:12px}
-  .ex-mt{font-size:9px;margin-top:1px}
+  /* ── KPI tiles: genuinely BIGGER, not just "un-shrunk". At ~79px
+     per tile in a 5-column row there's room for a larger number
+     than even the standard 4-column phone size (17px) uses. ── */
+  .sc-kpi.five .kc-v{font-size:19px}
+  .sc-kpi.five .kc-l{font-size:8.5px}
+  .kc{padding:12px 4px}
 
-  .set-row{margin-bottom:4px}
-  .inp-sm{padding:6px 4px;font-size:14px}
-  .feel-cell{min-height:28px;padding:3px 2px}
-  .add-set{padding:6px}
+  /* ── Set-row: wider tap targets for the actual weight/reps inputs
+     (the thing you touch most during a set), plus room for the
+     existing 1RM/diff badges to sit comfortably rather than overlap. ── */
+  .set-row{grid-template-columns:32px 1fr 1fr 58px 24px;gap:6px;margin-bottom:6px}
+  .inp-sm{padding:10px 4px;font-size:16px}
+  .s-o{font-size:9px}
+  .diff{font-size:9px;top:-8px}
 
-  .sheet-ft{padding:8px 11px}
-  .card{padding:12px}
-  .card-hdr{margin-bottom:8px}
+  /* ── Focus-panel prev/next: bigger tap targets, not thin text rows —
+     these are the primary navigation while your hands are busy. ── */
+  .focus-arrow{padding:11px}
+
+  /* ── New vertical exercise tiles: comfortably large, full-width ── */
+  .ex-tile{padding:14px 15px}
+  .ex-tile-nm{font-size:14px}
+  .ex-tile-max{font-size:14px}
+  .ex-dot{width:7px;height:7px}
+
+  /* ── Session card / exercise block chrome ── */
+  .sc-top{margin-bottom:5px}
+  .sc-name{font-size:19px}
+  .ex-hd{padding:9px 12px}
+  .ex-nm{font-size:13px}
+  .ex-mt{font-size:9.5px}
+  .card{padding:14px}
+  .card-hdr{margin-bottom:9px}
 }
 </style>
 </head>
@@ -2011,9 +2077,8 @@ var LIB_DEFAULT = {
   'Core':      ['PLANK','CRUNCHES','LEG RAISES','RUSSIAN TWIST','AB WHEEL']
 };
 
-var APP_VERSION = '1.0.1';
-var APP_BUILD = '2026.08.26';
-var APP_NOTE = 'Fold 8 optimized';
+var APP_VERSION = '1.0.0';
+var APP_BUILD = '2026.05.18';
 
 var sessions  = [];
 var library   = {};
@@ -2022,7 +2087,15 @@ var weekPlan  = {};
 var templates = [];
 
 var openSess   = new Set();
-var openExSets = new Set();
+var activeEx = {}; // {sessionId: exerciseId} — the SINGLE active exercise per session.
+// One state model drives BOTH the phone accordion (shows this exercise expanded,
+// others as compact tappable headers) and the fold filmstrip+focus panel (this
+// exercise fills the focus panel, filmstrip highlights its card). Replaces what
+// were previously two independent state machines (openExSets Set + focusEx map)
+// that could silently drift out of sync — e.g. across a Fold device's live
+// cover<->inner screen transition, where the SAME session must show the SAME
+// active exercise regardless of which physical screen is rendering it.
+var _importIdCounter = 0; // guards against Date.now() collisions when importData assigns fallback ids in a tight loop
 var openMonths = new Set();
 var editSessId = null;
 var swapExId   = null;
@@ -3482,7 +3555,7 @@ function showView(v) {
   if(v==='settings'){
     setAutoTimerUI(); setGlassUI(); setNotifUI(); setSmartTimerUI();
     var vEl = document.getElementById('app-version');
-    if(vEl) vEl.textContent = 'GymLog v' + APP_VERSION + ' • ' + APP_BUILD + ' • ' + APP_NOTE;
+    if(vEl) vEl.textContent = 'GymLog v' + APP_VERSION + ' • ' + APP_BUILD;
   }
 }
 
@@ -3827,7 +3900,25 @@ function commitEditName(id,val) {
   editSessId=null; saveRender();
 }
 function toggleSess(id){if(openSess.has(id))openSess.delete(id);else openSess.add(id);renderSessions();}
-function toggleEx(id){if(openExSets.has(id))openExSets.delete(id);else openExSets.add(id);renderSessions();}
+// ── Single, unified interaction: set which exercise is active in a session.
+//    Same function drives every entry point: tapping a phone accordion header,
+//    tapping a fold filmstrip card, or tapping a fold focus-panel nav arrow.
+function setActiveEx(sessionId, exId){
+  // Deliberately no toggle-close: a session with NO active exercise is a
+  // confusing, purposeless state during a workout — you always want to know
+  // which exercise you're on. Tapping any exercise simply makes it active.
+  activeEx[sessionId] = exId;
+  renderSessions();
+}
+function stepActiveEx(sessionId, delta){
+  var s = sessions.find(function(x){ return x.id === sessionId; });
+  if(!s || !s.exercises.length) return;
+  var curIdx = s.exercises.findIndex(function(e){ return e.id === activeEx[sessionId]; });
+  var nextIdx = curIdx + delta;
+  if(nextIdx < 0 || nextIdx >= s.exercises.length) return;
+  activeEx[sessionId] = s.exercises[nextIdx].id;
+  renderSessions();
+}
 function toggleMon(k){if(openMonths.has(k))openMonths.delete(k);else openMonths.add(k);renderSessions();}
 
 // ═══════════════════════════════════════════════════
@@ -3924,166 +4015,213 @@ function renderExercises(s) {
     });
   });
 
-  var h = '<div class="sc-body">';
-  s.exercises.forEach(function(ex, xi){
-    var open = openExSets.has(ex.id);
+  // ── Single source of truth: ensure this session has an active exercise
+  //    whenever it has exercises at all. Same guarantee on every screen format. ──
+  if(s.exercises.length && (!activeEx[s.id] || !s.exercises.some(function(e){ return e.id === activeEx[s.id]; }))){
+    activeEx[s.id] = s.exercises[0].id;
+  }
+
+  // ── Shared: full set/rep/feel detail markup for ONE exercise.
+  //    Used identically regardless of which screen presentation renders it. ──
+  function buildExerciseDetail(ex){
+    var prevSets = null;
+    for(var si = 0; si < sessions.length; si++){
+      var ss = sessions[si];
+      if(ss.id === s.id || new Date(ss.rawDate) >= new Date(s.rawDate)) continue;
+      for(var ei = 0; ei < ss.exercises.length; ei++){
+        if(ss.exercises[ei].name.toUpperCase() === ex.name.toUpperCase()){
+          prevSets = ss.exercises[ei].sets;
+          break;
+        }
+      }
+      if(prevSets) break;
+    }
+    var bw = isBodyweight(ex.name);
+
+    var dh = '';
+    if(ex.note){
+      dh += '<div class="ex-note-banner">'
+        + '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px">'
+        + '<path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>'
+        + '<path stroke-linecap="round" d="M9 12h6M9 16h4"/></svg>'
+        + '<span style="flex:1;line-height:1.4">' + esc(ex.note) + '</span>'
+        + '<button class="ob ex-note-edit" onclick="editExNote(' + s.id + ',' + ex.id + ')">'
+        + '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 4H6a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'
+        + '</button></div>';
+    }
+
+    dh += '<div class="sets-tbl">'
+      + (bw
+         ? '<div class="sets-hdr bw"><span>Set</span><span>Reps</span><span>Gevoel</span><span></span></div>'
+         : '<div class="sets-hdr"><span>Set</span><span>KG</span><span>Reps</span><span>Gevoel</span><span></span></div>');
+
+    ex.sets.forEach(function(set, si){
+      var o = bw ? 0 : orm(set.w, set.r);
+      var prevS = prevSets ? prevSets[si] : null;
+      var prevW = prevS ? w2f(prevS.w) : 0;
+      var prevR = prevS && prevS.r ? prevS.r : '';
+      var prevFeel = prevS ? prevS.feel : '';
+      var curW = w2f(set.w);
+      var diff = (!bw && curW && prevW) ? +(curW - prevW).toFixed(1) : 0;
+      var feelCls = 'feel-cell' + (set.feel === 'EASY' ? ' fe' : set.feel === 'GOOD' ? ' fg' : set.feel === 'HARD' ? ' fh' : '');
+      var feelLbl = set.feel === 'EASY' ? 'Makkelijk' : set.feel === 'GOOD' ? 'Goed' : set.feel === 'HARD' ? 'Zwaar' : '＋';
+
+      var sugW = 0, sugR = 0;
+      if(bw){
+        if(prevR){
+          if(prevFeel === 'EASY'){ sugR = parseInt(prevR) + 2; }
+          else if(prevFeel === 'GOOD'){ sugR = parseInt(prevR) + 1; }
+          else { sugR = parseInt(prevR); }
+        }
+      } else if(prevW && prevR){
+        if(prevFeel === 'EASY'){ sugW = +(prevW + 2.5).toFixed(1); sugR = parseInt(prevR); }
+        else if(prevFeel === 'GOOD'){ sugW = prevW; sugR = parseInt(prevR) + 1; }
+        else { sugW = prevW; sugR = parseInt(prevR); }
+      }
+
+      if(bw){
+        dh += '<div class="set-row bw">'
+          + '<div class="s-num"><div class="s-n">' + (si + 1) + '</div><div class="s-o" style="color:rgba(99,102,241,.7);font-size:8px">BW</div></div>'
+          + '<input class="inp-sm" type="text" inputmode="numeric" value="' + esc(set.r || '') + '" placeholder="' + (sugR || prevR || 'reps') + '"'
+          + ' onclick="this.select()" onchange="updSet(' + s.id + ',' + ex.id + ',' + si + ',&quot;r&quot;,this.value)">'
+          + '<div class="' + feelCls + '" onclick="openFeel(' + s.id + ',' + ex.id + ',' + si + ')">' + feelLbl + '</div>'
+          + '<button class="s-del" onclick="delSet(' + s.id + ',' + ex.id + ',' + si + ')">&#x00D7;</button></div>';
+      } else {
+        dh += '<div class="set-row">'
+          + '<div class="s-num"><div class="s-n">' + (si + 1) + '</div><div class="s-o">' + (o > 0 ? o + 'kg' : '') + '</div></div>'
+          + '<div style="position:relative">'
+          + '<input class="inp-sm" type="text" inputmode="decimal" value="' + esc(set.w || '') + '" placeholder="' + (sugW || prevW || 'kg') + '"'
+          + ' onclick="this.select()" onchange="updSet(' + s.id + ',' + ex.id + ',' + si + ',&quot;w&quot;,this.value.replace(/,/g,&quot;.&quot;))">'
+          + (diff !== 0 ? '<span class="diff ' + (diff > 0 ? 'p' : 'n') + '">' + (diff > 0 ? '+' : '') + diff + '</span>' : '')
+          + '</div>'
+          + '<input class="inp-sm" type="text" inputmode="numeric" value="' + esc(set.r || '') + '" placeholder="' + (sugR || prevR || 'reps') + '"'
+          + ' onclick="this.select()" onchange="updSet(' + s.id + ',' + ex.id + ',' + si + ',&quot;r&quot;,this.value)">'
+          + '<div class="' + feelCls + '" onclick="openFeel(' + s.id + ',' + ex.id + ',' + si + ')">' + feelLbl + '</div>'
+          + '<button class="s-del" onclick="delSet(' + s.id + ',' + ex.id + ',' + si + ')">&#x00D7;</button></div>';
+      }
+
+      var hasSugg = bw ? (!set.r && sugR) : (!set.w && !set.r && (sugW || sugR));
+      if(hasSugg){
+        var sugText = bw ? (sugR + ' reps') : (sugW + 'kg × ' + sugR);
+        var sugReason = prevFeel === 'EASY' ? (bw?'↑ Vorige was makkelijk, +2 reps':'↑ Vorige was makkelijk, +2.5kg')
+                      : prevFeel === 'GOOD' ? '↑ Vorige was goed, +1 rep'
+                      : prevFeel === 'HARD' ? '→ Herhaal vorige (was zwaar)'
+                      : '→ Zelfde als vorige';
+        dh += '<div style="display:grid;grid-template-columns:28px 1fr 22px;gap:4px;align-items:center;margin:-4px 0 7px 0;padding:0 0 4px;cursor:pointer" onclick="applySuggestion(' + s.id + ',' + ex.id + ',' + si + ',' + sugW + ',' + sugR + ')">'
+          + '<div></div><div style="font-size:9px;color:rgba(99,102,241,.7);font-weight:600;background:rgba(99,102,241,.06);border:1px dashed rgba(99,102,241,.25);border-radius:6px;padding:3px 6px;display:flex;justify-content:space-between;align-items:center">'
+          + '<span>' + sugText + '</span><span style="font-size:8px;opacity:.7">' + sugReason + '</span></div><div></div></div>';
+      }
+    });
+
+    dh += '<button class="add-set" onclick="addSet(' + s.id + ',' + ex.id + ')">'
+      + '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>'
+      + ' Set toevoegen</button></div>';
+    return dh;
+  }
+
+  // ── Shared: exercise header (name, PR badge, meta text, action buttons).
+  //    `compact` drops the reorder arrows for the fold focus panel, where
+  //    reordering happens via the filmstrip's natural left-to-right order
+  //    instead of dedicated up/down buttons — one less redundant control. ──
+  function buildExerciseHeader(ex, xi, isPR, metaText, compact){
+    return '<div class="ex-hd" onclick="setActiveEx(' + s.id + ',' + ex.id + ')">'
+      + '<div style="flex:1;min-width:0">'
+      + '<div class="ex-nm">' + esc(ex.name) + (isPR ? ' <span style="font-size:9px;color:#f59e0b">🏆 PR</span>' : '') + '</div>'
+      + '<div class="ex-mt">' + metaText + '</div></div>'
+      + '<div class="ex-ct">'
+      + '<button class="ob info-btn' + (getExInfo(ex.name) ? ' has-info' : '') + '" onclick="event.stopPropagation();openExInfo(\'' + ex.name.replace(/'/g, "\\'") + '\')" title="Info">'
+      + '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:block"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 16v-4M12 8h.01"/></svg></button>'
+      + '<button class="ob ex-note-btn' + (ex.note ? ' has-note' : '') + '" onclick="event.stopPropagation();editExNote(' + s.id + ',' + ex.id + ')" title="Notitie">'
+      + '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:block"><path stroke-linecap="round" stroke-linejoin="round" d="M11 4H6a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-5"/><path stroke-linecap="round" stroke-linejoin="round" d="M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'
+      + (compact ? '' :
+          '<button class="ob" onclick="event.stopPropagation();moveEx(' + s.id + ',' + xi + ',-1)">↑</button>'
+        + '<button class="ob" onclick="event.stopPropagation();moveEx(' + s.id + ',' + xi + ',1)">↓</button>')
+      + '<button class="eb eb-s" onclick="event.stopPropagation();swapExId=' + ex.id + ';openExModal(' + s.id + ')">Wissel</button>'
+      + '<button class="eb eb-d" onclick="event.stopPropagation();delEx(' + s.id + ',' + xi + ')">&#x2715;</button>'
+      + '</div></div>';
+  }
+
+  function metaFor(ex){
     var mw = 0;
     ex.sets.forEach(function(st){ var w = w2f(st.w); if(w > mw) mw = w; });
     var filled = ex.sets.filter(function(st){ return st.w && st.r; }).length;
     var isPR = mw > 0 && prMap[ex.name.toUpperCase()] <= mw;
-    var mp = [ex.sets.length + ' sets'];
-    if(mw > 0) mp.push('max ' + mw + 'kg');
-    if(filled < ex.sets.length) mp.push('(' + filled + '/' + ex.sets.length + ' gevuld)');
-    else if(filled > 0) mp.push('✓');
+    var arr = [ex.sets.length + ' sets'];
+    if(mw > 0) arr.push('max ' + mw + 'kg');
+    if(filled < ex.sets.length) arr.push('(' + filled + '/' + ex.sets.length + ' gevuld)');
+    else if(filled > 0) arr.push('✓');
+    return { text: arr.join(' · '), isPR: isPR };
+  }
 
-    h += '<div class="ex-bl">'
-      + '<div class="ex-hd" onclick="toggleEx(' + ex.id + ')">'
-      + '<div style="flex:1;min-width:0">'
-      + '<div class="ex-nm">' + esc(ex.name) + (isPR && mw > 0 ? ' <span style="font-size:9px;color:#f59e0b">🏆 PR</span>' : '') + '</div>'
-      + '<div class="ex-mt">' + mp.join(' · ') + '</div>'
-      + '</div>'
-      + '<div class="ex-ct">'
-      + '<button class="ob info-btn' + (getExInfo(ex.name) ? ' has-info' : '') + '" onclick="event.stopPropagation();openExInfo(\'' + ex.name.replace(/'/g, "\\'") + '\')" title="Info">'
-      + '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:block">'
-      + '<circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 16v-4M12 8h.01"/>'
-      + '</svg>'
-      + '</button>'
-      + '<button class="ob ex-note-btn' + (ex.note ? ' has-note' : '') + '" onclick="event.stopPropagation();editExNote(' + s.id + ',' + ex.id + ')" title="Notitie">'
-      + '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:block">'
-      + '<path stroke-linecap="round" stroke-linejoin="round" d="M11 4H6a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-5"/>'
-      + '<path stroke-linecap="round" stroke-linejoin="round" d="M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z"/>'
-      + '</svg>'
-      + '</button>'
-      + '<button class="ob" onclick="event.stopPropagation();moveEx(' + s.id + ',' + xi + ',-1)">↑</button>'
-      + '<button class="ob" onclick="event.stopPropagation();moveEx(' + s.id + ',' + xi + ',1)">↓</button>'
-      + '<button class="eb eb-s" onclick="event.stopPropagation();swapExId=' + ex.id + ';openExModal(' + s.id + ')">Wissel</button>'
-      + '<button class="eb eb-d" onclick="event.stopPropagation();delEx(' + s.id + ',' + xi + ')">&#x2715;</button>'
-      + '</div></div>';
-
-    if(open){
-      // Find prev session for this exercise
-      var prevSets = null;
-      var prevDate = null;
-      for(var si = 0; si < sessions.length; si++){
-        var ss = sessions[si];
-        if(ss.id === s.id || new Date(ss.rawDate) >= new Date(s.rawDate)) continue;
-        for(var ei = 0; ei < ss.exercises.length; ei++){
-          if(ss.exercises[ei].name.toUpperCase() === ex.name.toUpperCase()){
-            prevSets = ss.exercises[ei].sets;
-            prevDate = ss.rawDate;
-            break;
-          }
-        }
-        if(prevSets) break;
-      }
-
-      // Per-exercise note display
-      if(ex.note){
-        h += '<div class="ex-note-banner">'
-          + '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px">'
-          + '<path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>'
-          + '<path stroke-linecap="round" d="M9 12h6M9 16h4"/>'
-          + '</svg>'
-          + '<span style="flex:1;line-height:1.4">' + esc(ex.note) + '</span>'
-          + '<button class="ob ex-note-edit" onclick="editExNote(' + s.id + ',' + ex.id + ')">'
-          + '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 4H6a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'
-          + '</button>'
-          + '</div>';
-      }
-
-      var bwHdr = isBodyweight(ex.name);
-      h += '<div class="sets-tbl">'
-        + (bwHdr 
-           ? '<div class="sets-hdr bw"><span>Set</span><span>Reps</span><span>Gevoel</span><span></span></div>'
-           : '<div class="sets-hdr"><span>Set</span><span>KG</span><span>Reps</span><span>Gevoel</span><span></span></div>');
-
-      var bw = isBodyweight(ex.name);
-
-      // Different table header for bodyweight
-      h = h.replace(/<div class="sets-hdr"><span>Set<\/span><span>KG<\/span><span>Reps<\/span><span>Gevoel<\/span><span><\/span><\/div>$/m, '');
-
-      ex.sets.forEach(function(set, si){
-        var o = bw ? 0 : orm(set.w, set.r);
-        var prevS = prevSets ? prevSets[si] : null;
-        var prevW = prevS ? w2f(prevS.w) : 0;
-        var prevR = prevS && prevS.r ? prevS.r : '';
-        var prevFeel = prevS ? prevS.feel : '';
-        var curW = w2f(set.w);
-        var diff = (!bw && curW && prevW) ? +(curW - prevW).toFixed(1) : 0;
-        var feelCls = 'feel-cell' + (set.feel === 'EASY' ? ' fe' : set.feel === 'GOOD' ? ' fg' : set.feel === 'HARD' ? ' fh' : '');
-        var feelLbl = set.feel === 'EASY' ? 'Makkelijk' : set.feel === 'GOOD' ? 'Goed' : set.feel === 'HARD' ? 'Zwaar' : '＋';
-
-        // Compute smart suggestion based on prev feel
-        var sugW = 0, sugR = 0;
-        if(bw){
-          if(prevR){
-            if(prevFeel === 'EASY'){ sugR = parseInt(prevR) + 2; }
-            else if(prevFeel === 'GOOD'){ sugR = parseInt(prevR) + 1; }
-            else if(prevFeel === 'HARD'){ sugR = parseInt(prevR); }
-            else { sugR = parseInt(prevR); }
-          }
-        } else if(prevW && prevR){
-          if(prevFeel === 'EASY'){ sugW = +(prevW + 2.5).toFixed(1); sugR = parseInt(prevR); }
-          else if(prevFeel === 'GOOD'){ sugW = prevW; sugR = parseInt(prevR) + 1; }
-          else if(prevFeel === 'HARD'){ sugW = prevW; sugR = parseInt(prevR); }
-          else { sugW = prevW; sugR = parseInt(prevR); }
-        }
-
-        if(bw){
-          // Bodyweight row: skip KG column entirely
-          h += '<div class="set-row bw">'
-            + '<div class="s-num"><div class="s-n">' + (si + 1) + '</div><div class="s-o" style="color:rgba(99,102,241,.7);font-size:8px">BW</div></div>'
-            + '<input class="inp-sm" type="text" inputmode="numeric" value="' + esc(set.r || '') + '" placeholder="' + (sugR || prevR || 'reps') + '"'
-            + ' onclick="this.select()" onchange="updSet(' + s.id + ',' + ex.id + ',' + si + ',&quot;r&quot;,this.value)">'
-            + '<div class="' + feelCls + '" onclick="openFeel(' + s.id + ',' + ex.id + ',' + si + ')">' + feelLbl + '</div>'
-            + '<button class="s-del" onclick="delSet(' + s.id + ',' + ex.id + ',' + si + ')">&#x00D7;</button>'
-            + '</div>';
-        } else {
-          h += '<div class="set-row">'
-            + '<div class="s-num"><div class="s-n">' + (si + 1) + '</div><div class="s-o">' + (o > 0 ? o + 'kg' : '') + '</div></div>'
-            + '<div style="position:relative">'
-            + '<input class="inp-sm" type="text" inputmode="decimal" value="' + esc(set.w || '') + '" placeholder="' + (sugW || prevW || 'kg') + '"'
-            + ' onclick="this.select()"'
-            + ' onchange="updSet(' + s.id + ',' + ex.id + ',' + si + ',&quot;w&quot;,this.value.replace(/,/g,&quot;.&quot;))">'
-            + (diff !== 0 ? '<span class="diff ' + (diff > 0 ? 'p' : 'n') + '">' + (diff > 0 ? '+' : '') + diff + '</span>' : '')
-            + '</div>'
-            + '<input class="inp-sm" type="text" inputmode="numeric" value="' + esc(set.r || '') + '" placeholder="' + (sugR || prevR || 'reps') + '"'
-            + ' onclick="this.select()" onchange="updSet(' + s.id + ',' + ex.id + ',' + si + ',&quot;r&quot;,this.value)">'
-            + '<div class="' + feelCls + '" onclick="openFeel(' + s.id + ',' + ex.id + ',' + si + ')">' + feelLbl + '</div>'
-            + '<button class="s-del" onclick="delSet(' + s.id + ',' + ex.id + ',' + si + ')">&#x00D7;</button>'
-            + '</div>';
-        }
-
-        // Smart suggestion line under empty sets
-        var hasSugg = bw ? (!set.r && sugR) : (!set.w && !set.r && (sugW || sugR));
-        if(hasSugg){
-          var sugText = bw ? (sugR + ' reps') : (sugW + 'kg × ' + sugR);
-          var sugReason = prevFeel === 'EASY' ? (bw?'↑ Vorige was makkelijk, +2 reps':'↑ Vorige was makkelijk, +2.5kg')
-                        : prevFeel === 'GOOD' ? '↑ Vorige was goed, +1 rep'
-                        : prevFeel === 'HARD' ? '→ Herhaal vorige (was zwaar)'
-                        : '→ Zelfde als vorige';
-          h += '<div style="display:grid;grid-template-columns:28px 1fr 22px;gap:4px;align-items:center;margin:-4px 0 7px 0;padding:0 0 4px;cursor:pointer" onclick="applySuggestion(' + s.id + ',' + ex.id + ',' + si + ',' + sugW + ',' + sugR + ')">'
-            + '<div></div>'
-            + '<div style="font-size:9px;color:rgba(99,102,241,.7);font-weight:600;background:rgba(99,102,241,.06);border:1px dashed rgba(99,102,241,.25);border-radius:6px;padding:3px 6px;display:flex;justify-content:space-between;align-items:center">'
-            + '<span>' + sugText + '</span><span style="font-size:8px;opacity:.7">' + sugReason + '</span>'
-            + '</div>'
-            + '<div></div>'
-            + '</div>';
-        }
-      });
-
-      h += '<button class="add-set" onclick="addSet(' + s.id + ',' + ex.id + ')">'
-        + '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>'
-        + ' Set toevoegen</button></div>';
-    }
-    h += '</div>';
+  // ── VIEW A: vertical list, phone-format. Exactly one exercise expanded
+  //    (the active one) at a time; the rest are compact tappable headers.
+  //    This is a DELIBERATE behavior refinement from the previous "several
+  //    can be open via a Set" model: predictable, and — critically — driven
+  //    by the SAME activeEx value the fold view uses, so there is only ever
+  //    one true answer to "which exercise is the user working on right now",
+  //    regardless of which physical screen renders it. ──
+  var stackedHtml = '<div class="ex-stack">';
+  s.exercises.forEach(function(ex, xi){
+    var isActive = activeEx[s.id] === ex.id;
+    var m = metaFor(ex);
+    stackedHtml += '<div class="ex-bl' + (isActive ? ' active' : '') + '">'
+      + buildExerciseHeader(ex, xi, m.isPR, m.text, false)
+      + (isActive ? buildExerciseDetail(ex) : '')
+      + '</div>';
   });
+  stackedHtml += '</div>';
 
-  h += '<button class="add-ex" onclick="swapExId=null;openExModal(' + s.id + ')">'
+  // ── VIEW B: filmstrip + focus panel, fold-format. Same activeEx value
+  //    highlights the filmstrip card AND fills the focus panel. ──
+  var exList = '<div class="ex-list">';
+  s.exercises.forEach(function(ex){
+    var isActive = activeEx[s.id] === ex.id;
+    var dots = ex.sets.map(function(st){ return '<div class="ex-dot' + (st.w && st.r ? ' filled' : '') + '"></div>'; }).join('');
+    var mw = 0;
+    ex.sets.forEach(function(st){ var w = w2f(st.w); if(w > mw) mw = w; });
+    exList += '<div class="ex-tile' + (isActive ? ' active' : '') + '" onclick="setActiveEx(' + s.id + ',' + ex.id + ')">'
+      + '<div class="ex-tile-main"><div class="ex-tile-nm">' + esc(ex.name) + '</div>'
+      + '<div class="ex-tile-dots">' + dots + '</div></div>'
+      + '<div class="ex-tile-side">'
+      + (mw > 0 ? '<span class="ex-tile-max">' + mw + 'kg</span>' : '')
+      + '<span class="ex-tile-chevron">›</span>'
+      + '</div></div>';
+  });
+  exList += '<div class="ex-tile-add" onclick="swapExId=null;openExModal(' + s.id + ')">+ Oefening toevoegen</div></div>';
+
+  var focusPanelHtml;
+  var focusedExercise = s.exercises.find(function(e){ return e.id === activeEx[s.id]; });
+  if(focusedExercise){
+    var fxi = s.exercises.indexOf(focusedExercise);
+    var fm = metaFor(focusedExercise);
+    var curIdx = fxi;
+    focusPanelHtml = '<div class="focus">'
+      + buildExerciseHeader(focusedExercise, fxi, fm.isPR, fm.text, true)
+      + '<div class="focus-arrows">'
+      + '<button class="focus-arrow" onclick="stepActiveEx(' + s.id + ',-1)"' + (curIdx<=0?' disabled':'') + '>‹ Vorige</button>'
+      + '<button class="focus-arrow" onclick="stepActiveEx(' + s.id + ',1)"' + (curIdx>=s.exercises.length-1?' disabled':'') + '>Volgende ›</button>'
+      + '</div>'
+      + buildExerciseDetail(focusedExercise)
+      + '</div>';
+  } else {
+    focusPanelHtml = '<div class="focus-empty">Geen oefeningen — tik op + om te beginnen.</div>';
+  }
+
+  var passportHtml = '<div class="ex-passport">' + exList + focusPanelHtml + '</div>';
+
+  return stackedHtml + passportHtml
+    + '<button class="add-ex" onclick="swapExId=null;openExModal(' + s.id + ')">'
     + '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>'
     + ' Oefening Toevoegen</button></div>';
-  return h;
 }
+
+
+// ═══════════════════════════════════════════════════
+// EXERCISE OPS
+
+
+// ═══════════════════════════════════════════════════
+// EXERCISE OPS
 
 
 // ═══════════════════════════════════════════════════
@@ -4250,7 +4388,7 @@ function selectEx(name){
       {w:'',r:12,feel:'',note:''},{w:'',r:10,feel:'',note:''},
       {w:'',r:8,feel:'',note:''},{w:'',r:6,feel:'',note:''}
     ]});
-    openExSets.add(nid);openSess.add(targetSess);
+    activeEx[targetSess]=nid;openSess.add(targetSess);
   }
   saveRender();closeExModal();
 }
@@ -5645,13 +5783,13 @@ function importData(ev){
       if(imp.sessions){
         sessions = imp.sessions.map(function(s){
           return {
-            id:      s.id || Date.now()+Math.random(),
+            id:      s.id || (Date.now()+'_'+(_importIdCounter++)),
             name:    norm(s.name) || 'TRAINING',
             rawDate: s.rawDate || '',
             date:    s.date || s.rawDate || '',
             exercises:(s.exercises||[]).map(function(ex){
               return {
-                id:   ex.id || Date.now()+Math.random(),
+                id:   ex.id || (Date.now()+'_'+(_importIdCounter++)),
                 name: norm(ex.name),
                 sets:(ex.sets||[]).map(function(st){
                   return {
